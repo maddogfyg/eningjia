@@ -33,12 +33,12 @@ class PW_StaticPage {
 		$this->db =& $db;
 		$this->htmdir =& $db_htmdir;
 		$this->perpage =& $db_readperpage;
-		
+
 		$this->initVars();
 		$this->initUserColumn();
 		$this->initStyle();
 	}
-	
+
 	function initVars() {
 		$this->vars = L::config();
 		$this->vars['imgpath'] = $GLOBALS['imgpath'];
@@ -146,7 +146,7 @@ class PW_StaticPage {
 		$this->vars['pwforum'] = $this->forum;
 		$_pids = array();
 		$read['aid'] && $_pids[] = 0;
-		
+
 		$count = $read['replies'] + 1;
 		$this->vars['pages'] = numofpage($count, 1, ceil($count / $this->perpage), "$GLOBALS[db_bbsurl]/read.php?tid=$this->tid&");
 
@@ -166,7 +166,7 @@ class PW_StaticPage {
 			}
 			$this->db->free_result($query);
 		}
-		$attachdb = $this->getAttachs($_pids); 
+		$attachdb = $this->getAttachs($_pids);
 		$this->vars['db_menuinit']  = "'td_post' : 'menu_post','td_post1' : 'menu_post','td_hack' : 'menu_hack'";
 
 		$bandb = $this->forum->forumBan($readdb);
@@ -218,7 +218,6 @@ class PW_StaticPage {
 
 	function createHtml($readdb) {
 		extract($this->vars);
-
 		ob_end_clean();
 		ObStart();
 
@@ -364,7 +363,7 @@ class PW_StaticPage {
 							$rat = array('aid' => $at['aid'], 'img' => $dfurl, 'dfadmin' => 0, 'desc' => $at['desc']);
 						} elseif ($a_url == 'imgurl') {
 							$atype = 'picurl';
-							$rat = array('aid' => $at['aid'], 'name' => $at['name'], 'dfadmin' => 0, 'verify' => md5("showimg{$tid}{$read[pid]}{$fid}{$at[aid]}{$GLOBALS[db_hash]}"));
+							$rat = array('aid' => $at['aid'], 'name' => $at['name'], 'dfadmin' => 0, 'verify' => md5("showimg{$read[tid]}{$read[pid]}{$read[fid]}{$at[aid]}{$GLOBALS[db_hash]}"));
 						}
 					} else {
 						$atype = 'downattach';

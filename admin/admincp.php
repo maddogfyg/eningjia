@@ -262,7 +262,7 @@ function checkpass($CK) {
 		}
 		require GetLang('purview');
 		foreach ($rightset as $key=>$value) {
-			$rightset[$key] = isset($purview[$key]) ? 1 : 0;
+			$rightset[$key] = (isset($purview[$key]) && $rightset[$key]==1) ? 1 : 0;
 		}
 		$rightset['gid'] = $rt['groupid'];
 	}
@@ -429,17 +429,9 @@ function afooter($unfoot=null){
 	}
 
 	$output = ob_get_contents();
-	if ($db_redundancy) {
-		$output = str_replace(
-			array("\r","\n\n","\n\t","\n ",">\n","\n<","}\n","{\n",";\n","/\n","\t ",">\t","\t<","}\t","{\t",";\t","/\t",'  ','<!--<!--<!---->','<!--<!---->','<!---->'),
-			array('',"\n",' ',' ','>','<','}','{',';','/',' ','>','<','}','{',';','/',' ','','',''),
-			$output
-		);
-	} else {
-		$output = str_replace(array('<!--<!--<!---->','<!--<!---->','<!---->'),'',$output);
-	}
+	$output = str_replace(array('<!--<!--<!---->','<!--<!---->','<!---->'),'',$output);
 	if ($admin_keyword) {
-		$output = preg_replace('/('.preg_quote($admin_keyword, '/').')([^">]*<)/si','<font color="red"><u>\\1</u></font>\\2',$output);
+		$output = preg_replace('/('.preg_quote($admin_keyword, '/').')([^">]*<)(?!\/script)/si','<font color="red"><u>\\1</u></font>\\2',$output);
 	}
 	$output = preg_replace(
 		"/\<form([^\<\>]*)\saction=['|\"]?([^\s\"'\<\>]+)['|\"]?([^\<\>]*)\>/ies",

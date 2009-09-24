@@ -125,9 +125,11 @@ class PW_STopicService {
 		if (!is_array($fieldsData) || !count($fieldsData)) return 0;
 		$fieldsData['create_date'] = time();
 
-		$stopicId = $this->_getSTopicDB()->add($fieldsData);
-		if ($stopicId && isset($fieldsData['copy_from']) && $fieldsData['copy_from']) $this->_getSTopicDB()->increaseField($fieldsData['copy_from'], 'used_count');
-		if ($stopicId && isset($fieldsData['bg_id']) && $fieldsData['bg_id']) $this->_getSTopicPicturesDB()->increaseField($fieldsData['bg_id'], 'num');
+		$stopicDB = $this->_getSTopicDB();
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$stopicId = $stopicDB->add($fieldsData);
+		if ($stopicId && isset($fieldsData['copy_from']) && $fieldsData['copy_from']) $stopicDB->increaseField($fieldsData['copy_from'], 'used_count');
+		if ($stopicId && isset($fieldsData['bg_id']) && $fieldsData['bg_id']) $stopicPicturesDB->increaseField($fieldsData['bg_id'], 'num');
 		return $stopicId;
 	}
 
@@ -140,10 +142,12 @@ class PW_STopicService {
 	}
 
 	function deleteSTopicById($stopicId) {
-		$stopicData = $this->_getSTopicDB()->get($stopicId);
+		$stopicDB = $this->_getSTopicDB();
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$stopicData = $stopicDB->get($stopicId);
 		if (null == $stopicData) return false;
-		$isSuccess = (bool) $this->_getSTopicDB()->delete($stopicId);
-		if ($isSuccess && $stopicData['bg_id']) $this->_getSTopicPicturesDB()->increaseField($stopicData['bg_id'], 'num', -1);
+		$isSuccess = (bool) $stopicDB->delete($stopicId);
+		if ($isSuccess && $stopicData['bg_id']) $stopicPicturesDB->increaseField($stopicData['bg_id'], 'num', -1);
 		if ($isSuccess) $this->_delFile($this->getStopicDir($stopicId));
 		return $isSuccess;
 	}
@@ -153,35 +157,40 @@ class PW_STopicService {
 	}
 
 	function updateSTopicById($stopicId, $updateData) {
-		$stopicData = $this->_getSTopicDB()->get($stopicId);
+		$stopicDB = $this->_getSTopicDB();
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$stopicData = $stopicDB->get($stopicId);
 		if (null == $stopicData) return false;
 
-		$isSuccess = (bool) $this->_getSTopicDB()->update($stopicId,$updateData);
+		$isSuccess = (bool) $stopicDB->update($stopicId,$updateData);
 		if ($isSuccess && isset($updateData['bg_id']) && $updateData['bg_id'] != $stopicData['bg_id']) {
-			if ($stopicData['bg_id']) $this->_getSTopicPicturesDB()->increaseField($stopicData['bg_id'], 'num', -1);
-			if ($updateData['bg_id']) $this->_getSTopicPicturesDB()->increaseField($updateData['bg_id'], 'num');
+			if ($stopicData['bg_id']) $stopicPicturesDB->increaseField($stopicData['bg_id'], 'num', -1);
+			if ($updateData['bg_id']) $stopicPicturesDB->increaseField($updateData['bg_id'], 'num');
 		}
 		return $isSuccess;
 	}
 
 	function getSTopicInfoById($stopicId) {
+		$stopicDB = $this->_getSTopicDB();
 		static $stopics = array();
 		if (!isset($stopics[$stopicId])) {
-			$stopics[$stopicId] = $this->_getSTopicDB()->get($stopicId);
+			$stopics[$stopicId] = $stopicDB->get($stopicId);
 			$stopics[$stopicId]['bg_url'] = $stopics[$stopicId]['bg_id'] ? $this->_getBackgroundUrl($stopics[$stopicId]['bg_id']) : "";
 		}
 		return $stopics[$stopicId];
 	}
 
 	function countSTopic($keyword = '', $categoryId = 0) {
-		return $this->_getSTopicDB()->countByKeyWord ($keyword, $categoryId);
+		$stopicDB = $this->_getSTopicDB();
+		return $stopicDB->countByKeyWord ($keyword, $categoryId);
 	}
 
 	function findSTopicInPage($page, $perPage, $keyword = '', $categoryId = 0) {
+		$stopicDB = $this->_getSTopicDB();
 		$page = intval ( $page );
 		$perPage = intval ( $perPage );
 		if ($page <= 0 || $perPage <= 0) return array ();
-		$result	= $this->_getSTopicDB()->findByKeyWordInPage($page, $perPage, $keyword, $categoryId);
+		$result	= $stopicDB->findByKeyWordInPage($page, $perPage, $keyword, $categoryId);
 		foreach ($result as $key=>$value) {
 			$result[$key]['url'] = $this->getStopicUrl($value['stopic_id']);
 			$result[$key]['create_date'] = get_date($value['create_date']);
@@ -190,19 +199,21 @@ class PW_STopicService {
 	}
 
 	function findValidCategorySTopicInPage($page, $perPage, $categoryId = 0) {
+		$stopicDB = $this->_getSTopicDB();
 		$page = intval ( $page );
 		$perPage = intval ( $perPage );
 		if ($page <= 0 || $perPage <= 0)
 			return array ();
 
-		return $this->_getSTopicDB()->findValidByCategoryIdInPage ( $page, $perPage, $categoryId );
+		return $stopicDB->findValidByCategoryIdInPage ( $page, $perPage, $categoryId );
 	}
 
 	function findUsefulSTopicInCategory($limit, $categoryId = 0) {
+		$stopicDB = $this->_getSTopicDB();
 		$limit = intval ( $limit );
 		if ($limit <= 0) return array ();
 
-		return $this->_lardBackground($this->_getSTopicDB()->findByCategoryIdOrderByUsedInPage(1, $limit, $categoryId));
+		return $this->_lardBackground($stopicDB->findByCategoryIdOrderByUsedInPage(1, $limit, $categoryId));
 	}
 
 	function getStopicDir($stopic_id) {
@@ -245,7 +256,8 @@ class PW_STopicService {
 	 * @return lastInsertId or null
 	 */
 	function addCategory($fieldData) {
-		return $this->_getSTopicCategoryDB()->add($fieldData);
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
+		return $stopicCategoryDB->add($fieldData);
 	}
 
 	/**
@@ -256,11 +268,12 @@ class PW_STopicService {
 	 * @return affected_rows or null
 	 */
 	function updateCategory($fieldData, $categoryId) {
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
 		$categoryId = intval ( $categoryId );
 		if ($categoryId<= 0) {
 			return NULL;
 		}
-		return $this->_getSTopicCategoryDB()->update($fieldData,$categoryId);
+		return $stopicCategoryDB->update($fieldData,$categoryId);
 	}
 
 	/**
@@ -270,11 +283,14 @@ class PW_STopicService {
 	 * @return affected_rows or null
 	 */
 	function deleteCategory($categoryId) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
+		
 		$categoryId = intval ( $categoryId );
 		if ($categoryId <= 0 || ! $this->isAllowDeleteCategory ( $categoryId )) {
 			return NULL;
 		}
-		return ($this->_getSTopicCategoryDB()->delete ( $categoryId )) ? $this->_getSTopicPicturesDB()->updateByCategoryId ( array("categoryid"=>0),$categoryId ) : NULL;
+		return ($stopicCategoryDB->delete ( $categoryId )) ? $stopicPicturesDB->updateByCategoryId ( array("categoryid"=>0),$categoryId ) : NULL;
 	}
 
 	/**
@@ -285,8 +301,10 @@ class PW_STopicService {
 	 * @return bool
 	 */
 	function isAllowDeleteCategory($categoryId) {
-		if ($this->_getSTopicDB()->countByCategoryId($categoryId)) return false;
-		$category = $this->_getSTopicCategoryDB()->get($categoryId);
+		$stopicDB = $this->_getSTopicDB();
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
+		if ($stopicDB->countByCategoryId($categoryId)) return false;
+		$category = $stopicCategoryDB->get($categoryId);
 		if (!$category || $category['status'] == 1) return false;
 		return true;
 	}
@@ -297,7 +315,8 @@ class PW_STopicService {
 	 * @return array
 	 */
 	function getCategorys() {
-		return $this->_getSTopicCategoryDB()->gets ();
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
+		return $stopicCategoryDB->gets ();
 	}
 
 	/**
@@ -306,7 +325,8 @@ class PW_STopicService {
 	 * @return array
 	 */
 	function getCategory($categoryId) {
-		return $this->_getSTopicCategoryDB()->get ( $categoryId );
+		$stopicCategoryDB = $this->_getSTopicCategoryDB();
+		return $stopicCategoryDB->get ( $categoryId );
 	}
 
 	/**
@@ -316,10 +336,12 @@ class PW_STopicService {
 	 * @return picture name like[20090819152809.jpg]
 	 */
 	function uploadPicture($fileArray, $categoryId, $creator) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$uploadPictureClass = $this->_setUploadPictureClass();
 		if (count ( $fileArray ) < 0 || intval ( $categoryId ) < 0 || trim ( $creator ) == "") {
 			return null;
 		}
-		$filename = $this->_setUploadPictureClass ()->upload ( $fileArray );
+		$filename = $uploadPictureClass->upload ( $fileArray );
 		if ($filename === FALSE) {
 			return null;
 		}
@@ -329,7 +351,7 @@ class PW_STopicService {
 			"path" => trim ($filename),
 			"creator" => $creator
 		);
-		return $this->_getSTopicPicturesDB()->add ( $fieldData );
+		return $stopicPicturesDB->add ( $fieldData );
 	}
 
 	function _setUploadPictureClass() {
@@ -347,11 +369,12 @@ class PW_STopicService {
 	 * @return affected_rows or null
 	 */
 	function updatePicture($fieldData, $pictureId) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
 		$pictureId = intval ( $pictureId );
 		if ($pictureId <= 0) {
 			return NULL;
 		}
-		return $this->_getSTopicPicturesDB()->update($fieldData,$pictureId);
+		return $stopicPicturesDB->update($fieldData,$pictureId);
 	}
 
 	/**
@@ -361,12 +384,14 @@ class PW_STopicService {
 	 * @return affected_rows or null
 	 */
 	function deletePicture($pictureId) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		$uploadPictureClass = $this->_setUploadPictureClass();
 		$pictureId = intval ( $pictureId );
 		if ($pictureId <= 0) return null;
 		if (!$this->isAllowDeletePicture($pictureId)) return null;
-		$picture = $this->_getSTopicPicturesDB()->get($pictureId);
+		$picture = $stopicPicturesDB->get($pictureId);
 		if (!$picture) return null;
-		return ($this->_getSTopicPicturesDB()->delete ( $pictureId )) ? $this->_setUploadPictureClass ()->delete ( $picture ['path'] ) : "";
+		return ($stopicPicturesDB->delete ( $pictureId )) ? $uploadPictureClass->delete ( $picture ['path'] ) : "";
 	}
 
 	/**
@@ -376,7 +401,8 @@ class PW_STopicService {
 	 * @return bool
 	 */
 	function isAllowDeletePicture($pictureId) {
-		return $this->_getSTopicDB()->countByBackgroundId($pictureId) ? false : true;
+		$stopicDB = $this->_getSTopicDB();
+		return $stopicDB->countByBackgroundId($pictureId) ? false : true;
 	}
 
 	/**
@@ -386,12 +412,18 @@ class PW_STopicService {
 	 * @return array
 	 */
 	function getPictures($categoryId = 0) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
 		$categoryId = intval ( $categoryId );
 		if ($categoryId < 0) return array();
 
 		return $this->_lardBackground( $categoryId
-			? $this->_getSTopicPicturesDB()->getsByCategoryId ($categoryId)
-			: $this->_getSTopicPicturesDB()->gets() );
+			? $stopicPicturesDB->getsByCategoryId ($categoryId)
+			: $stopicPicturesDB->gets() );
+	}
+	
+	function getBackgroundsInPage($page, $perPage, $categoryId=0) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		return $this->_lardBackground($stopicPicturesDB->getsInPage($page, $perPage, $categoryId));
 	}
 
 	function getPicturesAndDefaultBGs($categoryId = 0) {
@@ -401,9 +433,10 @@ class PW_STopicService {
 	}
 
 	function _getBackgroundUrl($bgId) {
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
 		if ($bgId<0) return $this->_getDefaultBackgroundUrl($bgId);
 
-		$bg = $this->_getSTopicPicturesDB()->get($bgId);
+		$bg = $stopicPicturesDB->get($bgId);
 		return $bg['path'] ? $this->_getSTopicConfig ('bgBaseUrl') . $bg ['path'] : "";
 	}
 
@@ -445,43 +478,48 @@ class PW_STopicService {
 	 * @return number
 	 */
 	function countPictures($categoryId = 0) {
-		return $categoryId ? $this->_getSTopicPicturesDB()->countByCategoryId($categoryId) : $this->_getSTopicPicturesDB()->count();
+		$stopicPicturesDB = $this->_getSTopicPicturesDB();
+		return $categoryId ? $stopicPicturesDB->countByCategoryId($categoryId) : $stopicPicturesDB->count();
 	}
 
 	function _lardBackground($bgList) {
-		foreach ( $bgList as &$bg ) {
-			$bg ['thumb_url'] = $bg ['path'] ? $this->_getSTopicConfig ('bgBaseUrl') . "thumb_" . $bg ['path'] : "";
+		foreach ($bgList as $key => $bg) {
+			$bgList[$key]['thumb_url'] = $bg['path'] ? $this->_getSTopicConfig('bgBaseUrl') . "thumb_" . $bg ['path'] : "";
 		}
-		unset ( $bg );
 		return $bgList;
 	}
 
 	function addBlock($fieldData) {
 		$fieldData = $this->_completeBlockFields($fieldData);
 
-		return $this->_getSTopicBloackDB()->add($fieldData);
+		$stopicBlockDB = $this->_getSTopicBloackDB();
+		return $stopicBlockDB->add($fieldData);
 	}
 
 	function replaceBlock($fieldData) {
 		$fieldData = $this->_completeBlockFields($fieldData);
-		return $this->_getSTopicBloackDB()->replace($fieldData);
+		$stopicBlockDB = $this->_getSTopicBloackDB();
+		return $stopicBlockDB->replace($fieldData);
 	}
 
 	function updateBlock($block_id,$fieldData) {
 		$fieldData = $this->_completeBlockFields($fieldData);
-		return $this->_getSTopicBloackDB()->update($block_id,$fieldData);
+		$stopicBlockDB = $this->_getSTopicBloackDB();
+		return $stopicBlockDB->update($block_id,$fieldData);
 	}
 
 	function getBlocks() {
 		static $blocks;
 		if (!$blocks) {
-			$blocks	= $this->_getSTopicBloackDB()->gets();
+			$stopicBlockDB = $this->_getSTopicBloackDB();
+			$blocks	= $stopicBlockDB->gets();
 		}
 		return $blocks;
 	}
 
 	function getBlockById($id) {
-		return $this->_getSTopicBloackDB()->get($id);
+		$stopicBlockDB = $this->_getSTopicBloackDB();
+		return $stopicBlockDB->get($id);
 	}
 
 	function _completeBlockFields($fieldData) {
@@ -496,23 +534,28 @@ class PW_STopicService {
 	}
 
 	function addUnit($fieldData) {
-		return $this->_getSTopicUnitDB()->add($fieldData);
+		$stopicUnitDB = $this->_getSTopicUnitDB();
+		return $stopicUnitDB->add($fieldData);
 	}
 
 	function updateUnitByFild($stopic_id,$html_id,$fieldData) {
-		return $this->_getSTopicUnitDB()->updateByFild($stopic_id,$html_id,$fieldData);
+		$stopicUnitDB = $this->_getSTopicUnitDB();
+		return $stopicUnitDB->updateByFild($stopic_id,$html_id,$fieldData);
 	}
 
 	function deleteUnits($stopic_id,$html_ids) {
-		return $this->_getSTopicUnitDB()->deletes($stopic_id,$html_ids);
+		$stopicUnitDB = $this->_getSTopicUnitDB();
+		return $stopicUnitDB->deletes($stopic_id,$html_ids);
 	}
 
 	function getStopicUnitsByStopicId($stopic_id) {
-		return $this->_getSTopicUnitDB()->getStopicUnits($stopic_id);
+		$stopicUnitDB = $this->_getSTopicUnitDB();
+		return $stopicUnitDB->getStopicUnits($stopic_id);
 	}
 
 	function getStopicUnitByStopic($stopic_id,$html_id) {
-		return $this->_getSTopicUnitDB()->getByStopicAndHtml($stopic_id,$html_id);
+		$stopicUnitDB = $this->_getSTopicUnitDB();
+		return $stopicUnitDB->getByStopicAndHtml($stopic_id,$html_id);
 	}
 
 	function getHtmlData($data,$block) {

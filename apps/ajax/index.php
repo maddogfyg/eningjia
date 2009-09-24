@@ -39,7 +39,7 @@ if ($a == 'delshare') {
 	if ($u) {
 		if ($friend = getOneFriend($u)) {
 			$db->update("DELETE FROM pw_friends WHERE (uid=".pwEscape($winduid)." AND friendid=".pwEscape($u).") OR (uid=".pwEscape($u)." AND friendid=".pwEscape($winduid).")");
-			$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE uid=".pwEscape($winduid)." OR uid=".pwEscape($u));
+			$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE (uid=".pwEscape($winduid)." OR uid=".pwEscape($u).") AND f_num>0");
 			echo "success|";ajax_footer();
 		} else {
 			Showmsg('mode_o_not_friend');
@@ -422,6 +422,9 @@ if ($a == 'delshare') {
 	if ($affected_rows = delAppAction('diary',$id)) {
 		countPosts("-$affected_rows");
 	}
+
+	$usercache = L::loadDB('Usercache');
+	$usercache->delete($winduid,'diary',$id);
 	//积分变动
 	require_once(R_P.'require/credit.php');
 	$o_diary_creditset = unserialize($o_diary_creditset);

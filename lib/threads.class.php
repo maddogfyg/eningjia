@@ -2,7 +2,7 @@
 !defined('P_W') && exit('Forbidden');
 
 class PW_Threads {
-
+	var $_db;
 	var $_connect	= FALSE;
 	var $_expire	= 3600;
 	var $_exist		= FALSE;
@@ -10,6 +10,7 @@ class PW_Threads {
 	var $_prefixTmsgs	= "tmsgs_";
 
 	function PW_Threads () {
+		$this->_db = $GLOBALS['db'];
         if($this->_isMemecacheOpen()) {
             $this->_exist = TRUE;
         }
@@ -38,23 +39,26 @@ class PW_Threads {
 	function _delThreadsByTid($tid) {
 		if($this->_exist == FALSE) return null;
         $key = $this->_getThreadsKey($tid);
-		$this->_getMemcacheConnection()->delete($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+		$memcacheConnection->delete($key);
 	}
 
 	function _delTmsgsByTid($tid) {
 		if($this->_exist == FALSE) return null;
         $key = $this->_getTmsgsKey($tid);
-		$this->_getMemcacheConnection()->delete($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+		$memcacheConnection->delete($key);
 	}
 
 	function _getThreadsByTid($tid) {
 		if($this->_exist == FALSE) return null;
         $key = $this->_getThreadsKey($tid);
-        $result = $this->_getMemcacheConnection()->get($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+        $result = $memcacheConnection->get($key);
         if($result === FALSE) {
             $result = $this->_getThreadsByTidNoCache($tid);
             if($result) {
-                $this->_getMemcacheConnection()->set($key,$result,$this->_expire);
+                $memcacheConnection->set($key,$result,$this->_expire);
             }
         }
         return $result;
@@ -63,11 +67,12 @@ class PW_Threads {
 	function _getTmsgsByTid($tid) {
 		if($this->_exist == FALSE) return null;
         $key = $this->_getTmsgsKey($tid);
-        $result = $this->_getMemcacheConnection()->get($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+        $result = $memcacheConnection->get($key);
         if($result === FALSE) {
             $result = $this->_getTmsgsByTidNoCache($tid);
             if($result) {
-                $this->_getMemcacheConnection()->set($key,$result,$this->_expire);
+                $memcacheConnection->set($key,$result,$this->_expire);
             }
         }
         return $result;
@@ -75,18 +80,18 @@ class PW_Threads {
 
 	function _getTmsgsByTidNoCache($tid) {
 		$pw_tmsgs = GetTtable($tid);
-		$read = $this->_getConnection()->get_one("SELECT * FROM $pw_tmsgs WHERE tid=".pwEscape($tid));
+		$read = $this->_db->get_one("SELECT * FROM $pw_tmsgs WHERE tid=".pwEscape($tid));
 		return $read;
 	}
 
 	function _getThreadsByTidNoCache($tid) {
-		$read = $this->_getConnection()->get_one("SELECT * FROM pw_threads WHERE tid=".pwEscape($tid));
+		$read = $this->_db->get_one("SELECT * FROM pw_threads WHERE tid=".pwEscape($tid));
 		return $read;
 	}
 
 	function _getThreadsAndTmsgsByTidNoCache($tid) {
 		$pw_tmsgs = GetTtable($tid);
-		$read = $this->_getConnection()->get_one("SELECT t.* ,tm.* FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON t.tid=tm.tid WHERE t.tid=".pwEscape($tid));
+		$read = $this->_db->get_one("SELECT t.* ,tm.* FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON t.tid=tm.tid WHERE t.tid=".pwEscape($tid));
 		return $read;
 	}
 

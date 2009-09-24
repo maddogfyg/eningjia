@@ -14,7 +14,8 @@ class PW_Rate {
         if ($id < 1) {
             return null;
         }
-        return ($this->_cache) ? $this->_get_RateConfigCache ( $typeId, $id ) : $this->_getRateConfigDB ()->get ( $id );
+		$rateConfigDb = $this->_getRateConfigDB();
+        return ($this->_cache) ? $this->_get_RateConfigCache ( $typeId, $id ) : $rateConfigDb->get ( $id );
     }
 
     /**
@@ -26,7 +27,8 @@ class PW_Rate {
         if ($fieldData === FALSE) {
             return null;
         }
-        $result = $this->_getRateConfigDB ()->add ( $fieldData );
+		$rateConfigDB = $this->_getRateConfigDB();
+        $result = $rateConfigDB->add ( $fieldData );
         if ($this->_cache && $result) {
             $this->_set_RateConfigCache ();
         }
@@ -49,7 +51,8 @@ class PW_Rate {
         }
         $fieldData ['creator'] = trim ( $fieldData ['creator'] );
         $fieldData ['updater'] = trim ( $fieldData ['updater'] );
-        if (! $this->_isAllowFields ( $fieldData, $this->_getRateConfigDB ()->getStruct () )) {
+		$rateConfigDB = $this->_getRateConfigDB();
+        if (! $this->_isAllowFields ( $fieldData, $rateConfigDB->getStruct () )) {
             return FALSE;
         }
         $fieldData ['created_at'] = $fieldData ['update_at'] = time ();
@@ -71,10 +74,11 @@ class PW_Rate {
      */
     function updateRateConfig($fieldData, $id) {
         $id = intval ( $id );
-        if ($id < 1 || ! $this->_isAllowFields ( $fieldData, $this->_getRateConfigDB ()->getStruct () )) {
+		$rateConfigDB = $this->_getRateConfigDB();
+        if ($id < 1 || ! $this->_isAllowFields ( $fieldData, $rateConfigDB->getStruct () )) {
             return null;
         }
-        $result = $this->_getRateConfigDB ()->update ( $fieldData, $id );
+        $result = $rateConfigDB->update ( $fieldData, $id );
         if ($this->_cache && $result) {
             $this->_set_RateConfigCache ();
         }
@@ -90,7 +94,8 @@ class PW_Rate {
         if ($id < 1) {
             return null;
         }
-        $result = $this->_getRateConfigDB ()->delete ( $id );
+		$rateConfigDB = $this->_getRateConfigDB();
+        $result = $rateConfigDB->delete ( $id );
         if ($this->_cache && $result) {
             $this->_set_RateConfigCache ();
         }
@@ -106,9 +111,10 @@ class PW_Rate {
         if ($typeId < 1) {
             return null;
         }
+		$rateConfigDB = $this->_getRateConfigDB();
         //@todo 是否开启文件缓存
         if (! $this->_cache || ! $rateConfigs = $this->_get_RateConfigCache ( $typeId )) {
-            $rateConfigs = $this->_getRateConfigDB ()->getsByTypeId ( $typeId );
+            $rateConfigs = $rateConfigDB->getsByTypeId ( $typeId );
         }
         if (! $rateConfigs) {
             return null;
@@ -143,7 +149,7 @@ class PW_Rate {
     //记录是否已经存在 没有则新增，否则更新
     //先检查用户是否评价
     //@todo 检查对象的有效性 并获取对象作者的ID
-        if ($this->getsRateByUserId ( $userId, $objectId, $typeId ) || ! $authorId = $this->_checkObjectByTypeId ( $typeId, $objectId )) {
+        if (! $authorId = $this->_checkObjectByTypeId ( $typeId, $objectId )) {
             return null;
         }
         //再检查评价结果记录是否存在
@@ -158,11 +164,12 @@ class PW_Rate {
         if ($fieldData === FALSE) {
             return null;
         }
-        $this->_getRateDB ()->add ( $fieldData );
+		$rateDB = $this->_getRateDB();
+        $rateDB->add ( $fieldData );
         // TODO 增加对应的金币或积分等
         //获取配置信息 是否读取缓存／或数据库
         if (! $this->_cache || ! $config = $this->_get_RateConfigCache ( $typeId, $optionId )) {
-            $config = $this->getRateConfig ( $typeId, $id );
+            $config = $this->getRateConfig ( $typeId, $optionId );
         }
         require_once $this->_getRootPath () . "/require/credit.php";
         if ($config ['creditset'] < 0) {
@@ -204,7 +211,7 @@ class PW_Rate {
 
     function _addRateForHot($objectId,$typeId,$optionId) {
         $action = $this->_getRateTypesForHot($typeId,$optionId);
-        $this->_getDatanalyseService()->updateDatanalyse($objectId,$action);
+        updateDatanalyse($objectId,$action,1);
     }
 
     # 贴子
@@ -232,7 +239,8 @@ class PW_Rate {
         if (! $anonymity && $fieldData ['uid'] < 0) {
             return FALSE;
         }
-        if ($fieldData ['objectid'] < 0 || ! in_array ( $fieldData ['typeid'], $this->_getRateType () ) || $fieldData ['optionid'] < 0 || ! $this->_isAllowFields ( $fieldData, $this->_getRateDB ()->getStruct () )) {
+		$rateDB = $this->_getRateDB ();
+        if ($fieldData ['objectid'] < 0 || ! in_array ( $fieldData ['typeid'], $this->_getRateType () ) || $fieldData ['optionid'] < 0 || ! $this->_isAllowFields ( $fieldData, $rateDB->getStruct () )) {
             return FALSE;
         }
         $fieldData ['created_at'] = time ();
@@ -254,7 +262,8 @@ class PW_Rate {
         if ($typeId < 1 || $userId < 1 || $objectId < 1) {
             return null;
         }
-        return $this->_getRateDB ()->getsByUserId ( $userId, $objectId, $typeId );
+		$rateDB = $this->_getRateDB ();
+        return $rateDB->getsByUserId ( $userId, $objectId, $typeId );
     }
 
     /**
@@ -266,7 +275,8 @@ class PW_Rate {
         if ($typeId < 1) {
             return null;
         }
-        $RateResult = $this->_getRateDB ()->getFromTmpTableByWeek ( $typeId );
+		$rateDB = $this->_getRateDB ();
+        $RateResult = $rateDB->getFromTmpTableByWeek ( $typeId );
         //$RateResult = $this->_getRateDB ()->getByWeek ( $typeId );
         if (! $RateResult) {
             return null;
@@ -298,7 +308,8 @@ class PW_Rate {
     }
 
     function _getThreadById($tid) {
-        $thread = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_threads WHERE tid={$tid}" );
+		$rateDB = $this->_getRateDB ();
+        $thread = $rateDB->_db->get_one ( "SELECT * FROM pw_threads WHERE tid={$tid}" );
         if (! $thread) {
             return array ();
         }
@@ -311,7 +322,8 @@ class PW_Rate {
     }
 
     function _getDiaryByById($did) {
-        $diary = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_diary WHERE did={$did}" );
+		$rateDB = $this->_getRateDB ();
+        $diary = $rateDB->_db->get_one ( "SELECT * FROM pw_diary WHERE did={$did}" );
         if (! $diary) {
             return array ();
         }
@@ -324,11 +336,12 @@ class PW_Rate {
     }
 
     function _getPhotoById($pid) {
-        $photo = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_cnphoto WHERE pid={$pid}" );
+		$rateDB = $this->_getRateDB ();
+        $photo = $rateDB->_db->get_one ( "SELECT * FROM pw_cnphoto WHERE pid={$pid}" );
         if (! $photo) {
             return array ();
         }
-        $album = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_cnalbum WHERE aid=" . $photo ['aid'] );
+        $album = $rateDB->_db->get_one ( "SELECT * FROM pw_cnalbum WHERE aid=" . $photo ['aid'] );
         $result = array ();
         $result ['title'] = (isset ( $photo ['pintro'] ) && trim ( $photo ['pintro'] ) != "") ? $photo ['pintro'] : '暂无描述';
         //$result ['href'] = "/mode.php?m=o&q=photos&a=view&pid=" . $pid;
@@ -356,7 +369,8 @@ class PW_Rate {
     }
 
     function _checkThreadById($tid) {
-        $thread = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_threads WHERE tid={$tid}" );
+		$rateDB = $this->_getRateDB ();
+        $thread = $rateDB->_db->get_one ( "SELECT * FROM pw_threads WHERE tid={$tid}" );
         if (! $thread || ! isset ( $thread ['authorid'] )) {
             return FALSE;
         }
@@ -364,7 +378,8 @@ class PW_Rate {
     }
 
     function _checkDiaryByById($did) {
-        $diary = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_diary WHERE did={$did}" );
+		$rateDB = $this->_getRateDB ();
+        $diary = $rateDB->_db->get_one ( "SELECT * FROM pw_diary WHERE did={$did}" );
         if (! $diary || ! isset ( $diary ['uid'] )) {
             return FALSE;
         }
@@ -372,11 +387,12 @@ class PW_Rate {
     }
 
     function _checkPhotoById($pid) {
-        $photo = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_cnphoto WHERE pid={$pid}" );
+		$rateDB = $this->_getRateDB ();
+        $photo = $rateDB->_db->get_one ( "SELECT * FROM pw_cnphoto WHERE pid={$pid}" );
         if (! $photo) {
             return FALSE;
         }
-        $album = $this->_getBaseDB ()->_getConnection ()->get_one ( "SELECT * FROM pw_cnalbum WHERE aid=" . $photo ['aid'] );
+        $album = $rateDB->_db->get_one ( "SELECT * FROM pw_cnalbum WHERE aid=" . $photo ['aid'] );
         if (! $album || ! isset ( $album ['ownerid'] )) {
             return FALSE;
         }
@@ -386,14 +402,13 @@ class PW_Rate {
     function addConfigPower($powerData, $groupData) {
         setConfig ( 'db_ratepower', serialize ( $powerData ) );
         setConfig ( 'db_rategroup', serialize ( $groupData ) );
-        //$this->_getBaseDB ()->_getConnection ()->update ( "REPLACE INTO pw_config SET db_name='db_ratepower',db_value=" . pwEscape ( serialize ( $powerData ), false ) );
-        //$this->_getBaseDB ()->_getConnection ()->update ( "REPLACE INTO pw_config SET db_name='db_rategroup',db_value=" . pwEscape ( serialize ( $groupData ), false ) );
         updatecache_c ();
     }
 
     function getUserGroupLevel() {
-        $query = $this->_getBaseDB ()->_getConnection ()->query ( "SELECT gid,gptype,grouptitle,groupimg,grouppost FROM pw_usergroups ORDER BY grouppost,gid" );
-        $userGroups = $this->_getBaseDB ()->_getAllResultFromQuery ( $query );
+		$rateDB = $this->_getRateDB ();
+        $query = $rateDB->_db->query ( "SELECT gid,gptype,grouptitle,groupimg,grouppost FROM pw_usergroups ORDER BY grouppost,gid" );
+        $userGroups = $rateDB->_getAllResultFromQuery ( $query );
         $tmp = array ();
         foreach ( $userGroups as $group ) {
             if ($group ['gptype'] == 'default' && $group ['gid'] != 2) {
@@ -415,7 +430,7 @@ class PW_Rate {
     }
 
     function _getBaseDB() {
-        require_once dirname ( __FILE__ ) . "/db/basedb.php";
+        require_once dirname ( __FILE__ ) . "/base/basedb.php";
         return new BaseDB ( );
     }
 	/*************************数据处理区域 end********************************/
@@ -428,7 +443,8 @@ class PW_Rate {
         if ($fieldData === FALSE) {
             return null;
         }
-        return $this->_getRateResultDB ()->add ( $fieldData );
+		$rateResultDB = $this->_getRateResultDB ();
+        return $rateResultDB->add ( $fieldData );
     }
 
     function _checkRateResult($fieldData) {
@@ -456,7 +472,8 @@ class PW_Rate {
         if ($optionId < 1 || $objectId < 1) {
             return null;
         }
-        return $this->_getRateResultDB ()->getByOptionId ( $optionId, $objectId );
+		$rateResultDB = $this->_getRateResultDB ();
+        return $rateResultDB->getByOptionId ( $optionId, $objectId );
     }
 
     /**
@@ -469,7 +486,8 @@ class PW_Rate {
         if ($optionId < 1 || $objectId < 1) {
             return null;
         }
-        return $this->_getRateResultDB ()->updateByOptionId ( $optionId, $objectId );
+		$rateResultDB = $this->_getRateResultDB ();
+        return $rateResultDB->updateByOptionId ( $optionId, $objectId );
     }
 
     /**
@@ -484,7 +502,8 @@ class PW_Rate {
         }
         $tmp = array ();
         $total = 0; #评价人数
-        $rateResults = $this->_getRateResultDB ()->getByTypeId ( $typeId, $objectId );
+		$rateResultDB = $this->_getRateResultDB ();
+        $rateResults = $rateResultDB->getByTypeId ( $typeId, $objectId );
         if (! $rateResults) {
             return array ($tmp, $total );
         }
@@ -522,7 +541,8 @@ class PW_Rate {
 
 	/************************************文件缓存区域start***********************************************/
     function _set_RateConfigCache() {
-        $configs = $this->_getRateConfigDB ()->gets ();
+		$rateConfigDB = $this->_getRateConfigDB ();
+        $configs = $rateConfigDB->gets ();
         if (! $configs) {
             return null;
         }
@@ -569,24 +589,61 @@ class PW_Rate {
         if (intval ( $userId ) < 1) {
             return - 1;
         }
-        return $this->_getRateDB ()->countByUserId ( $userId );
+		$rateDB = $this->_getRateDB ();
+        return $rateDB->countByUserId ( $userId );
     }
 
     function countByIp($ip) {
         if ($ip == "") {
             return - 1;
         }
-        return $this->_getRateDB ()->countByIp ( $ip );
+		$rateDB = $this->_getRateDB ();
+        return $rateDB->countByIp ( $ip );
     }
 
     function getsByIp($ip, $objectId, $typeId) {
-        return $this->_getRateDB ()->getsByIp ( $ip, $objectId, $typeId );
+		$rateDB = $this->_getRateDB ();
+        return $rateDB->getsByIp ( $ip, $objectId, $typeId );
     }
 
-    function _getDatanalyseService() {
-        require_once R_P . 'lib/datanalyse.class.php'; //updateDatanalyse
-        return new Datanalyse ( );
+    /**********************************************************/
+
+    function getWeekData($typeId,$hotSource = true){
+    	if($hotSource){
+    		return $this->getWeekResultHtmlFromHot($typeId);
+    	}
+    	return $this->getRateByWeek($typeId);
     }
+
+    function getWeekResultHtmlFromHot($typeId){
+		$datanalyse = $this->_getDatanalyseService();
+		$result = $datanalyse->getDatanalyseForRateByType($typeId);
+        if(!$result){
+        	return '';
+        }
+
+        $tmp = array();
+        foreach($result as $objectId => $object){
+        	$info = array();
+        	$info ['title'] = $object ['title'];
+        	$info ['href'] = "/".$object ['url'];
+        	$info ['author'] = $object ['author'];
+        	$info ['authorUrl'] = "/u.php?action=show&username=".$object['author'];
+        	$optionId = substr($object['action'],strrpos($object['action'],"_")+1);
+        	$info ['objectid'] = $objectId;
+        	$info ['optionid'] = $optionId;
+        	$info ['typeid'] = $typeId;
+            $tmp [$optionId]['objectInfo'] = $info;
+        }
+        return $tmp;
+    }
+
+    function _getDatanalyseService(){
+    	require_once R_P.'lib/datanalyse.class.php';
+    	return new Datanalyse();
+    }
+
+    /***********************************************************/
 
     function _getRateConfigDB() {
         return L::loadDB ( 'RateConfig' );

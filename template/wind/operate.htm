@@ -88,7 +88,7 @@ initCheckTextNum('atc_content','atc_content_warn',100);
 EOT;
 }elseif($action=='recommend'){print <<<EOT
 -->
-<form method="post"  name="FORM" action="operate.php?action=recommend">
+<form method="post"  name="recommendFORM" action="operate.php?action=recommend">
 <input type="hidden" name="verify" value="$verifyhash" />
 <input type="hidden" name="tid" value="$tid" />
 <div class="t f_one" style="margin-top:8px;">
@@ -127,7 +127,7 @@ EOT;
 }print<<<EOT
 -->
 			</ul></div>
-			<span class="bta" style="cursor:pointer;" onClick="CheckAll(document.FORM,'touid')">全 选</span>
+			<span class="bta" style="cursor:pointer;" onClick="CheckAll(document.recommendFORM,'touid')">全 选</span>
 <!--
 EOT;
 }print <<<EOT

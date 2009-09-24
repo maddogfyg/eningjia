@@ -150,11 +150,12 @@ if ($action == 'sign') {
 		//验证码
 		//require_once(R_P.'require/postfunc.php');
 		require_once("mode/o/require/core.php");
-		InitGP(array('uid','windid','verify'),'P');
+		InitGP(array('uid','verify'),'P');
 		InitGP(array('aid','filenames','photoid'),'G');
 		$swfhash = GetVerify($uid);
 
-		$windid = pwConvert($windid,$db_charset,'utf-8');
+		//$windid = pwConvert($windid,$db_charset,'utf-8');
+		$windid = $db->get_value("SELECT username FROM pw_members WHERE uid=".pwEscape($uid));
 		$filenames = pwConvert($filenames,$db_charset,'utf-8');
 		$filenames = addslashes($filenames);
 
@@ -203,6 +204,16 @@ if ($action == 'sign') {
 				$feedText .= "[url=$db_bbsurl/mode.php?m=o&space=1&q=photos&a=view&pid=$pid&u=$uid][img]" . getphotourl($value['path'], $value['ifthumb'])."[/img][/url]&nbsp;";
 			}
 			pwAddFeed($uid, 'photo', $pid, array('num' => $photoNum, 'text' => $feedText));
+
+			//会员资讯缓存
+			$usercache = L::loadDB('Usercache');
+			$usercachedata = $usercache->get($uid,'photos');
+			$usercachedata = explode(',',$usercachedata['value']);
+			is_array($usercachedata) || $usercachedata = array();
+			if (count($usercachedata) >= 4) array_pop($usercachedata);
+			array_unshift($usercachedata,$pid);
+			$usercachedata = implode(',',$usercachedata);
+			$usercache->update($uid,'photos',$pid,$usercachedata);
 		}
 
 		$db->update("UPDATE pw_cnalbum SET photonum=photonum+".pwEscape($photoNum,false) . ",lasttime=" . pwEscape($timestamp,false) . ',lastpid=' . pwEscape(implode(',',$lastpid)) . (!$rt['lastphoto'] ? ',lastphoto='.pwEscape($img->getLastPhoto()) : '') . " WHERE aid=" . pwEscape($aid));
@@ -245,7 +256,7 @@ if ($action == 'sign') {
 		$ext = strtolower(substr(strrchr($_GET['filename'],'.'),1));
 		$udir = str_pad(substr($winduid,-2),2,'0',STR_PAD_LEFT);
 
-		$source = PwUpload::savePath($db_ifftp, "{$winduid}_tmp.$ext", "upload/$udir/");
+		$source = PwUpload::savePath(0, "{$winduid}_tmp.$ext", "upload/$udir/");
 		if (!file_exists($source)) {
 			Showmsg('undefined_action');
 		}
@@ -253,14 +264,16 @@ if ($action == 'sign') {
 
 		if ($data) {
 
+			InitGP(array('from'));
 			require_once(R_P . 'require/showimg.php');
 
 			$filename  = "{$winduid}.jpg";
 			$normalDir = "upload/$udir/";
 			$middleDir = "upload/middle/$udir/";
 			$smallDir  = "upload/small/$udir/";
+			$img_w = $img_h = 0;
 
-			$middleFile = PwUpload::savePath($db_ifftp, $filename, "$middleDir");
+			$middleFile = PwUpload::savePath($db_ifftp, $filename, "$middleDir", 'm_');
 			PwUpload::createFolder(dirname($middleFile));
 			writeover($middleFile, $data);
 
@@ -275,11 +288,15 @@ if ($action == 'sign') {
 			list($w, $h) = explode("\t", $db_fthumbsize);
 			if ($db_iffthumb && MakeThumb($source, $normalFile, $w, $h)) {
 				P_unlink($source);
+				$img_w = $w;
+				$img_h = $h;
 			} elseif (!PwUpload::movefile($source, $normalFile)) {
 				Showmsg('undefined_action');
+			} else {
+				list($img_w, $img_h) = getimagesize($normalFile);
 			}
 
-			$smallFile = PwUpload::savePath($db_ifftp, $filename, "$smallDir");
+			$smallFile = PwUpload::savePath($db_ifftp, $filename, "$smallDir", 's_');
 			$s_ifthumb = 0;
 			PwUpload::createFolder(dirname($smallFile));
 			if (MakeThumb($middleFile, $smallFile, 48, 48)) {
@@ -293,11 +310,13 @@ if ($action == 'sign') {
 			pwFtpClose($GLOBALS['ftp']);
 
 			$user_a = explode('|',$winddb['icon']);
+			$user_a[2] = $img_w;
+			$user_a[3] = $img_h;
 			$usericon = setIcon("$udir/{$winduid}.$ext", 3, $user_a);
 
 			$db->update("UPDATE pw_members SET icon=" . pwEscape($usericon,false) . " WHERE uid=" . pwEscape($winduid));
 
-			refreshto('profile.php?action=modify&info_type=face','upload_icon_success');
+			refreshto($from == 'reg' ? 'index.php' : 'profile.php?action=modify&info_type=face','upload_icon_success');
 
 		} else {
 			Showmsg('upload_icon_fail');
@@ -1132,6 +1151,15 @@ if ($action == 'sign') {
 		$memberdb[] = $rt;
 	}
 
+	if ($db_charset == 'utf-8') {
+		if (function_exists('mb_convert_encoding')) {
+			$read['subject'] = mb_convert_encoding($read['subject'], "gbk",'utf-8');
+		} else {
+			require_once(R_P.'wap/chinese.php');
+			$chs  = new Chinese('UTF8','gbk');
+			$read['subject'] = $chs->Convert($read['subject']);
+		}
+	}
 	header("Content-type:application/vnd.ms-excel");
 	header("Content-Disposition:attachment;filename=$read[subject].xls");
 	header("Pragma: no-cache");

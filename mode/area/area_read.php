@@ -4,6 +4,7 @@ define('M_P',R_P."mode/$db_mode/");
 $m = $db_mode;
 $db_modepages = $db_modepages[$db_mode];
 
+if ('' == $read['content']) $read = $threads->getThreads($tid, true);
 $readnum = $db_readperpage = 5;
 if (!$openIndex) $count--;
 
@@ -151,7 +152,10 @@ if ($_pids) {
 $bandb = isban($readdb,$fid);
 $wordsfb = wordsfb::getInstance();
 
+isset($bandb[$thread_read['authorid']]) && $thread_read['groupid'] = 6;
+$authorids[] = $thread_read['authorid'];
 $thread_read = viewread($thread_read, 0);
+
 foreach ($readdb as $key => $read) {
 	isset($bandb[$read['authorid']]) && $read['groupid'] = 6;
 	$authorids[] = $read['authorid'];

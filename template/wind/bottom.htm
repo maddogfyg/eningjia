@@ -161,7 +161,7 @@ EOT;
 				</span>
 <!--
 EOT;
-if ($db_modes[o][ifopen]) {
+if (isset($db_modes[o][ifopen]) && $db_modes[o][ifopen]) {
 if($GLOBALS['db_dopen']){print <<<EOT
 -->			 <span>
 					<span style="display:none;float:left;margin-top:-1px;">
@@ -198,7 +198,7 @@ EOT;
 	</div>
 <div id="pwd_app_hidden" style="display:none;">
 	<div class="sbar-title cc" style="cursor: pointer;padding:5px 10px;" onclick = "pw_bottom.hiddenTab();">
-	<span class="fr closeicon"><img src="$imgpath/$stylepath/index/cate_open.gif" /></span>
+	<span class="fr closeicon"><img src="$imgpath/wind/index/cate_open.gif" /></span>
 		<span class="b">我的菜单&nbsp;</span>
 	</div>
 	<h6 class="gray">我的书签</h6>
@@ -235,7 +235,7 @@ EOT;
 	</div>
 <!--
 EOT;
-if ($db_modes[o][ifopen]) {print <<<EOT
+if (isset($db_modes[o][ifopen]) && $db_modes[o][ifopen]) {print <<<EOT
 -->
 	<h6 class="gray"><a href="mode.php?m=o&q=myapp&action=my" class="fr">管理</a>圈子应用</h6>
 	<div class="listAppItem">
@@ -276,12 +276,13 @@ EOT;
 			<li><img src="$imgpath/apps/icon/groups.png" align="absmiddle" /> <a href="mode.php?m=o&q=groups">群组</a></li>
 <!--
 EOT;
-}foreach ($bottom_appshortcut as $key => $value) {print <<<EOT
+}if ($bottom_appshortcut) {
+foreach ($bottom_appshortcut as $key => $value) {print <<<EOT
 -->
 			<li><img src="$imgpath/apps/icon/posts.png" align="absmiddle" /> <a href="mode.php?m=o&q=app&id=$key"> $value</a></li>
 <!--
 EOT;
-}
+}}
 print <<<EOT
 -->
 
@@ -291,7 +292,7 @@ print <<<EOT
 EOT;
 }else{print <<<EOT
 -->
-	<h6 class="gray" style="background:$GLOBALS[forumcolortwo];">快捷链接</h6>
+	<h6 class="gray" style="background:{$GLOBALS['forumcolortwo']};">快捷链接</h6>
 	<div class="listAppItem">
 		<ul class="cc">
 			<li><img src="$imgpath/posts.png" align="absmiddle" /> <a href="u.php?action=topic&uid=$winduid">我的帖子</a></li>
@@ -331,4 +332,4 @@ EOT;
 </script>
 <!--
 EOT;
-}?> 
+}?>

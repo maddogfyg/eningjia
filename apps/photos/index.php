@@ -84,9 +84,9 @@ if (empty($a) || $a == 'own') {
 			}
 		}
 	}
-	
+
 } elseif ($a == 'friend') {
-	
+
 	$sum = $db->get_value("SELECT COUNT(*) AS sum FROM pw_friends f LEFT JOIN pw_cnalbum c ON c.atype='0' AND f.friendid=c.ownerid WHERE f.uid=" . pwEscape($winduid) . ' AND f.uid!=f.friendid AND c.aid IS NOT NULL AND c.private!=2');
 
 	if ($sum) {
@@ -127,9 +127,9 @@ if (empty($a) || $a == 'own') {
 
 	$cnpho = array();
 	$album = $db->get_one("SELECT c.aname,c.aintro,c.private,c.albumpwd,c.ownerid,c.owner,c.lastphoto,c.photonum,m.groupid FROM pw_cnalbum c LEFT JOIN pw_members m ON c.ownerid=m.uid WHERE c.atype='0' AND c.aid=" . pwEscape($aid));
-	
+
 	$isown = $album['ownerid'] == $winduid ? '1' : '0';
-	
+
 	if ($checkpwd) {
 		if (empty($album)) {
 			echo "data_error";
@@ -163,7 +163,7 @@ if (empty($a) || $a == 'own') {
 	if ($album['ownerid'] <> $winduid && $album['private'] == 3 && $viewpwd != $album['albumpwd'] && $groupid != 3) {
 		Showmsg('mode_o_photos_private_3');
 	}
-	
+
 	if ($album['photonum']) {
 		list($pages,$limit) = pwLimitPages($album['photonum'],$page,"{$basename}a=$a&aid=$aid&");
 		$query = $db->query("SELECT c.pid,c.path,c.ifthumb,c.uptime,m.groupid,c.pintro,c.c_num FROM pw_cnphoto c LEFT JOIN pw_members m ON c.uploader=m.username WHERE c.aid=" . pwEscape($aid) . " ORDER BY c.pid $limit");
@@ -209,7 +209,7 @@ if (empty($a) || $a == 'own') {
 	$username = $photo['owner'];
 	$aid = $photo['aid'];
 	$num = $db->get_value("SELECT COUNT(*) AS sum FROM pw_cnphoto WHERE aid=" . pwEscape($photo['aid']) . ' AND pid<=' . pwEscape($pid));
-         
+
 //	$up_photo = $db->get_one("SELECT p.pid,p.path,p.ifthumb,m.groupid FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid LEFT JOIN pw_members m ON p.uploader=m.username WHERE p.pid<".pwEscape($pid)." AND  a.ownerid=".pwEscape($u)." AND p.aid=".pwEscape($aid)." ORDER BY pid DESC");
 //	if ($up_photo) {
 //		$up_photo['path'] = getphotourl($up_photo['path'],$up_photo['ifthumb']);
@@ -265,7 +265,7 @@ if (empty($a) || $a == 'own') {
 		$pid = $db->get_value("SELECT MIN(b.pid) AS pid FROM pw_cnphoto a LEFT JOIN pw_cnphoto b ON a.aid=b.aid AND a.pid<b.pid WHERE a.pid=" . pwEscape($pid));
 		echo "ok\t$pid";
 	}
-	
+
 	ajax_footer();
 } elseif ($a == 'pre') {
 	define('AJAX',1);
@@ -292,13 +292,13 @@ if (empty($a) || $a == 'own') {
 	banUser();
 
 	InitGP(array('pid'), null, 2);
-	
+
 	$photo = $db->get_one("SELECT p.aid,p.pintro,a.ownerid,p.path,a.lastphoto FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid WHERE pid=" . pwEscape($pid));
 	if (empty($photo) || (!$isGM && ($photo['ownerid'] <> $winduid))) {
 		Showmsg('data_error');
 	}
 	if (empty($_POST['step'])) {
-		
+
 		$options = '';
 		$query = $db->query("SELECT aid,aname FROM pw_cnalbum WHERE atype='0' AND ownerid=" . pwEscape($photo['ownerid']) . ' ORDER BY aid DESC');
 		while ($rt = $db->fetch_array($query)) {
@@ -310,15 +310,15 @@ if (empty($a) || $a == 'own') {
 		InitGP(array('pintro'),'P');
 		InitGP(array('aid'), null, 2);
 		!$aid && Showmsg('colony_albumclass');
-		
+
 		if (strlen($pintro)>255) Showmsg('album_pintro_toolang');
-		
+
 		require_once(R_P.'require/bbscode.php');
 		$wordsfb = wordsfb::getInstance();
 		if (($banword = $wordsfb->comprise($pintro)) !== false) {
 			Showmsg('content_wordsfb');
 		}
-		
+
 		$pwSQL = array('pintro' => $pintro);
 
 		$ischage = false;
@@ -350,7 +350,7 @@ if (empty($a) || $a == 'own') {
 
 	define('AJAX','1');
 	InitGP(array('pid'), null, 2);
-	
+
 	$isGM = CkInArray($windid,$manager);
 	!$isGM && $groupid==3 && $isGM=1;
 
@@ -364,7 +364,7 @@ if (empty($a) || $a == 'own') {
 	if (empty($photo)) {
 		Showmsg('data_error');
 	}
-	
+
 	$db->update("DELETE FROM pw_cnphoto WHERE pid=" . pwEscape($pid));
 
 	$pwSQL = array();
@@ -384,7 +384,7 @@ if (empty($a) || $a == 'own') {
 
 	$affected_rows = delAppAction('photo',$pid) + 1;
 	countPosts("-$affected_rows");
-	
+
 	//积分变动
 	require_once(R_P.'require/credit.php');
 	$o_photos_creditset = unserialize($o_photos_creditset);
@@ -395,13 +395,13 @@ if (empty($a) || $a == 'own') {
 		$credit->sets($photo['uid'],$creditset,true);
 		updateMemberid($photo['uid'],false);
 	}
-	
+
 	if ($creditlog = unserialize($o_photos_creditlog)) {
 		addLog($creditlog['Deletephoto'],$photo['uploader'],$photo['uid'],'photos_Deletephoto');
 	}
-	
+
 	updateUserAppNum($photo['uid'],'photo','minus');
-	
+
 	echo 'ok'."\t".$photo['aid'];ajax_footer();
 
 } elseif ($a == 'setcover') {
@@ -487,7 +487,7 @@ if (empty($a) || $a == 'own') {
 				Showmsg('colony_phototype');
 			}
 			$rt['photonum'] >= $o_maxphotonum && Showmsg('colony_photofull');
-			
+
 			require_once(R_P . 'lib/upload/photoupload.class.php');
 			$img = new PhotoUpload($aid);
 			PwUpload::upload($img);
@@ -504,13 +504,22 @@ if (empty($a) || $a == 'own') {
 			if (!$rt['private']) {
 				$feedText = "[url=$db_bbsurl/{$basename}space=1&a=album&aid=$aid&u=$winduid]{$rt[aname]}[/url]\n";
 				foreach ($photos as $value) {
-					$feedText .= "[url=$db_bbsurl/{#APPS_BASEURL#}space=1&a=view&pid=$pid&u=$winduid][img]".getphotourl($value['path'], $value['ifthumb'])."[/img][/url]&nbsp;";
+					$feedText .= "[url=$db_bbsurl/{#APPS_BASEURL#}q=photos&space=1&a=view&pid=$pid&u=$winduid][img]".getphotourl($value['path'], $value['ifthumb'])."[/img][/url]&nbsp;";
 				}
 				pwAddFeed($winduid, 'photo', $pid, array('num' => $photoNum, 'text' => $feedText));
+				//会员资讯缓存
+				$usercache = L::loadDB('Usercache');
+				$usercachedata = $usercache->get($winduid,'photos');
+				$usercachedata = explode(',',$usercachedata['value']);
+				is_array($usercachedata) || $usercachedata = array();
+				if (count($usercachedata) >=4) array_pop($usercachedata);
+				array_unshift($usercachedata,$pid);
+				$usercachedata = implode(',',$usercachedata);
+				$usercache->update($winduid,'photos',$pid,$usercachedata);
 			}
 			$db->update("UPDATE pw_cnalbum SET photonum=photonum+".pwEscape($photoNum,false).",lasttime=" . pwEscape($timestamp,false) . ',lastpid=' . pwEscape(implode(',',$lastpid)) . (!$rt['lastphoto'] ? ',lastphoto='.pwEscape($img->getLastPhoto()) : '') . " WHERE aid=" . pwEscape($aid));
 			countPosts("+$photoNum");
-			
+
 			//积分变动
 			require_once(R_P.'require/credit.php');
 			$o_photos_creditset = unserialize($o_photos_creditset);
@@ -524,7 +533,7 @@ if (empty($a) || $a == 'own') {
 				addLog($creditlog['Uploadphoto'],$windid,$winduid,'photos_Uploadphoto');
 			}
 			updateUserAppNum($winduid,'photo','add',$photoNum);
-			refreshto("{$basename}a=view&pid=$pid",'operate_success');
+			refreshto("{$basename}a=view&pid=$pid",'operate_success',2,true);
 		}
 	} elseif ($job == 'flash') {
 		//require_once(M_P.'require/header.php');
@@ -572,7 +581,7 @@ if (empty($a) || $a == 'own') {
 			createfail($checkpwd,'colony_aintro_toolang');
 			Showmsg('colony_aintro_toolang');
 		}
-		
+
 		$private = (int)$private;
 		if ($private == 3 && !$pwd) {
 			createfail($checkpwd,'photo_password_add');
@@ -604,12 +613,12 @@ if (empty($a) || $a == 'own') {
 		if (($banword = $wordsfb->comprise($aintro)) !== false) {
 			Showmsg('content_wordsfb');
 		}
-		
+
 		if ($o_albumnum2 > 0 && $o_albumnum2 <= $db->get_value("SELECT COUNT(*) AS count FROM pw_cnalbum WHERE atype='0' AND ownerid=" . pwEscape($winduid))) {
 			createfail($checkpwd,$o_albumnum2,'limit_num');
 			Showmsg('colony_album_num2');
 		}
-		
+
 		require_once(R_P.'require/credit.php');
 		$o_photos_creditset = unserialize($o_photos_creditset);
 		$o_photos_creditset['Createalbum'] = @array_diff($o_photos_creditset['Createalbum'],array(0));
@@ -628,7 +637,7 @@ if (empty($a) || $a == 'own') {
 			$credit->sets($winduid,$creditset,true);
 			updateMemberid($winduid);
 		}
-		
+
 		if ($creditlog = unserialize($o_photos_creditlog)) {
 			addLog($creditlog['Createalbum'],$windid,$winduid,'photos_Createalbum');
 		}
@@ -699,6 +708,7 @@ if (empty($a) || $a == 'own') {
 		$db->update("DELETE FROM pw_cnphoto WHERE aid=" . pwEscape($aid));
 		$db->update("DELETE FROM pw_cnalbum WHERE aid=" . pwEscape($aid));
 		updateUserAppNum($album['ownerid'],'photo','minus',$album['photonum']);
+
 		if($album['ownerid'] != $winduid){
 			echo getLangInfo('msg','operate_success') . "\tjump\t{$basename}a=friend";
 		} else {
@@ -730,7 +740,7 @@ if (empty($a) || $a == 'own') {
 		!$aname && Showmsg('colony_aname_empty');
 		if (strlen($aname)>24) Showmsg('colony_aname_toolang');
 		if (strlen($aintro)>255) Showmsg('colony_aintro_toolang');
-		
+
 		if ($private == 3 && !$pwd && !$rt['albumpwd']) {
 			Showmsg('photo_password_add');
 		}
@@ -804,7 +814,7 @@ if ($space == 1 && defined('F_M')) {
 	require_once PrintEot('user_photos');
 	footer();
 } else {
-	
+
 	/*** userapp **/
 	$app_array = array();
 	if (true) {

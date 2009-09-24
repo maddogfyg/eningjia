@@ -68,7 +68,7 @@ if (empty($a)) {
 			}
 		}
 		if ($colonyids) {
-			$query = $db->query("SELECT f.*,m.username,m.groupid,c.id,c.cname FROM pw_feed f LEFT JOIN pw_members m ON f.uid=m.uid LEFT JOIN pw_colonys c ON f.typeid=c.id WHERE f.type IN('colony_post','colony_photo') AND f.typeid IN(" . pwImplode($colonyids) . ') ORDER BY f.timestamp DESC LIMIT 30');
+			$query = $db->query("SELECT f.*,m.username,m.groupid,c.id,c.cname FROM pw_feed f LEFT JOIN pw_members m ON f.uid=m.uid LEFT JOIN pw_colonys c ON f.typeid=c.id WHERE f.type IN('colony_post','colony_photo','colony') AND f.typeid IN(" . pwImplode($colonyids) . ') ORDER BY f.timestamp DESC LIMIT 30');
 			while ($rt = $db->fetch_array($query)) {
 				$rt['descrip'] = parseFeed($rt['descrip']);
 				if ($rt['groupid'] == 6 && $db_shield && $groupid != 3) {
@@ -277,11 +277,14 @@ if (empty($a)) {
 		$username = $windid;
 		$o_cate = array();
 		include_once(D_P . 'data/bbscache/forum_cache.php');
-                if(is_array($o_classdb)){
-                    foreach ($o_classdb as $key => $value) {
-                            $o_cate[$forum[$key]['fup']][$key] = $value;
-                    }
-                }
+		if(is_array($o_classdb)){
+			foreach ($o_classdb as $key => $value) {
+					$o_cate[$forum[$key]['fup']][$key] = $value;
+			}
+		}
+		if (empty($o_cate)) {
+			Showmsg('没有设置群组分类与版块的关联,无法创建群组');
+		}
 //		require_once(M_P.'require/header.php');
 //		require_once PrintEot('m_groups');
 //		footer();

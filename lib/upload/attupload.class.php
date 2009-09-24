@@ -149,11 +149,12 @@ class AttUpload extends uploadBehavior {
 				$this->attachs[$rt['aid']]['special']	= $pwSQL['special']		= $rt['special'];
 				$this->attachs[$rt['aid']]['ctype']		= $pwSQL['ctype']		= $rt['ctype'];
 			}
-			//$this->post->user['uploadnum']++;
+			$this->post->user['uploadnum']++;
+			$this->post->user['uploadtime'] = $timestamp;
 			$this->pw_attachs->updateById($rt['aid'],$pwSQL);
 			$this->ifupload = ($rt['type'] == 'img' ? 1 : ($rt['type'] == 'txt' ? 2 : 3));
 
-			if (($db_ifpwcache & 512) && !$rt['needrvrc'] && !$this->elementpic) {
+			if (($db_ifpwcache & 512) && !$rt['needrvrc'] && $rt['type'] == 'img' && !$this->elementpic) {
 				$this->elementpic = array('aid' => $rt['aid'], 'attachurl' => $rt['fileuploadurl'], 'ifthumb' => $rt['ifthumb']);
 			}
 		}
@@ -265,7 +266,8 @@ class AttUpload extends uploadBehavior {
 					'ifthumb'	=> $value['ifthumb']
 				);
 				$this->idrelate[$aid] = $value['id'];
-				//$this->post->user['uploadnum']++;
+				$this->post->user['uploadnum']++;
+				$this->post->user['uploadtime'] = $timestamp;
 			}
 			$this->ifupload = ($value['type'] == 'img' ? 1 : ($value['type'] == 'txt' ? 2 : 3));
 			//Start elementupdate
@@ -300,6 +302,18 @@ class AttUpload extends uploadBehavior {
 
 	function getAttachs() {
 		return $this->attachs;
+	}
+
+	function getImages($num) {
+		$imgs = array();
+		foreach ($this->attachs as $key => $value) {
+			if ($value['type'] == 'img') {
+				$imgs[] = array('attachurl' => $value['attachurl'], 'ifthumb' => $value['ifthumb']);
+				$num = $num - 1;
+				if (empty($num)) break;
+			}
+		}
+		return $imgs;
 	}
 
 	function getAids() {

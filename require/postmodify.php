@@ -11,7 +11,7 @@ if ($t_db) {
 		if ($value['upid'] == 0) {
 			$t_typedb[$value['id']] = $value;
 		} else {
-			$t_subtypedb[$value['upid']][$value['id']] = $value['name'];
+			$t_subtypedb[$value['upid']][$value['id']] = strip_tags($value['name']);
 		}
 		$t_exits = 1;
 	}
@@ -112,7 +112,7 @@ if (empty($_POST['step'])) {
 			$postSpecial = new postSpecial($pwpost);
 			$set = $postSpecial->resetInfo($tid, $atcdb);
 		}
-		list($tags) = explode("\t",$tags);
+		list($tags) = explode("\t", $atcdb['tags']);
 	}
 	//empty($subject) && $subject = ' ';
 
@@ -159,6 +159,7 @@ if (empty($_POST['step'])) {
 	require_once(R_P.'require/credit.php');
 	$creditset = $credit->creditset($creditset,$db_creditset);
 	if ($atcdb['aid']) {
+		require_once(R_P.'require/updateforum.php');
 		delete_att($atcdb['aid']);
 		pwFtpClose($ftp);
 	}

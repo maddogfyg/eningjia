@@ -19,12 +19,12 @@ EOT;
 EOT;
 if ($colony['banner']) {print <<<EOT
 -->
-	<div class="mb10" style="height:200px;overflow:hidden;"><img src="{$colony[banner]}" width="100%" /></div>
+	<div class="mb10" style="height:{$banner_height}px;overflow:hidden;width:778px;"><img src="{$colony[banner]}" /></div>
+	<div class="c mb10"></div>
 <!--
 EOT;
 }print <<<EOT
 -->
-	<div class="c mb10"></div>
 	<div id="content-main" class="fl">
 	<div class="cc mb10">
 	<div class="fl pr10"><table height="100"><tr><td style="border:1px solid #e4e4e4;padding:4px;"><img src="{$cnimg}" onload="imgResize(this,110)" /></td></tr></table></div>
@@ -447,12 +447,13 @@ EOT;
 } elseif ($a == 'read') {print <<<EOT
 -->
 		<div class="cc">
-				<div class="pl10 mt10"><a href="{$basename}a=thread&cyid=$cyid">返回话题区</a></div>
+			<div class="pl10 mt10"><a href="{$basename}a=thread&cyid=$cyid">返回话题区</a></div>
 				<div class="p10">
 <!--
 EOT;
 foreach ($readdb as $key => $read) {print <<<EOT
 -->
+					<div id="article_{$read[pid]}">
 					<div class="title"><span class="fr red b">$read[lou]楼</span>
 					<a href="u.php?uid=$read[authorid]">$read[author]</a> 发表于：<span class="f10">{$read[postdate]}</span>
 <!--
@@ -473,13 +474,13 @@ if ($ifadmin || $read['authorid'] == $winduid) {print <<<EOT
 EOT;
 }if ($ifadmin) {print <<<EOT
 -->
-&nbsp;&nbsp;<a href="javascript:;" onclick="sendmsg('{$basename}a=del&cyid=$cyid&tid=$read[tid]','','read_$read[lou]');">删除</a>
+&nbsp;&nbsp;<a href="javascript:;" id="del_{$read[pid]}" onclick="sendmsg('{$basename}a=del&cyid=$cyid&tid=$read[tid]&pid={$read[pid]}','',this.id);">删除</a>
 <!--
 EOT;
 }print <<<EOT
 -->
 					</div>
-					<table width="100%" class="mb10" style="table-layout:fixed" id="lou_{$read[tid]}">
+					<table width="100%" class="mb10" style="table-layout:fixed">
 						<tr class="vt">
 							<th width="70" class="tac"><div class="p10"><img src="$read[icon]" class="img-50" /></div></th>
 							<td>
@@ -585,6 +586,7 @@ EOT;
 							</td>
 						</tr>
 					</table>
+				</div>
 <!--
 EOT;
 }print <<<EOT
@@ -725,8 +727,8 @@ if ($db_allowupload && $_G['allowupload']) {print <<<EOT
 						<table cellPadding="0" cellSpacing="0" style="display:none;" width="100%">
 							<tbody id="att_mode">
 							<tr>
-								<td><input class="input" type="text" name="atc_desc" size="20" /></td>
 								<td><input class="input" type="file" name="attachment_" size="20" /></td>
+								<td><input class="input" type="text" name="atc_desc" size="20" /></td>
 								<td><select style="display:none"></select></td>
 								<td><select style="display:none"></select></td>
 								<td><input class="input" type="hidden" name="atc_needrvrc" value="0" size="1" /></td>
@@ -748,15 +750,15 @@ var charset = '$db_charset';
 EOT;
 if ($mutiupload > 0) {print <<<EOT
 -->
-						<span id="mutiinfo">您现在有 <b>{$mutiupload}</b> 个已经上传的附件 <a href="javascript:void(0);" class="bta" onclick="flashAtt.use();">使用</a> <a href="javascript:void(0);" class="bta" onclick="flashAtt.clear();" title="删除所有已经上传的附件">清空</a></span>
+						<span id="mutiinfo" style="margin-left:10px">您现在有 <b>{$mutiupload}</b> 个已经上传的附件 <a href="javascript:void(0);" class="bta" onclick="flashAtt.use();">使用</a> <a href="javascript:void(0);" class="bta" onclick="flashAtt.clear();" title="删除所有已经上传的附件">清空</a></span>
 <!--
 EOT;
 }print <<<EOT
 -->
 						<table cellPadding="0" cellSpacing="0" width="100%">
 							<tr>
-								<td width="25%">描述</td>
-								<td>附件</td>
+								<td width="35%">附件</td>
+								<td>描述</td>
 							</tr>
 							<tbody id="attach"></tbody>
 						</table>

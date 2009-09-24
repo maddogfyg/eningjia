@@ -83,7 +83,9 @@ XMLhttp.prototype = {
 			ajax.request.responseText = ajax.request.iframe.contentWindow.document.documentElement.firstChild.nodeValue;
 			ajax.request.iframe.removeEventListener('load',ajax.load,true);
 		}
-		ajax.recall();
+		if (typeof(ajax.recall) == 'function') {
+			ajax.recall();
+		}
 	},
 
 	XmlDocument : function(obj) {
@@ -98,10 +100,10 @@ XMLhttp.prototype = {
 		closep();
 	},
 
-	get : function(newread) {
+	get : function(newread,border) {
 		var temp = newread ? newread : read;
 		if (ajax.request.responseText != null && ajax.request.responseText.indexOf('<') != -1) {
-			temp.setMenu(this.runscript(ajax.request.responseText));
+			temp.setMenu(this.runscript(ajax.request.responseText),'',border);
 			temp.menupz(temp.obj);
 			try{temp.menu.getElementsByTagName("input")[1].focus();}catch(e){}
 		} else {

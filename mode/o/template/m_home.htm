@@ -25,7 +25,7 @@ foreach($pwForumList as $key=>$value){print <<<EOT
 EOT;
 foreach($value['child'] as $k=>$v){print <<<EOT
 -->
-					<a href="thread.php?fid=$k" target="_blank" onclick="return pwForumList(true,gIsPost,$k,,true);"><span>$v</span></a>
+					<a href="thread.php?fid=$k" target="_blank" onclick="return pwForumList(true,gIsPost,$k,'',true);"><span>$v</span></a>
 <!--
 EOT;
 }print <<<EOT
@@ -49,7 +49,7 @@ EOT;
         <div class="p-update mb10">
             <dl>
                 <dt><a href="u.php"><img src="$faceurl" height="48" width="48" /></a><a href="profile.php?action=modify&info_type=face" target="_blank">更换头像</a><a href="profile.php?action=modify" target="_blank">更新资料</a></dt>
-                
+
                 <dd>
                     <div class="tab cc mb10 b"><a href="javascript:;" onclick="return pwForumList(false,true,null,this);" style="cursor:pointer;"><span>站点发贴</span></a><a href="{$basename}q=photos&a=upload"><span>发照片</span></a><a href="{$basename}q=share"><span>分享东东</span></a></div>
                     <form method="post" action="{$basename}q=write&do=post" onsubmit="submitwrite(this);return false;">
@@ -71,7 +71,7 @@ if ($_G['allowhonor']) {print <<<EOT
 EOT;
 }print <<<EOT
 -->
-												
+
                         <div>
                         </div>
                     </form>
@@ -186,7 +186,7 @@ EOT;
                 <a href="{$basename}q=home&f_type=friend" id='home_friend' class="fl">结交动态</a>
                 <a href="javascript:;" id="feedsetting" onclick="sendmsg('mode.php?m=o&q=ajax&a=feedsetting','',this.id)" title="设置特定好友显示动态信息"><img src="$pwModeImg/applied/edit-app.png" style="margin-top:7px;*margin-top:5px;" class="fr" /></a>
             </h3>
-   
+
             <div class="dynamic-bg">
                 <div class="dynamic-dl" style="min-height:225px;">
 <!--
@@ -194,14 +194,14 @@ EOT;
 if (!empty($feeds)) {
 foreach ($feeds as $day => $feed) {
 print <<<EOT
--->                
+-->
                 <div class="dynamic-h cc b" style="margin:5px 10px;"><div></div><span>$day</span></div>
 								<div class="dynamic dynamic-home">
 <!--
 EOT;
 foreach ($feed as $key => $value) {
 print <<<EOT
--->                
+-->
                     <dl class="cc">
                         <dt>
                         	<img src="$value[faceurl]" class="img-20" />
@@ -228,7 +228,7 @@ EOT;
 <!--
 EOT;
 }print <<<EOT
--->                    
+-->
 <script language="JavaScript" src="js/app_comment.js"></script>
 <!--
 EOT;
@@ -258,7 +258,7 @@ function submitwrite(o) {
 }
 var charset = '$db_charset';
 initCheckTextNum('writetext','writetext_warn',255);
-</script>        
+</script>
     </div>
     <div class="w-bg-a fr">
         <div class="p10">
@@ -272,7 +272,7 @@ if ($notify_message_num || $private_message_num) {print <<<EOT
 <!--
 EOT;
 if ($private_message_num){print <<<EOT
--->    
+-->
                 <li><a href="message.php?type=newmsg" target="_blank">{$private_message_num}个人消息</a></li>
 <!--
 EOT;
@@ -288,7 +288,7 @@ EOT;
 EOT;
 }if (!empty($mfriends)) {
 print <<<EOT
--->       
+-->
            <div class="b lh24">好友生日</div>
 <!--
 EOT;
@@ -318,8 +318,8 @@ EOT;
 -->
 			<div class="bor-top"></div>
 			<div class="mb10 b">可能认识</div>
-			<div class="o-list-img h-90">      
-        <ul class="cc tac">
+			<div class="o-list-img h-90">
+				<ul class="cc tac">
 <!--
 EOT;
 foreach ($mfriends as $value) {
@@ -327,22 +327,17 @@ if ($value[uid] == $winduid) continue;
 print <<<EOT
 -->
 					<li>
-                       	<a title="$value[title]" href="u.php?uid=$value[uid]"><img src="$value[face]" class="img-50" onmouseover="getObj('card_$value[uid]').style.display=''" onmouseout="getObj('card_$value[uid]').style.display='none'"/></a><a class="pw-card" id="card_{$value[uid]}" onmouseover="getObj('card_$value[uid]').style.display=''" onmouseout="getObj('card_$value[uid]').style.display='none'" onclick="showcard(this.id,'$value[uid]')" style="margin-left:-16px;margin-top:36px;cursor:pointer;display:none;" title="查看名片">查看名片</a>
+                       	<a title="$value[title]" href="u.php?uid=$value[uid]"><img src="$value[face]" class="img-50 userCard" id="card_sf_{$value[uid]}_{$value[uid]}" /></a>
                         <br /><a id="add_$value[uid]" onclick="sendmsg('pw_ajax.php?action=addfriend&touid=$value[uid]','',this.id)" style="cursor: pointer;" title="加为好友"><img src="$pwModeImg/operation/add.png" /></a>&nbsp;<a title="$value[username]" href="u.php?uid=$value[uid]">$value[sub_username]</a>
-        	</li>
+        			</li>
 <!--
 EOT;
 }print<<<EOT
 -->
 				</ul>
-<script language="JavaScript">
-function showcard(id,uid) {
-	read.obj = getObj(id);
-	try {ajax.send('pw_ajax.php?action=showcard&uid='+uid,'',ajax.get);} catch(e){}
-}
-</script>
+<script language="JavaScript">window.onReady(userCard.init);</script>
             </div>
-		    
+
 <!--
 EOT;
 }print <<<EOT

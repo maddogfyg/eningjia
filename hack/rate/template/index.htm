@@ -3,9 +3,7 @@
 
 print <<<EOT
 -->
-<style>
 
-</style>
 <!-- 
 EOT;
 //是显示评价页还是结果页
@@ -16,7 +14,7 @@ print <<<EOT
 <div class="mood tac cc">
 <div class="mood-bg">
 <div class="mood-bg2">
-<div class="mood-title"><b>评价一下你阅读这篇帖子的感受</b></div>
+<div class="mood-title"><b>评价一下你浏览此{$typename}的感受</b></div>
 
 <table class="mood-hover">
 <tr>
@@ -44,16 +42,14 @@ EOT;
 }else{
 print <<<EOT
 -->
-
-
-
+<div class="pr">
 <!-- 
 EOT;
 //是否显示tips
 if($tips){
 print <<<EOT
 -->
-<div id="ratetips" style="position:fixed;_position:absolute;z-index:1003;top:30%;left:40%">
+<div id="ratetips" style="position:absolute;z-index:1003;top:-35px;left:5px;">
 	<div class="reward tac w">
 		<div class="rewardbg">
 			<span class="f14 b st2">{$tips}</span>
@@ -84,7 +80,7 @@ print <<<EOT
 	{$rateResultHtml}
 </tr>
 </table>
-<div class="mood-title"><b>本周{$typeTitle}评价之最</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onClick="document.getElementById('more').style.display=(document.getElementById('more').style.display =='none')?'':'none'">更多</a></div>
+<div class="mood-title"><b>本周{$typeTitle}评价之最</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" onClick="rate.showWeekMore();">更多</a></div>
 <div class="c" style="width:20px;"></div>
 <ul>
 {$weekHTML}
@@ -93,6 +89,7 @@ print <<<EOT
 </div>
 </div>
 <div class="c"></div>
+</div>
 <!--
 EOT;
 }

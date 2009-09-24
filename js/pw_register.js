@@ -49,7 +49,7 @@ function checkAll(){
 		var question_99 = objCheck("question_99").selected;
 	}
     for(var i=0;i<e.length;i++){
-		if (e[i].id != 'pwuser' && e[i].id != 'customquest_l') {
+		if (e[i].id != 'pwuser' && e[i].id != 'customquest_l' && e[i].id != 'keyword') {
 			if (question_0 == true && (e[i].id == 'customquested' || e[i].id == 'answered')) {
 				continue;
 			} else if (question_99 == false && question_0 == false && e[i].id == 'customquested') {

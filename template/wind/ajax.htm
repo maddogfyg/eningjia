@@ -131,7 +131,7 @@ EOT;
 						</div>
 						<div style="margin-left:50px; line-height:180%">
 						<div class="fl" style="width:100%">
-							<div class="gray" style="float:left;clear:right"><span class="fl">等级:$gp_grouptitle, 帖子:$winddb[postnum], <a href="u.php?action=topic" class="link5">我的主题</a> <a href="u.php?action=post" class="link5">我的回复</a>&nbsp;</span><div class="fl" style="margin:.4em 1em 0 0"><a class="dropB" id="td_u">更多</a></div><span class="fl">
+							<div class="gray" style="float:left;clear:right"><span class="fl">等级:$gp_grouptitle, 帖子: $winddb[postnum], <a href="u.php?action=topic" class="link5">我的主题</a> <a href="u.php?action=post" class="link5">我的回复</a>&nbsp;</span><div class="fl" style="margin:.4em 1em 0 0"><a class="dropB" id="td_u">更多</a></div><span class="fl">
 <!--
 EOT;
 if (SCR == 'index' && ($groupid == 3 || $groupid == 4)) {print <<<EOT
@@ -552,7 +552,7 @@ EOT;
 <form action="ajax.php?action=$action" method="post" onsubmit="return false;">
 <input type="hidden" name="verify" value="$verifyhash" />
 <table width="100%" cellspacing="0" cellpadding="5">
-	<tr><th class="h" colspan="2" style="cursor:move" onmousedown="read.move(event);"><span class="fr" style="margin-top:2px;cursor:pointer" onclick="closep();"><img src="$imgpath/close.gif" /></span>编辑帖子 <span style="color:#FA891B">(按住Ctrl点击直接进入高级模式)</span></th></tr>
+	<tr><th class="h" colspan="2" style="cursor:move" onmousedown="read.move(event);"><span class="fr" style="margin-top:2px;cursor:pointer" onclick="closep();"><img src="$imgpath/close.gif" /></span>编辑帖子 </th></tr>
 	<tr><td width="15%" align="center" style="padding:5px 0">作者:</td><td>$atcdb[author]</td></tr>
 	<tr><td align="center">标题:</td><td><input class="input" type="text" name="atc_title" size="65" value="$atc_title" /></td></tr>
 <!--
@@ -592,7 +592,7 @@ EOT;
 <form action="post.php?" method="post" name="quoteFORM">
 <input type="hidden" name="verify" value="$verifyhash" />
 <table cellspacing="0" cellpadding="5" width="100%">
-	<tr><th class="h" colspan="2" style="cursor:move" onmousedown="read.move(event);"><span class="fr" style="margin-top:2px;cursor:pointer" onclick="closep();"><img src="$imgpath/close.gif" /></span>编辑帖子 <span style="color:#FA891B">(按住Ctrl点击直接进入高级模式)</span></th></tr>
+	<tr><th class="h" colspan="2" style="cursor:move" onmousedown="read.move(event);"><span class="fr" style="margin-top:2px;cursor:pointer" onclick="closep();"><img src="$imgpath/close.gif" /></span>编辑帖子 </th></tr>
 	<tr><td width="15%" align="center" style="padding:5px 0">标题:</td><td><input class="input" type="text" name="atc_title" value="$atc_title" size="60" /></td></tr>
 <!--
 EOT;
@@ -690,7 +690,7 @@ EOT;
 <div id="mgmode">
 <div class="menu-post">
 <div class="menu-b">
-	<table width="100" cellspacing="0" cellpadding="0">
+	<table width="120" cellspacing="0" cellpadding="0">
 		<tr><th class="h"><span class="fr" style="margin-top:2px;cursor:pointer" onclick="closep();"><img src="$imgpath/close.gif" /></span>可视化布局</th></tr>
 <!--
 EOT;
@@ -1118,47 +1118,78 @@ EOT;
 <!--
 EOT;
 }elseif ($action == 'showcard') {
+foreach($usercachedb as $key => $info){
 print <<<EOT
 -->
-<div class="pop-card" id="cardmenu" onmouseover="clearTimeout(window.menu_timer);" onmouseout="movecard(event);">
+<div class="pop-card" id="cardmenu_$info[uid]" onmouseover="clearTimeout(userCard.t2);" onmouseout="movecard(event,this.id);">
 	<div class="pop-card-bg">
 		<div class="pop-card-info">
 			<dl class="cc">
-				<dt><img src="$usericon" class="card-face" /></dt>
+				<dt><img src="$info[icon]" class="card-face" /></dt>
 				<dd>
-					<p class="card-title cc"><a href="u.php?u=$userdb[uid]" class="fl b">$userdb[username]</a>
+					<p class="card-title cc"><a href="u.php?action=show&uid=$info[uid]" class="fl b">$info[username]</a>
 <!--
 EOT;
-if($db_showonline && checkOnline($userdb['thisvisit'])){print <<<EOT
+if($db_showonline && checkOnline($info['thisvisit'])){print <<<EOT
 -->
 					<span class="card-online" title="在线">在线</span>
 <!--
 EOT;
+}else{print<<<EOT
+-->
+					<span class="card-offline" title="离线">离线</span>
+<!--
+EOT;
+}if(isset($db_hackdb['blog'][2]) && $db_hackdb['blog'][2] && $bg_ifopen){print <<<EOT
+-->
+					<a href="$bg_blogurl/blog.php?bbsuid=$info[uid]" target="_blank" class="card-blog" title="个人博客">个人博客</a>
+<!--
+EOT;
+}print <<<EOT
+-->
+					<!--<a href="u.php?action=show&uid=$info[uid]" class="card-profile" title="个人资料">个人资料</a>-->
+<!--
+EOT;
+if($groupid!='guest' && isset($db_hackdb['toolcenter'][1]) &&  $db_hackdb['toolcenter'][1]){print <<<EOT
+-->
+					<a href="javascript:;" class="card-magic" title="使用道具" onclick="sendmsg('pw_ajax.php?action=usertool&uid=$info[uid]','','sf_$info[lou]')" style="cursor:pointer">使用道具</a>
+<!--
+EOT;
+}if($info['oicq']){print <<<EOT
+-->
+					<a title="QQ:$info[oicq]" href="http://wpa.qq.com/msgrd?V=1&Uin=$info[oicq]&Site=$db_bbsname&Menu=yes" target="_blank" class="card-qq">QQ</a>
+<!--
+EOT;
+}if ($info['aliww']) {print <<<EOT
+-->
+					<a title="阿里旺旺:$info[aliww]" href="http://amos.im.alisoft.com/msg.aw?uid=$info[aliww]&site=cntaobao" target="_blank" class="card-ww">淘宝旺旺</a>
+<!--
+EOT;
 }if($winduid){print <<<EOT
 -->
-					<a href="javascript:;" onclick="sendmsg('pw_ajax.php?action=msg&touid=$userdb[uid]');" class="card-mail" title="发送消息">发送消息</a>
+					<a href="javascript:;" onclick="sendmsg('pw_ajax.php?action=msg&touid=$info[uid]');" class="card-mail" title="发送消息">发送消息</a>
 <!--
 EOT;
-}if($ismyfriend == false && $winduid){print <<<EOT
+}if(!$info[ismyfriend] && $winduid){print <<<EOT
 -->
-					<a href="javascript:;" class="card-fri" onclick="sendmsg('pw_ajax.php?action=addfriend&touid=$userdb[uid]')" title="加为好友">加为好友</a>
+					<a href="javascript:;" class="card-fri" onclick="sendmsg('pw_ajax.php?action=addfriend&touid=$info[uid]')" title="加为好友">加为好友</a>
 <!--
 EOT;
-}elseif($ismyfriend == true){print <<<EOT
+}elseif($info[ismyfriend]){print <<<EOT
 -->
-					<a href="javascript:;" class="card-fri" onclick="pwConfirm('是否确认解除',this,function(){delFriend('$userdb[uid]')});" title="解除好友">解除好友</a>
+					<a href="javascript:;" class="card-fri-out" onclick="pwConfirm('是否确认解除',this,function(){delFriend('$info[uid]')});" title="解除好友">解除好友</a>
 <!--
 EOT;
 }print <<<EOT
 -->
 					</p>
 
-					<p class="gray2"><span class="mr20">级别：{$memtitle}</span>
+					<p class="gray2"><span class="mr20">级别：{$info[memtitle]}</span>
 <!--
 EOT;
-if($systitle){print <<<EOT
+if($info[systitle]){print <<<EOT
 -->
-						身份：{$systitle}
+						身份：{$info[systitle]}
 <!--
 EOT;
 }print <<<EOT
@@ -1167,15 +1198,15 @@ EOT;
 					<p class="card-write">
 <!--
 EOT;
-if($write[content]){
+if($info[honor]){
 print<<<EOT
 -->
-						<span class="mr20">$write[content]</span><span class="gray2">- $write[posttime]</span>
+						<span class="mr20">$info[honor]</span><!--<span class="gray2">- $write[posttime]</span>-->
 <!--
 EOT;
 }else{print<<<EOT
 -->
-						<span class="mr20">暂无记录</span>
+						<span class="mr20">暂无签名</span>
 <!--
 EOT;
 }print<<<EOT
@@ -1186,97 +1217,97 @@ EOT;
 		</div>
 		<div class="card-app">
 			<div class="p10">
-				<p><span class="mr20">他的朋友：<a href="u.php?u=$userdb[uid]">{$friend[f_num]}</a></span>&nbsp;&nbsp;&nbsp;
-				<span class="mr20">来访：<a href="u.php?u=$userdb[uid]">{$friend[visits]}</a></span>&nbsp;&nbsp;&nbsp;
-				<span>访问过：<a href="u.php?u=$userdb[uid]">{$friend[tovisits]}</a></span></p>
+				<p><span class="mr20">他的朋友：<a href="u.php?action=show&uid=$info[uid]">{$info[f_num]}</a></span>&nbsp;&nbsp;&nbsp;
+				<span class="mr20">来访：<a href="u.php?action=show&uid=$info[uid]">{$info[visits]}</a></span>&nbsp;&nbsp;&nbsp;
+				<span>访问过：<a href="u.php?action=show&uid=$info[uid]">{$info[tovisits]}</a></span></p>
 				<p class="mt10 b">
 
 <!--
 EOT;
-if($appcount[owrite]){print <<<EOT
+if($info[appcount][owrite]){print <<<EOT
 -->
-					<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=write">记录</a><span class="card-new">new</span>
+					<a href="mode.php?m=o&space=1&u=$info[uid]&q=write">记录</a><span class="card-new">new</span>
 <!--
 EOT;
 }else{print <<<EOT
 -->
-					<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=write">记录</a>
+					<a href="mode.php?m=o&space=1&u=$info[uid]&q=write">记录</a>
 <!--
 EOT;
-}if($appcount[diary]){print <<<EOT
+}if($info[appcount][diary]){print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=diary">日志</a><span class="card-new">new</span>
-<!--
-EOT;
-}else{print <<<EOT
--->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=diary">日志</a>
-<!--
-EOT;
-}if($appcount[photo]){print <<<EOT
--->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=photos">相册</a><span class="card-new">new</span>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=diary">日志</a><span class="card-new">new</span>
 <!--
 EOT;
 }else{print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=photos">相册</a>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=diary">日志</a>
 <!--
 EOT;
-}if($appcount[share]){print <<<EOT
+}if($info[appcount][photo]){print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=share">分享</a><span class="card-new">new</span>
-<!--
-EOT;
-}else{print <<<EOT
--->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=share">分享</a>
-<!--
-EOT;
-}if($appcount[topic]){print <<<EOT
--->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=article">帖子</a><span class="card-new">new</span>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=photos">相册</a><span class="card-new">new</span>
 <!--
 EOT;
 }else{print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=article">帖子</a>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=photos">相册</a>
 <!--
 EOT;
-}if($appcount[group]){print <<<EOT
+}if($info[appcount][share]){print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=groups">群组</a><span class="card-new">new</span>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=share">分享</a><span class="card-new">new</span>
 <!--
 EOT;
 }else{print <<<EOT
 -->
-					&nbsp;&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$userdb[uid]&q=groups">群组</a>
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=share">分享</a>
+<!--
+EOT;
+}if($info[appcount][topic]){print <<<EOT
+-->
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=article">帖子</a><span class="card-new">new</span>
+<!--
+EOT;
+}else{print <<<EOT
+-->
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=article">帖子</a>
+<!--
+EOT;
+}if($info[appcount][group]){print <<<EOT
+-->
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=groups">群组</a><span class="card-new">new</span>
+<!--
+EOT;
+}else{print <<<EOT
+-->
+					&nbsp;&nbsp;<a href="mode.php?m=o&space=1&u=$info[uid]&q=groups">群组</a>
 <!--
 EOT;
 }print <<<EOT
 -->
 				</p>
 			</div>
+			<div class="card-app-bot cc">
 <!--
 EOT;
-if($db_appsdb){print<<<EOT
+if($info['app']){print<<<EOT
 -->
-			<div class="card-app-bot cc">
 				<span id="t_typedb" class="card-bot-icon">
 <!--
 EOT;
 $i = 1;
-foreach($db_appsdb as $value){
+foreach($info['app'] as $val){
 $i++;
-if ($value[ifshow]) {
+if ($val[ifshow]) {
 print <<<EOT
 -->
-				<a href="apps.php?id=$value[appid]"><img src="http://apps.phpwind.net/images/icon/s{$value[appid]}.png" align="absmiddle" /></a>
+				<a href="apps.php?id=$val[appid]"><img src="http://apps.phpwind.net/images/icon/s{$val[appid]}.png" align="absmiddle" /></a>
 <!--
 EOT;
 }else{print<<<EOT
 -->
-				<a href="apps.php?id=$value[appid]"><img src="http://apps.phpwind.net/images/icon/s_{$value[appid]}.png" align="absmiddle" /></a>
+				<a href="apps.php?id=$val[appid]"><img src="http://apps.phpwind.net/images/icon/s_{$val[appid]}.png" align="absmiddle" /></a>
 <!--
 EOT;
 }}print<<<EOT
@@ -1290,14 +1321,111 @@ if($i > $db_maxnum){print<<<EOT
 				<span class="card-left-down fr" title="上一页" onclick="showTypeTab(-$db_maxnum,$db_maxnum,'a');" >上一页</span>
 <!--
 EOT;
-}print<<<EOT
+}}print<<<EOT
 -->
 			</div>
-<script language="javascript">
+		</div>
 <!--
 EOT;
-if($i > $db_maxnum){print<<<EOT
+if($info['appinfo']){print<<<EOT
 -->
+		<div class="card-content p10" style="/*display:none;*/">
+<!--
+EOT;
+$i=0;
+foreach($info['appinfo'] as $k => $value){
+$k && $k = get_date($k);
+if($i>=2) continue;
+$i++;
+if($value[type]=='topic'){print<<<EOT
+-->
+			<p class="card-title">帖子：<a href="read.php?tid=$value[id]" target="_blank" class="mr20">{$value[value][subject]}</a><span class="gray2">$k</span></p>
+			<p>{$value[value][content]}</p>
+<!--
+EOT;
+if($value[attimages]){print<<<EOT
+-->
+			<ul class="card-photo cc">
+<!--
+EOT;
+foreach ($value[attimages] as $v) {print<<<EOT
+-->
+				<li><a href="read.php?tid=$value[id]" target="_blank"><img src="$v" /></a></li>
+<!--
+EOT;
+}print<<<EOT
+-->
+			</ul>
+<!--
+EOT;
+}print<<<EOT
+-->
+			<div class="card-cont-hr"></div>
+<!--
+EOT;
+}elseif($value[type]=='diary'){print<<<EOT
+-->
+			<p class="card-title">日志：<a href="mode.php?m=o&q=diary&did=$value[id]&u=$info[uid]&space=1" target="_blank" class="mr20">{$value[value][subject]}</a><span class="gray2">$k</span></p>
+			<p>{$value[value][content]}</p>
+<!--
+EOT;
+if($value[attimages]){print<<<EOT
+-->
+			<ul class="card-photo cc">
+<!--
+EOT;
+foreach ($value[attimages] as $v) {print<<<EOT
+-->
+				<li><a href="mode.php?m=o&q=diary&did=$value[id]&u=$info[uid]&space=1" target="_blank"><img src="$v" /></a></li>
+<!--
+EOT;
+}print<<<EOT
+-->
+			</ul>
+<!--
+EOT;
+}print<<<EOT
+-->
+			<div class="card-cont-hr"></div>
+<!--
+EOT;
+}elseif($value[type]=='photos'){print<<<EOT
+-->
+			<p class="card-title">照片：<a href="mode.php?m=o&q=photos&a=album&aid={$value[value][aid]}&u=$info[uid]&space=1" class="mr20">《{$value[value][aname]}》</a><span class="gray2">$k</span></p>
+			<ul class="card-photo cc">
+<!--
+EOT;
+foreach($value[value][photo] as $photo){print<<<EOT
+-->
+				<li><a href="mode.php?m=o&q=photos&space=1&q=photos&a=view&pid=$photo[pid]&u=$info[uid]"><img src="$photo[path]" /></a></li>
+<!--
+EOT;
+}print<<<EOT
+-->
+			</ul>
+			<div class="card-cont-hr"></div>
+<!--
+EOT;
+}elseif($value[type]=='write'){print<<<EOT
+-->
+			<span class="mr20">记录：{$value[value][content]}</span><span class="gray2">$k</span>
+			<div class="card-cont-hr"></div>
+<!--
+EOT;
+}}print<<<EOT
+-->
+		</div>
+<!--
+EOT;
+}print<<<EOT
+-->
+	</div>
+</div>
+<!--
+EOT;
+}print <<<EOT
+-->
+<script language="javascript">
 function showTypeTab(p,n,tag){
 	var o = getObj('t_typedb');
 	var f = o.getElementsByTagName(tag);
@@ -1315,114 +1443,6 @@ function showTypeTab(p,n,tag){
 	}
 	return;
 }
-<!--
-EOT;
-}print<<<EOT
--->
-</script>
-<!--
-EOT;
-}print<<<EOT
--->
-		</div>
-<!--
-EOT;
-if($userinfo){print<<<EOT
--->
-		<div class="card-content p10" style="/*display:none;*/">
-<!--
-EOT;
-$i=0;
-foreach($userinfo as $key => $value){
-$key && $key=get_date($key);
-if($i>=2) continue;
-$i++;
-if($value[type]=='topic'){print<<<EOT
--->
-			<p class="card-title">帖子：<a href="read.php?tid=$value[tid]" target="_blank" class="mr20">$value[subject]</a><span class="gray2">$key</span></p>
-			<p>$value[content]</p>
-<!--
-EOT;
-if($attimages){print<<<EOT
--->
-			<ul class="card-photo cc">
-<!--
-EOT;
-foreach ($attimages as $k => $v) {print<<<EOT
--->
-				<li><a href="read.php?tid=$value[tid]" target="_blank"><img src="$v" /></a></li>
-<!--
-EOT;
-}print<<<EOT
--->
-			</ul>
-<!--
-EOT;
-}print<<<EOT
--->
-			<div class="card-cont-hr"></div>
-<!--
-EOT;
-}elseif($value[type]=='diary'){print<<<EOT
--->
-			<p class="card-title">日志：<a href="mode.php?m=o&q=diary&did=$value[did]&u=$uid&space=1" target="_blank" class="mr20">$value[subject]</a><span class="gray2">$key</span></p>
-			<p>$value[content]</p>
-<!--
-EOT;
-if($diaryimages){print<<<EOT
--->
-			<ul class="card-photo cc">
-<!--
-EOT;
-foreach ($diaryimages as $k => $v) {print<<<EOT
--->
-				<li><a href="mode.php?m=o&q=diary&did=$value[did]&u=$uid&space=1" target="_blank"><img src="$v" /></a></li>
-<!--
-EOT;
-}print<<<EOT
--->
-			</ul>
-<!--
-EOT;
-}print<<<EOT
--->
-			<div class="card-cont-hr"></div>
-<!--
-EOT;
-}elseif($value[type]=='photos'){print<<<EOT
--->
-			<p class="card-title">照片：<a href="mode.php?m=o&q=photos&a=album&aid=$value[aid]&u=$uid&space=1" class="mr20">《$value[aname]》</a><span class="gray2">$key</span></p>
-			<ul class="card-photo cc">
-<!--
-EOT;
-foreach($value[photo] as $val){print<<<EOT
--->
-				<li><a href="mode.php?m=o&q=photos&space=1&q=photos&a=view&pid=$val[pid]&u=$uid"><img src="$val[path]" /></a></li>
-<!--
-EOT;
-}print<<<EOT
--->
-			</ul>
-			<div class="card-cont-hr"></div>
-<!--
-EOT;
-}elseif($value[type]=='write'){print<<<EOT
--->
-			<span class="mr20">记录：$value[content]</span><span class="gray2">$key</span>
-			<div class="card-cont-hr"></div>
-<!--
-EOT;
-}}print<<<EOT
--->
-		</div>
-<!--
-EOT;
-}print<<<EOT
--->
-	</div>
-</div>
-
-<script language="javascript">
 function delFriend(u){
 	ajax.send('mode.php?m=o&q=ajax&a=delfriend&u='+u,'',function(){
 		var rText = ajax.request.responseText.split('\t');
@@ -1449,21 +1469,21 @@ if (typeof(HTMLElement) != "undefined") {
 	};
 }
 
-function movecard(theEvent){
-	if (theEvent){
-		if (is_gecko){
-			if (document.getElementById('cardmenu').contains(theEvent.relatedTarget)) {
-				return;
+function movecard(theEvent, id){ 
+	if (theEvent){ 
+		if (is_ie) {
+			if (document.getElementById(id).contains(event.toElement)) {
+				return false;
 			}
-		}
-		if (is_ie){
-			if (document.getElementById('cardmenu').contains(event.toElement)) {
-				return;
+		} else {
+			if (document.getElementById(id).contains(theEvent.relatedTarget)) {
+				return false;
 			}
 		}
 	}
-	closep();
+	try{userCard.menu.close();}catch(e){}
 }
+verifyhash = "$verifyhash";
 </script>
 <!--
 EOT;
@@ -1886,7 +1906,7 @@ EOT;
 print <<<EOT
 -->
 <!-- splitTr --><!-- pingId:{$pingdata['id']} -->
-<span id="pingUserShow_{$pingdata['id']}"></span><img src="{$pingdata['icon']}" width="16" height="16" onmouseover="setTimeout(function(){showcard('pingUserShow_{$pingdata['id']}','{$pingdata['uid']}')}, 200)" />
+<span id="pingUserShow_{$pingdata['id']}"></span><img src="{$pingdata['icon']}" width="16" height="16" id="card_pingUserShow_{$pingdata[id]}" onmouseover="setTimeout(function(){showcard('{$pingdata['id']}','{$pingdata['uid']}','pingUserShow_')}, 700)" />
 <!-- split -->
 <a target="_blank" href="u.php?action=show&username={$pingdata['pinger']}">{$pingdata['pinger']}</a>
 <!-- split -->

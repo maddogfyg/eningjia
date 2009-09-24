@@ -44,6 +44,7 @@ EOT;
 EOT;
 $num=0;
 foreach ($threads[data] as $key => $value) {
+$_disable = $value['replies'] > 0 ? "" : "disabled";
 $num++;
 print <<< EOT
 -->
@@ -52,7 +53,7 @@ print <<< EOT
 	<td align="left">$value[subject]</td>
 	<td>$value[replies]</td>
 	<td>$value[postdate]</td>
-	<td><input type="checkbox" name="threads[]" value="$value[tid]"/> </td>
+	<td><input type="checkbox" name="threads[]" value="$value[tid]" $_disable/> </td>
 </tr>
 <!--
 EOT;

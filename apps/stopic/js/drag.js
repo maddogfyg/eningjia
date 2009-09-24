@@ -7,7 +7,11 @@ var drag = Class({},{
 		this.closeClass	= close;
 		this.contentClass	= content;
 		this.packId	= pack;
-
+		if (is_ie) {
+			document.body.onselectstart = function(){
+				return false;
+			}
+		}
 		this._initContainers();
 		this._initItems();
 		this._initItemHeads();
@@ -135,6 +139,7 @@ var drag = Class({},{
 		var self = this;
 		var e = is_ie ? window.event: e;
 		var o = e.srcElement || e.target;
+
 		if (o.className==this.closeClass) {
 			this._removeItem(o);
 		} else if (o.className==this.editClass) {
@@ -298,7 +303,7 @@ var externalDrag = Class(drag,{
 	_externalMouseDown	: function (e) {
 		var e = is_ie ? window.event: e;
 		var o = e.srcElement || e.target;
-
+		
 		this.currentItem = this._creadItem(o.id,o.innerHTML);
 		document.body.appendChild(this.currentItem);
 

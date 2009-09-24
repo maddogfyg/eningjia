@@ -2,7 +2,6 @@
 !defined('P_W') && exit('Forbidden');
 define('AJAX',1);
 InitGP(array('style'));
-writeover(D_P.'data/text.txt',$style);
 $layout	= $stopic_service->getStyleConfig($style,'layout_set');
 if (!$layout) {
 	echo "error";

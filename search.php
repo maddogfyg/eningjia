@@ -112,7 +112,7 @@ if ($step == 2) {
 		} else {
 			$foruminfo = $db->get_one("SELECT forumadmin,fupadmin FROM pw_forums WHERE fid=".pwEscape($seekfid));
 			$isBM = admincheck($foruminfo['forumadmin'],$foruminfo['fupadmin'],$windid);
-			$pwSystem = pwRights(false,$isBM,$seekfid);
+			$pwSystem = pwRights($isBM,false,$seekfid);
 			if ($pwSystem && ($pwSystem['tpccheck'] || $pwSystem['digestadmin'] || $pwSystem['lockadmin'] || $pwSystem['pushadmin'] || $pwSystem['coloradmin'] || $pwSystem['downadmin'] || $pwSystem['delatc'] || $pwSystem['moveatc'] || $pwSystem['copyatc'] || $pwSystem['topped'])) {
 				$admincheck = 1;
 			}
@@ -123,7 +123,7 @@ if ($step == 2) {
 		require_once R_P.'require/sphinxsearch.php';
 	}else{
 		require_once R_P.'require/normalsearch.php';
-	}	
+	}
 }
 require_once PrintEot('search');footer();
 

@@ -2,7 +2,9 @@
 !function_exists('readover') && exit('Forbidden');
 
 list($GLOBALS['db_ifupload'],$GLOBALS['db_imgheight'],$GLOBALS['db_imgwidth'],$GLOBALS['db_imgsize']) = explode("\t",$GLOBALS['db_upload']);
-!$GLOBALS['db_imgwidth'] && !$GLOBALS['db_imgheight'] && $GLOBALS['db_imgwidth'] = 100;
+//!$GLOBALS['db_imgwidth'] && !$GLOBALS['db_imgheight'] && $GLOBALS['db_imgwidth'] = 100;
+!$GLOBALS['db_imgwidth'] && $GLOBALS['db_imgwidth'] = 150;
+!$GLOBALS['db_imgheight'] && !$GLOBALS['db_imgheight'] = 150;
 
 function showfacedesign($usericon,$show_a = null,$imgtype = null) {
 	global $imgpath;
@@ -53,19 +55,17 @@ function showfacedesign($usericon,$show_a = null,$imgtype = null) {
 		$faceurl = "$imgpath/face/$user_a[0]";
 	}
 	$imglen = '';
-	if ($user_a[1] == 2 || $user_a[1] == 3) {
+	if ($user_a[1] == 2 || ($user_a[1] == 3 && !$imgtype)) {
 		list($user_a[2],$user_a[3]) = getfacelen($user_a[2],$user_a[3]);
-		if (empty($show_a)) {
-			if ($user_a[2]) $imglen .= " width=\"$user_a[2]\"";
-			if ($user_a[3]) $imglen .= " height=\"$user_a[3]\"";
-		}
+		if ($user_a[2]) $imglen .= " width=\"$user_a[2]\"";
+		if ($user_a[3]) $imglen .= " height=\"$user_a[3]\"";
 	}
 	if (empty($show_a)) {
 		return "<img class=\"pic\" src=\"$faceurl\"$imglen border=\"0\" />";
 	} else {
 		!$user_a[2] && $user_a[2] = '80';
 		!$user_a[3] && $user_a[3] = '80';
-		return array($faceurl,$user_a[1],$user_a[2],$user_a[3],$user_a[0],$user_a[4],$user_a[5]);
+		return array($faceurl, $user_a[1], $user_a[2], $user_a[3], $user_a[0], $user_a[4],$user_a[5], $imglen);
 	}
 }
 
@@ -81,6 +81,44 @@ function getUploadTypeDir($imgtype,$check){
 	}
 }
 
+function flexlen($srcw, $srch, $dstw, $dsth) {
+	!$dstw && $dstw = $GLOBALS['db_imgwidth'];
+	!$dsth && $dsth = $GLOBALS['db_imgheight'];
+	if ($srcw && !$srch) {
+		$srch = ($dsth / $dstw) * $srcw;
+	} elseif (!$srcw && $srch) {
+		$srcw = ($dstw / $dsth) * $srch;
+	} elseif (!$srcw && !$srch) {
+		$srcw = $dstw;
+		$srch = $dsth;
+	}
+	return getfacelen($srcw, $srch);
+}
+
+function getfacelen($img_w, $img_h) {
+	global $db_imgheight,$db_imgwidth;
+	$img_w = intval($img_w);
+	$img_h = intval($img_h);
+	$temp_w = $img_w ? $img_w : $db_imgwidth;
+	$temp_h = $img_h ? $img_h : $db_imgheight;
+
+	if ($db_imgwidth && ($img_w < 1 || $img_w > $db_imgwidth)) {
+		$temp_w = $db_imgwidth;
+	}
+	if ($db_imgheight && ($img_h < 1 || $img_h > $db_imgwidth)) {
+		$temp_h = $db_imgheight;
+	}
+	if ($temp_w && $temp_h && $img_w && $img_h) {
+		if (($temp_w / $temp_h) < ($img_w / $img_h)) {
+			$temp_h = ($img_h / $img_w) * $temp_w;
+		} else {
+			$temp_w = ($img_w / $img_h) * $temp_h;
+		}
+	}
+	return array(round($temp_w), round($temp_h));
+}
+
+/*
 function getfacelen($img_w,$img_h){
 	global $db_imgheight,$db_imgwidth;
 	$temp_w = ((int)$img_w<1 || $img_w>$db_imgwidth) ? $db_imgwidth : $img_w;
@@ -96,6 +134,7 @@ function getfacelen($img_w,$img_h){
 	}
 	return array($img_w,$img_h);
 }
+*/
 
 function DelIcon($filename) {
 	if (strpos($filename,'..') !== false) {
@@ -119,7 +158,7 @@ function setIcon($proicon, $facetype, $oldface) {
 	} elseif ($facetype == 2) {
 
 	} elseif ($facetype == 3) {
-		$oldface[2] = $oldface[3] = 0;
+		//$oldface[2] = $oldface[3] = 0;
 	} else {
 		return '';
 	}

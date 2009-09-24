@@ -14,6 +14,7 @@ class FaceUpload extends uploadBehavior {
 		parent::uploadBehavior();
 		$this->uid = $uid;
 		$this->db =& $db;
+		$this->ifftp = 0;
 		
 		!$db_imgsize && $db_imgsize = 1000;
 		$this->ftype = array(

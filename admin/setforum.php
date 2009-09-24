@@ -14,7 +14,7 @@ if (empty($action)) {
 
 	$query = $db->query("SELECT fid,fup,type,name,vieworder,forumadmin,f_type,cms FROM pw_forums WHERE cms!='1' ORDER BY vieworder");
 	while ($forums = $db->fetch_array($query)) {
-		$forums['name'] = Quot_cv($forums['name']);
+		$forums['name'] = Quot_cv(strip_tags($forums['name']));
 		$forums['forumadmin'] = trim($forums['forumadmin'],',');
 		if ($forums['type'] == 'category') {
 			$catedb[] = $forums;
@@ -468,6 +468,7 @@ if (empty($action)) {
 			$query = $db->query("SELECT id,name,vieworder,upid FROM pw_topictype WHERE fid=".pwEscape($fid)." ORDER BY vieworder ");
 			$t_typedbnum = 1;
 			while ($rt = $db->fetch_array($query)) {
+				$rt['name'] = str_replace(array('<','>','"',"'"),array("&lt;","&gt;","&quot;","&#39;"),$rt['name']);
 				if($rt['upid'] == 0) {
 					$typedb[$rt['id']] = $rt;
 				} else {

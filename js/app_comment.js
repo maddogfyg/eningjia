@@ -284,7 +284,7 @@ function postComment(type,typeid,upid,form) {
 			dt.appendChild(img);
 			if (upid == 0 && type != 'board') {
 				var del_a = elementBind('a','','del fr mr10','cursor: pointer;');
-				del_a.setAttribute('onclick',"pwConfirm('是否确定删除本条评论',this,function(){delComment('"+commentid+"','0')})");
+				del_a.setAttribute('onclick',function(){pwConfirm('是否确定删除本条评论',this,function(){delComment(commentid,'0')})});
 				del_a.innerHTML = '删除';
 			}
 			var dd2 = elementBind('dd','','dd60');
@@ -301,10 +301,10 @@ function postComment(type,typeid,upid,form) {
 			if (upid>0 || type == 'board') {
 				var del_a = elementBind('a','','del','cursor:pointer;');
 				if (type == 'board') {
-					del_a.setAttribute('onclick',"pwConfirm('是否确定删除本条评论',this,function(){delComment('"+commentid+"','2')})");
+					del_a.setAttribute('onclick',function(){pwConfirm('是否确定删除本条评论',this,function(){delComment(commentid,'2')})});
 				}
 				if (upid>0) {
-					del_a.setAttribute('onclick',"pwConfirm('是否确定删除本条评论',this,function(){delComment('"+commentid+"','1')})");
+					del_a.setAttribute('onclick',function(){pwConfirm('是否确定删除本条评论',this,function(){delComment(commentid,'1')})});
 				}
 				del_a.innerHTML = '删除';
 			}

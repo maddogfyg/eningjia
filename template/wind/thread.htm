@@ -458,9 +458,10 @@ EOT;
 }
 foreach($t_db as $key=>$value){
 $i++;
+$ctypename = html_entity_decode($value[name]);
 print <<<EOT
 -->
-		<a id="thread_type_$key" href="thread.php?fid=$fid{$viewbbs}&type=$key#c">{$value[name]}</a>
+		<a id="thread_type_$key" href="thread.php?fid=$fid{$viewbbs}&type=$key#c">{$ctypename}</a>
 <!--
 EOT;
 }print <<<EOT

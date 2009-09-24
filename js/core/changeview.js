@@ -11,6 +11,7 @@ var changView = Class({},{
 		this._init();
 	},
 	_init: function () {
+		if(!document.getElementById(this.container))return;
 		var list = document.getElementById(this.container).getElementsByTagName(this.tag);
 		var self = this;
 		for (var i = 0; i< list.length; i++ ) {

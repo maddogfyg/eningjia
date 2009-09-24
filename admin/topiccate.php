@@ -34,7 +34,7 @@ if (empty($action)){
 	}
 	
 
-	include PrintEot('topiccate');exit;
+	include PrintEot('topiccate');
 }  elseif ($action == 'topic') {
 	InitGP(array('page','step','field','newfield'));
 
@@ -48,10 +48,8 @@ if (empty($action)){
 
 	if ($modelid) {
 		$searchhtml = $asearchhtml = '';
-		$i = 0;
 		$query = $db->query("SELECT fieldid,name,type,rules,ifsearch,ifasearch,vieworder FROM pw_topicfield WHERE ifable=1 AND (ifsearch=1 OR ifasearch=1) AND modelid=".pwEscape($modelid). "ORDER BY vieworder,fieldid");
 		while ($rt = $db->fetch_array($query)) {
-			$i++;
 			$rt['fieldvalue'] = $field[$rt['fieldid']];
 			$rt['rules'] && $rt['rules'] = unserialize($rt['rules']);
 			if ($rt['ifsearch'] == 1) {
@@ -59,6 +57,16 @@ if (empty($action)){
 			} elseif ($rt['ifasearch'] == 1) {
 				$asearchhtml .= getSearchHtml($rt);
 			}
+			
+		}
+		
+		$searchhtml .= '</span>';
+		$asearchhtml .= '</span>';
+		if (strpos($searchhtml,'</span></span>') !== false) {
+			$searchhtml = str_replace('</span></span>','</span>',$searchhtml);
+		}
+		if (strpos($asearchhtml,'</span></span>') !== false) {
+			$asearchhtml = str_replace('</span></span>','</span>',$asearchhtml);
 		}
 		$tablename = 'pw_topicvalue'.$modelid;
 	}
@@ -682,14 +690,25 @@ if (empty($action)){
 	$cateid = $db->get_value("SELECT cateid FROM pw_topicmodel WHERE modelid=".pwEscape($modelid));
 	
 	echo "success\t$cateid\t$modelid";ajax_footer();
-} elseif($action == 'delmodel') {
+} elseif ($action == 'delmodel') {
 	
 	define('AJAX',1);
-	$cateid = $db->get_value("SELECT cateid FROM pw_topicmodel WHERE modelid=".pwEscape($modelid));
-
+	Showmsg(111111);
+	/*$cateid = $db->get_value("SELECT cateid FROM pw_topicmodel WHERE modelid=".pwEscape($modelid));
+	$count = $db->get_value("SELECT COUNT(*) as count FROM pw_topicmodel WHERE cateid=".pwEscape($cateid));
+	if ($count == 1) Showmsg('model_mustone');
+	
 	$db->update("DELETE FROM pw_topicmodel WHERE modelid=".pwEscape($modelid));
 	$db->update("DELETE FROM pw_topicfield WHERE modelid=".pwEscape($modelid));
 	$tablename = 'pw_topicvalue'.$modelid;
+	$query = $db->query("SELECT tid FROM $tablename");
+	while($rt = $db->fetch_array($query)){
+		$tids[] = $rt['tid'];
+	}
+
+	$delarticle = L::loadClass('DelArticle');
+	$delarticle->delTopicByTids($tids);
+
 	$db->query("DROP TABLE IF EXISTS $tablename");
 	$query = $db->query("SELECT * FROM pw_forums WHERE cateid=".pwEscape($cateid));
 	while($rt = $db->fetch_array($query)){
@@ -700,7 +719,8 @@ if (empty($action)){
 			$db->update("UPDATE pw_forums SET modelid=".pwEscape($a_modelid)." WHERE fid=".pwEscape($rt['fid']));
 		}
 	}
-	updatecache_topic();
+
+	updatecache_topic();*/
 	echo "success\t$cateid";ajax_footer();
 
 }
@@ -738,8 +758,9 @@ function getSearchHtml($data) {
 		$searchhtml .= $name1 ? $name1."：" : '';
 	} elseif ($data['vieworder'] != 0) {
 		if ($vieworder_mark != $data['vieworder']) {
-			if ($vieworder_mark != 0) $searchhtml .= "</span>";
+			if ($vieworder_mark != 0 && $vieworder_mark) $searchhtml .= "</span>";
 			$searchhtml .= "<span>";
+			
 			$searchhtml .= $name1 ? $name1."：" : '';
 		} elseif ($vieworder_mark == $data['vieworder']) {
 			$searchhtml .= $name1 ? $name1 : '';
@@ -772,9 +793,9 @@ function getSearchHtml($data) {
 		$searchhtml .= "<input type=\"text\" name=\"field[$data[fieldid]]\" class=\"input\" value=\"$data[fieldvalue]\">";
 	}
 	if ($data['vieworder'] == 0) {
-		$searchhtml .= " ".$name2."</span>";
+		$searchhtml .= $name2."</span>";
 	} elseif ($data['vieworder'] != 0) {
-		$searchhtml .= " ".$name2;
+		$searchhtml .= $name2;
 		$vieworder_mark = $data['vieworder'];
 	}
 	return $searchhtml;

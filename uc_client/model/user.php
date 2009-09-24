@@ -64,6 +64,14 @@ class usermodel {
 		return $uid;
 	}
 
+	function delete($uids) {
+		if ($uids) {
+			$this->db->update("DELETE FROM pw_members WHERE uid IN (" . UC::implode($uids) . ')');
+			return $this->db->affected_rows();
+		}
+		return 0;
+	}
+
 	function edit($uid, $username, $pwd, $email) {
 		$user  = $this->get_by_uid($uid);
 		$ucsql = array();

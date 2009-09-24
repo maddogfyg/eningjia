@@ -39,7 +39,7 @@ switch (SCR) {
 		break;
 	default :
 }
-
+$db_menuinit .= ",'td_userinfomore' : 'menu_userinfomore'";
 
 $pwModeImg = "mode/$db_mode/themes/$db_tplstyle/images/$csspath";
 

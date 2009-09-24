@@ -16,7 +16,7 @@ a{color:#067098;text-decoration:none;}
 a:hover{color:#FF6600;}
 .input,.input2 input{border: 1px solid;border-color: #c0c0c0 #ededed #ededed #c0c0c0;padding:2px 0px 1px 1px;font-size:12px;vertical-align:middle;color:#000;margin-bottom:.3em;margin-right:.3em;}
 .btn{cursor:pointer;background:#2cc6ed;border-width:1px;vertical-align:middle;height:22px;padding-left:1.5em;padding-right:1.5em;border: 1px solid; color:#fff; font-weight:bold; border:none; border-bottom:1px solid #000; border-right:1px solid #000;}
-select{border: 1px solid;border-color: #c0c0c0 #ededed #ededed #c0c0c0;}
+select{border: 1px solid;border-color: #c0c0c0 #ededed #ededed #c0c0c0;vertical-align:middle;}
 .btn2{cursor:pointer;border:1px solid #b8d3e1;color:#333333;padding:1px 3px 0 3px; font-family:simsun;background:#f7fbff;margin-left:3px;height:19px;}
 textarea{border: 1px solid;border-color: #c0c0c0 #ededed #ededed #c0c0c0;font-size:12px;}
 .tal{text-align:left}
@@ -27,6 +27,20 @@ textarea{border: 1px solid;border-color: #c0c0c0 #ededed #ededed #c0c0c0;font-si
 .w{font-weight:normal;}
 .c{clear:both;height:0;overflow:hidden;}
 .cc{clear:both;margin-right:1em;border-top:1px solid #91c900;height:1px;}
+ol{ list-style:decimal;margin-left:2em;line-height:20px;}
+
+.box-newA,.box-newB{padding:20px;margin-top:20px;min-width:850px;}
+.box-newA .title,.box-newB .title{font-size:14px; font-weight:700;padding-bottom:10px;}
+.box-newA{border:1px solid #dedcc8;background:#fcfbf3;}
+.box-newA .title{color:#ff0000;}
+.box-newB{border:1px solid #c5d7e6;background:#ffffff;}
+.box-newB ul{margin-top:20px;border-right:1px solid #cccccc;padding-right:25px;padding-bottom:50px;}
+.box-newB ul li{padding:7px 0;}
+.box-newB-list li{background:url($imgpath/admin/box-ul-li.gif) 0 12px repeat-x;width:100%;}
+.box-newB-list li .fr{background:#ffffff;padding-left:5px;}
+.box-newB-list li div{float:left;background:#ffffff;padding-right:5px;}
+.box-btn{border-width:1px;height:22px;cursor:pointer;vertical-align:middle;padding-left:1.5em;padding-right:1.5em;}
+.box-newB .input{height:17px;border:1px solid #ccc;padding:2px 2px 0;width:154px;}
 
 /*清除浮动 代码*/
 .cc2:after {content: ".";display: block;height:0;clear: both;visibility: hidden;}
@@ -138,6 +152,8 @@ table{font-size:12px;}
 .pobg4{width:5px;}
 .popoutContent td{padding:.5em .6em;border-bottom:1px solid $tdcolor;}
 </style>
+<script src="js/desktop/Compatibility.js">
+</script>
 <script language="JavaScript">
 var agt = navigator.userAgent.toLowerCase();
 var is_ie = ((agt.indexOf("msie") != -1) && (agt.indexOf("opera") == -1));
@@ -306,23 +322,25 @@ document.onkeydown = function(e){
 		return false;
 	}
 }
-function Class(aBaseClass, aClassDefine) {
+Class = function(aBaseClass, aClassDefine) {
 	function class_() {
-		this.Type = aBaseClass;
-		for(var member in aClassDefine)
-			this[member] = aClassDefine[member]; 
-	};
+		this.Inherit = aBaseClass;
+		for (var member in aClassDefine) {
+			try{this[member] = aClassDefine[member];}catch(e){}		//针对opera,safri浏览器的只读属性的过滤
+		}
+	}
 	class_.prototype = aBaseClass;
-	return new class_();
+	return  new class_();
 };
-function New(aClass, aParams) {
-	function new_() {
-		this.Type = aClass; 
-		if (aClass.Create)
+New = function(aClass, aParams) {
+	function new_()	{
+		this.Inherit = aClass;
+		if (aClass.Create) {
 			aClass.Create.apply(this, aParams);
-	};
+		}
+	}
 	new_.prototype = aClass;
-	return new new_();
+	return  new new_();
 };
 </script>
 <!--

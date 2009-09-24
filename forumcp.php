@@ -229,8 +229,9 @@ if (!$action) {
 			${'t_type_'.$t_type}='checked';
 
 			//主题分类
-			$query = $db->query("SELECT id,name,vieworder,upid FROM pw_topictype WHERE fid=".pwEscape($fid)." ORDER BY vieworder DESC");
+			$query = $db->query("SELECT id,name,vieworder,upid FROM pw_topictype WHERE fid=".pwEscape($fid)." ORDER BY vieworder");
 			while ($rt = $db->fetch_array($query)) {
+				$rt['name'] = str_replace(array('<','>','"',"'"),array("&lt;","&gt;","&quot;","&#39;"),$rt['name']);
 				if($rt['upid'] == 0) {
 					$typedb[$rt['id']] = $rt;
 				} else {
@@ -244,16 +245,26 @@ if (!$action) {
 
 			PostCheck();
 			Add_S($forumset);
-			InitGP(array('t_db','t_view_db','new_t_db','new_t_view_db','new_t_sub_db','new_t_sub_view_db','addtpctype','t_type'),'P');
+			InitGP(array('t_view_db','new_t_view_db','new_t_sub_view_db','addtpctype'),'P');
+			InitGP(array('t_db','new_t_db','new_t_sub_db','f_type'),'P',0);
+			$temptype = array('t_db','new_t_db','new_t_sub_db');
+			empty($t_db) && $t_db = array();
+			empty($new_t_db) && $new_t_db = array();
+			empty($new_t_sub_db) && $new_t_sub_db = array();
+			foreach ($t_db as $key => $value) {
+				$value = str_replace(array('&#46;&#46;','&#41;','&#60;','&#61;'),array('..',')','<','='),$value);
+				$t_db[$key] = $value;
+			}
 
+			
 			//主题分类
 			empty($t_db) && $t_db = array();
 			empty($new_t_db) && $new_t_db = array();
 			empty($new_t_sub_db) && $new_t_sub_db = array();
 
 			//更新原有的分类
-
 			foreach ($t_db as $key => $value) {
+				if(empty($value)) continue;
 				$db->update("UPDATE pw_topictype SET " . pwSqlSingle(array(
 					'name'			=> $value,
 					'vieworder'		=> $t_view_db[$key]
@@ -264,6 +275,7 @@ if (!$action) {
 
 			foreach ($new_t_db as $key => $value) {
 				if(empty($value)) continue;
+				$value = str_replace(array('&#46;&#46;','&#41;','&#60;','&#61;'),array('..',')','<','='),$value);
 				$typedb[] = array ('fid' => $fid,'name' => $value,'vieworder'=>$new_t_view_db[$key]);
 			}
 			if ($typedb) {
@@ -273,12 +285,14 @@ if (!$action) {
 			foreach ($new_t_sub_db as $key => $value) {
 				foreach ($value as $k => $v) {
 					if (empty($v)) continue;
+					$v = str_replace(array('&#46;&#46;','&#41;','&#60;','&#61;'),array('..',')','<','='),$v);
 					$subtypedb[] = array ('fid' => $fid,'name' => $v,'vieworder'=>$new_t_sub_view_db[$key][$k],'upid'=>$key);
 				}
 			}
 			if ($subtypedb) {
 				$db->update("REPLACE INTO pw_topictype (fid,name,vieworder,upid) VALUES " . pwSqlMulti($subtypedb));
 			}
+            require_once (R_P.'admin/cache.php');
 			if ($addtpctype != $forumset['addtpctype']) {
 				$forumset['addtpctype'] = $addtpctype;
 				$forumset = serialize($forumset);
@@ -287,9 +301,9 @@ if (!$action) {
 				} else {
 					$db->update('INSERT INTO pw_forumsextra SET '.pwSqlSingle(array('fid'=>$fid,'forumset'=>$forumset)));
 				}
-				require_once (R_P.'admin/cache.php');
 				updatecache_forums($fid);
 			}
+            updatecache_f();
 			refreshto("forumcp.php?action=edit&type=f_type&fid=$fid",'operate_success');
 		}
 	} elseif ($type == 'reward') {

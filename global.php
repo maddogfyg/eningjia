@@ -58,18 +58,17 @@ foreach ($_GET as $_key => $_value) {
 	CheckVar($_GET[$_key]);
 }
 
-$db_debug && error_reporting(E_ALL ^ E_NOTICE);
+$db_debug && error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
 list($wind_version,$wind_repair,$wind_from) = explode(' ',WIND_VERSION);
 $db_olsize    = 96;
 
 if (in_array(SCR,array('index','cate','mode'))) {
-	$db_mode && $defaultMode = $db_mode;
 	$defaultMode = empty($db_mode) ? 'bbs' : $db_mode;
 	$M_domain = $pwServer['HTTP_HOST'];
 	($m = GetGP('m')) || ($db_modedomain && $m = array_search($M_domain,$db_modedomain));
 	if ($m == 'bbs') {
 		$db_mode = '';
-	} elseif ($db_modes && isset($db_modes[$m]) && $db_modes[$m]['ifopen']) {
+	} elseif ($db_modes && isset($db_modes[$m]) && is_array($db_modes[$m]) && $db_modes[$m]['ifopen']) {
 		$db_mode = $m;
 	}
 
@@ -372,9 +371,7 @@ function Showmsg($msg_info,$dejump=0){
 	extract(L::style());
 	list($_Navbar,$_LoginInfo) = pwNavBar();
 	ob_end_clean();ObStart();
-	require_once PrintEot('showmsg');
-	$output = str_replace(array('<!--<!---->','<!---->',"\r\n\r\n"),'',ob_get_contents());
-	echo ObContents($output);exit;
+	require_once PrintEot('showmsg');exit;
 }
 function GetLang($lang,$EXT='php'){
 	global $tplpath;
@@ -574,9 +571,9 @@ function footer() {
 			$output
 		);
 		*/
-		$output = str_replace(array("\t",'<!--<!---->',"<!---->\r\n",'<!---->','<!-- -->'),'',$output);
+		$output = str_replace(array("\r","\t\t",'<!--<!---->',"<!---->\r\n",'<!---->','<!-- -->',"<!--\n-->","\n\t","\n\n"),array('','','','','','',"\n","\n"),$output);
 	} else {
-		$output = str_replace(array('<!--<!---->',"<!---->\r\n",'<!---->','<!-- -->'),'',$output);
+		$output = str_replace(array('<!--<!---->',"<!---->\r\n",'<!---->','<!-- -->',"\t\t\t"),'',$output);
 	}
 	if ($SCR!='post') {
 		$ceversion = defined('CE') ? 1 : 0;
@@ -589,6 +586,7 @@ function footer() {
 	updateCacheData();
 	echo ObContents($output);
 	unset($output);
+	N_flush();
 	exit;
 }
 function updateCacheData(){
@@ -656,15 +654,16 @@ function User_info() {
 			}
 			//End elementupdate
 			if (!GetCookie('hideid')) {
-				$ecpvisit = pwEscape($timestamp);
+				$ecpvisit = pwEscape($timestamp,false);
 				$ct = 'lastvisit='.$ecpvisit.',thisvisit='.$ecpvisit;
 				if ($db_ifonlinetime) {
-					$c_oltime = pwEscape(($c_oltime <= 0 ? 0 : ($c_oltime > $db_onlinetime*1.2 ? $db_onlinetime : intval($c_oltime))),false);
-					$ct .= ',onlinetime=onlinetime+'.$c_oltime;
+					$c_oltime = $c_oltime <= 0 ? 0 : ($c_oltime > $db_onlinetime*1.2 ? $db_onlinetime : intval($c_oltime));
+					$s_oltime = pwEscape($c_oltime,false);
+					$ct .= ',onlinetime=onlinetime+'.$s_oltime;
 					if ($detail['lastvisit'] > $montime) {
-						$ct .= ',monoltime=monoltime+'.$c_oltime;
+						$ct .= ',monoltime=monoltime+'.$s_oltime;
 					} else {
-						$ct .= ',monoltime='.$c_oltime;
+						$ct .= ',monoltime='.$s_oltime;
 					}
 					$c_oltime && updateDatanalyse($winduid,'memberOnLine',$c_oltime);
 					$c_oltime = 0;
@@ -982,9 +981,10 @@ function pwGetShortcut() {
 		global $winddb,$forum,$winduid,$db_shortcutforum;
 		if (trim($winddb['shortcut'],',')) {
 			isset($forum) || require(D_P.'data/bbscache/forum_cache.php');
-			foreach (explode(',',$winddb['shortcut']) as $key => $value) {
+			$tempshortcut = explode(',',$winddb['shortcut']);
+			foreach ($tempshortcut as $value) {
 				if ($value && isset($forum[$value])) {
-					$shortcutforum[$value] = $forum[$value]['name'];
+					$shortcutforum[$value] = strip_tags($forum[$value]['name']);
 				}
 			}
 		}
@@ -1021,4 +1021,5 @@ function updateDatanalyse($tag, $action, $num) {
 		);
 	}
 }
+
 ?>

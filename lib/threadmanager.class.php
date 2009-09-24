@@ -8,6 +8,7 @@ class PW_ThreadManager {
     var $_memcache = FALSE;
 
     function PW_ThreadManager() {
+		$this->_db = $GLOBALS['db'];
         $this->_memcache = $GLOBALS['db_memcache'];
     }
 
@@ -15,10 +16,11 @@ class PW_ThreadManager {
         if($threadId<1) {
             return false;
         }
-        $this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE tid=".pwEscape($threadId));
-        $result =  $this->_getConnection ()->affected_rows ();
+        $this->_db->update("DELETE FROM ".$this->_tableName." WHERE tid=".pwEscape($threadId));
+        $result =  $this->_db->affected_rows ();
         if($result && $this->_memcache){
-            $this->_getThreadList()->removeThreadIdsByForumId($forumId,$threadId);
+			$threadList = $this->_getThreadList();
+            $threadList->removeThreadIdsByForumId($forumId,$threadId);
         }
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($threadId);
@@ -32,10 +34,11 @@ class PW_ThreadManager {
 			$threads->delThreads($threadIds);
             $threadIds = pwImplode($threadIds);
         }
-        $this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE tid in(".$threadIds.")");
-        $result =  $this->_getConnection ()->affected_rows ();
+        $this->_db->update("DELETE FROM ".$this->_tableName." WHERE tid in(".$threadIds.")");
+        $result =  $this->_db->affected_rows ();
         if($result && $this->_memcache){
-            $this->_getThreadList()->refreshThreadIdsByForumId($forumId);
+			$threadList = $this->_getThreadList();
+            $threadList->refreshThreadIdsByForumId($forumId);
         }
         return $result;
     }
@@ -44,10 +47,11 @@ class PW_ThreadManager {
         if($forumId<1) {
             return false;
         }
-        $this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId));
-        $result =  $this->_getConnection ()->affected_rows ();
+        $this->_db->update("DELETE FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId));
+        $result =  $this->_db->affected_rows ();
         if($result && $this->_memcache){
-            $this->_getThreadList()->clearThreadIdsByForumId($forumId);
+			$threadList = $this->_getThreadList();
+            $threadList->clearThreadIdsByForumId($forumId);
         }
         return $result;
     }
@@ -56,8 +60,8 @@ class PW_ThreadManager {
         if($authorId<1) {
             return false;
         }
-        $this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE authorid=".pwEscape($authorId,false));
-        return $this->_getConnection ()->affected_rows ();
+        $this->_db->update("DELETE FROM ".$this->_tableName." WHERE authorid=".pwEscape($authorId,false));
+        return $this->_db->affected_rows ();
     }
 
     function _getThreadList() {

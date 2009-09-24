@@ -17,7 +17,7 @@ if ($m == 'o') {
 	$temp_basename = $temp_baseUrl . 'q='.$q.'&';
 }
 
-if($space == 1 && defined('F_M')) {
+if($space == 1 && defined('F_M') && !in_array($q,array('group','galbum'))) {
 //	if($u==$winduid){
 //		$baseUrl = $temp_baseUrl."u=".$u."&";
 //		$basename = $temp_basename."u=".$u."&";
@@ -50,7 +50,7 @@ if ($groupid != 3 && $o_share_groups && strpos ( $o_share_groups, ",$groupid," )
 extract(L::style(null, 'wind'));
 
 
-if($space == 1 && $q!='galbum'){
+if($space == 1 && !in_array($q,array('group','galbum'))){
 	$pwModeCss = $imgpath.'/apps/browse-style.css';
 }else{
 	$pwModeCss = $imgpath.'/apps/app-style.css';

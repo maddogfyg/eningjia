@@ -89,8 +89,8 @@ unset($S_sql,$J_sql,$foruminfo['forumset']);
 $creditnames = pwCreditNames();
 
 $rewardtype = null; /*** 悬赏 ***/
-
-if ($db_threadrelated && $forumset['ifrelated']) {
+//过滤匿名作者相关动态
+if ($db_threadrelated && $forumset['ifrelated'] && !($read['anonymous'] && in_array($forumset['relatedcon'],array('ownpost', 'owndigest', 'ownhits', 'ownreply', 'oinfo')))) {
 	if ($forumset['relatedcon'] == 'custom') {
 		$relatedb = $forumset['relatedcustom'];
 	} else {
@@ -118,7 +118,7 @@ if ($openIndex) {#高楼帖子索引
 }
 
 //门户阅读方式
-if ($foruminfo['ifcms']) {
+if ($foruminfo['ifcms'] && $db_modes['area']['ifopen']) {
 	InitGP(array('viewbbs'));
 	if (!$viewbbs) {
 		require_once R_P. 'mode/area/area_read.php';exit;
@@ -283,7 +283,7 @@ if ($read['replies'] > 0) {
 		if ($postIds) {
 			$order = $rewardtype != null ? "t.ifreward DESC,t.postdate" : "t.postdate";
 			$postIds && $sql_postId = " AND t.pid IN ( ". pwImplode($postIds,false) ." ) ";
-			$query = $db->query("SELECT t.* FROM $pw_posts as t WHERE t.tid=".pwEscape($tid)." $sql_postId $sqladd ORDER BY $order ");
+			$query = $db->query("SELECT t.* $fieldadd FROM $pw_posts t $tablaadd WHERE t.tid=".pwEscape($tid)." $sql_postId $sqladd ORDER BY $order ");
 			while ($read = $db->fetch_array($query)) {
 				if ($read['ifcheck']!='1') {
 					$read['subject'] = '';
@@ -318,7 +318,7 @@ if ($read['replies'] > 0) {
 			$start_limit = 0;
 		}
 		$limit = pwLimit($start_limit,$readnum);
-		$query = $db->query("SELECT t.* FROM $pw_posts t WHERE t.tid=".pwEscape($tid)." AND t.ifcheck='1' $sqladd ORDER BY $order $limit");
+		$query = $db->query("SELECT t.* $fieldadd FROM $pw_posts t $tablaadd WHERE t.tid=".pwEscape($tid)." AND t.ifcheck='1' $sqladd ORDER BY $order $limit");
 		while ($read = $db->fetch_array($query)) {
 			$_uids[$read['authorid']] = 'UID_'.$read['authorid'];
 			$read['aid'] && $_pids[$read['pid']] = $read['pid'];
@@ -410,7 +410,7 @@ if ($_uids) {
 			is_array($pwMembers[$rt['uid']]) ? $pwMembers[$rt['uid']] += $rt : $pwMembers[$rt['uid']] = $rt;
 			$tmpCacheData['UID_'.$rt['uid']] = $rt;
 		}
-		is_object($_cache) && $_cache->update($tmpCacheData,300);
+		is_object($_cache) && $_cache->update($tmpCacheData,600);
 		$db->free_result($query);
 	}
 	unset($skey,$_uids,$_cache,$tmpUIDs,$tmpCREDITs,$tmpGROUPs,$tmpColonydb,$tmpCustomdb,$tmpCacheData);
@@ -579,7 +579,7 @@ function viewread($read,$start_limit) {
 			}
 		}
 	}
-	$read['face']	  = showfacedesign($read['micon']);
+	$read['face'] = showfacedesign($read['micon']);
 	list($read['posttime'],$read['postdate']) = getLastDate($read['postdate']);
 	$read['mark'] = $read['reward'] = $read['tag'] = NULL;
 	if ($read['ifmark']) {

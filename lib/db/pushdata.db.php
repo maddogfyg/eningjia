@@ -16,7 +16,7 @@ class PW_PushDataDB extends BaseDB {
 		return $this->_countByInvokepiece('overdue',$invokepieceid,$fid,$loopid);
 	}
 	function getDataById($id){
-		$temp	= $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
+		$temp	= $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}
@@ -36,14 +36,14 @@ class PW_PushDataDB extends BaseDB {
 	function update($id,$array){
 		$array	= $this->_checkData($array);
 		if (!$array) return null;
-		$this->_getConnection()->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE id=".pwEscape($id));
+		$this->_db->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE id=".pwEscape($id));
 	}
 	function delete($id){
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE id=".pwEscape($id));
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE id=".pwEscape($id));
 	}
 	function deleteOverdues($invokepieceid,$fid,$loopid){
 		$sqladd	= $this->_getAddSqlByType('overdue');
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd");
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd");
 	}
 
 	/*
@@ -51,14 +51,14 @@ class PW_PushDataDB extends BaseDB {
 	 */
 	function _countByInvokepiece($type,$invokepieceid,$fid,$loopid){
 		$sqladd	= $this->_getAddSqlByType($type);
-		return $this->_getConnection()->get_value("SELECT COUNT(*) AS count FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd");
+		return $this->_db->get_value("SELECT COUNT(*) AS count FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd");
 	}
 	function _getDatas($type,$invokepieceid,$fid=0,$loopid=0,$num = 10){
 		$temp	= array();
 		$sqladd	= $this->_getAddSqlByType($type);
 		list($start,$num)	= $this->_parseNum($num);
-		$query	= $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd ORDER BY offset ASC,starttime DESC ".pwLimit($start,$num));
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query	= $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." $sqladd ORDER BY offset ASC,starttime DESC ".pwLimit($start,$num));
+		while ($rt = $this->_db->fetch_array($query)) {
 			$rt	= $this->_unserializeData($rt);
 			$temp[$rt['id']] = $rt;
 		}
@@ -93,13 +93,13 @@ class PW_PushDataDB extends BaseDB {
 		if (!$array || !$array['invokepieceid'] || !$array['data']) {
 			return null;
 		}
-		$this->_getConnection()->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
+		return $this->_db->insert_id();
 	}
 
 	function _getDataByOffset($offset,$invokepieceid,$fid=0,$loopid=0){
 		global $timestamp;
-		$temp	= $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." AND offset=".pwEscape($offset)." AND (endtime>".pwEscape($timestamp)." OR endtime=0)");
+		$temp	= $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid)." AND offset=".pwEscape($offset)." AND (endtime>".pwEscape($timestamp)." OR endtime=0)");
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}

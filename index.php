@@ -84,7 +84,7 @@ if (defined('M_P') && file_exists(M_P.'index.php') && !$cateid) {
 				list($forums['t'],$forums['au'],$forums['newtitle'],$forums['ft']) = explode("\t",$forums['lastpost']);
 				$forums['pic'] = $newpic < $forums['newtitle'] && ($forums['newtitle'] + $db_newtime > $timestamp) ? 'new' : 'old';
 				$forums['newtitle'] = get_date($forums['newtitle']);
-				$forums['t'] = substrs($forums['t'],40);
+				$forums['t'] = substrs($forums['t'],26);
 			} elseif ($forum[$forums['fid']]['f_type'] === 'hidden' && $groupid != 3) {
 				if ($forums['password'] && allowcheck($forums['allowvisit'],$groupid,$winddb['groups'], $forums['fid'],$winddb['visit'])) {
 					$forums['pic'] = 'lock';

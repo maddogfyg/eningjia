@@ -8,15 +8,51 @@ print <<<EOT
 #editor-side{width:200px;position:absolute;margin-top:22px;}
 #editor-main{padding-right:240px;min-width:540px;}
 .rightItem td{cursor:default}
-/*提示*/
-.angle{position:absolute;border-left:5px transparent solid;_border-left:5px $forumcolortwo solid;border-top:5px $tablecolor solid;border-right:5px transparent solid;_border-right:5px $forumcolortwo solid;border-bottom:0;display:block;width:0;height:0;overflow:hidden;bottom:-5px;right:13px;}
-.p-cloes{cursor:pointer;position:absolute;top:8px;width:16px;height:16px;}
-.p-sitemsg{display:block;text-indent:-2000em;height:18px;width:18px;background:url($imgpath/sitemsg.gif);cursor:pointer;margin-right:15px;}
-.sitemsg{position:absolute;right:5px;_right:15px;bottom:6px;_bottom:40px;padding:5px 8px;border:1px solid $tablecolor;background:$bgcolor;}
-
 span input{margin-right:5px}
-
-.tr_p10 td{padding:5px 5px 5px 0;}
+.tr_p10 td{padding:1px 5px 8px 0;}
+.relative{margin-top:5px;}
+.tab-btns
+{
+position: absolute;
+width:100%;
+bottom:-1px;
+_bottom:-2px;
+}
+.tab-btns li{
+border:1px solid $tdcolor;
+background:$forumcolortwo;
+text-align:center;
+cursor:default;
+line-height:23px;height:22px;
+overflow:hidden;
+margin-left:5px;
+}
+.tab-btns li a{float:left;width:90px;text-align:center;}
+.tab-btns .tab-current
+{
+border-bottom:0;
+height:23px;
+background:$forumcolorone;
+font-weight:700;
+}
+.tab-margin
+{
+height:23px;
+z-index: 9;
+position:relative;
+}
+.tab-content
+{
+border:1px solid $tdcolor;
+width:100%;
+clear:both;
+/**
+ *修正ie6下的，外容器包不住内容器问题
+ */
+overflow:hidden;
+zoom:1;
+}
+.uploadFileInfo td{border-bottom:1px solid #e4e4e4;padding:2px 10px 2px 0;}
 </style>
 <!--
 EOT;
@@ -118,7 +154,7 @@ EOT;
 -->
 <table cellPadding="0" cellSpacing="0" style="display:none" width="100%">
 	<tbody id="att_mode"><tr>
-		<td><input class="input" type="file" name="attachment_" size="20" /></td><td><input class="input" type="text" name="atc_desc" size="20" /></td>
+		<td><input class="input" type="file" name="attachment_" style="width:200px;overflow:hidden;"/></td><td><input class="input" type="text" name="atc_desc" size="25" /></td>
 		<td><select name="att_special" onchange="newAtt.sel(this);" style="width:60px;"><option value="0"></option><option value="1">加密</option><option value="2">出售</option></select></td>
 		<td><select name="att_ctype" style="width:60px;">{$alltype}</select></td>
 		<td><input class="input" type="text" name="atc_needrvrc" value="0" size="1" /></td>
@@ -180,7 +216,7 @@ function showDialogBox(evt, id, obj)
     {
         $('dialogMainBox').style.display = '';
         //$('dialogMainBox').style.right = document.body.clientWidth - evt.clientX + getEventOffset(evt)[0] - 35 + "px";
-        $('dialogMainBox').style.top = -230 + evt.clientY + (document.body.scrollTop || document.documentElement.scrollTop) + "px";
+        //$('dialogMainBox').style.top = -230 + evt.clientY + (document.body.scrollTop || document.documentElement.scrollTop) + "px";
         if ($('dialogBox').firstChild && $('dialogBox').firstChild.tagName == "DIV")
         {
             $('dialogBox').firstChild.style.display = "none";
@@ -307,15 +343,9 @@ function showItems (all) {
 	}
 }
 </script>
-<div class="t f_one" style="position:relative;min-width:760px;">
-<div id="dialogMainBox" style="background:#FFF;z-index:20000;display:none;position:absolute;width:300px;border:1px solid #87BCD8; padding:0 0 5px 5px; right:225px">
-<div class="fr"><img src="$imgpath/close.gif" onclick="$('dialogMainBox').style.display='none'" style="cursor:pointer;"></div>
-<div id="dialogBox" style="padding:5px;"></div>
-<div style="width:100%;text-align:center; padding:5px;" ><input class="btn" type="button" value="确 定" tabindex="4" onclick="$('dialogMainBox').style.display = 'none'" id="dialogOkBtn" />
-<input class="bt" type="button" value="取 消" name="Button" onclick="$('dialogMainBox').style.display = 'none'" /></div>
-</div>
+<div class="t f_one" style="min-width:760px;">
 <table cellPadding="0" cellSpacing="0" width="100%" align="center">
-	<tr><th class="h" style="padding:3px 0 0;line-height:32px; height:32px"><span class="fr" style="padding-right:10px"><a href="profile.php?action=permission&fid=$fid" title="查看您在本版块的权限" target="_blank">版块权限查看</a></span><input class="btn b" style="padding:0 1em;*padding:0;width:70px;height:25px;margin-left:20px;" type="submit" value="发布" tabindex="4" /><span><a href="javascript:;" onclick="gopreview();">预览帖子</a>&nbsp;&nbsp;<a href="javascript:;" onClick="savedraft();">存为草稿</a></span><div class="c" style="width:760px"></div></th></tr>
+	<tr><th class="h" style="padding:3px 0 1px;"><span class="fr" style="padding-right:10px"><a href="profile.php?action=permission&fid=$fid" title="查看您在本版块的权限" target="_blank">版块权限查看</a></span><input class="btn b" style="padding:0 1em;*padding:0;width:70px;height:25px;margin-left:20px;" type="submit" value="发布" tabindex="4" /><span><a href="javascript:;" onclick="gopreview();">预览帖子</a>&nbsp;&nbsp;<a href="javascript:;" onClick="savedraft();">存为草稿</a></span><div class="c" style="width:760px"></div></th></tr>
 	<tr class="f_one tal">
 		<th></th>
 	</tr>
@@ -324,7 +354,7 @@ function showItems (all) {
 <div class="c" style="width:760px"></div>
 <div style="margin:0 0 0 19px; max-width:1240px;">
 	<div style="margin:10px auto 0 205px; height:30px;margin-left:0px">
-		<div class="fl input f_one" style="width:540px;" >
+		<div class="fl input f_one" style="width:580px;" >
 <!--
 EOT;
 $input_w = 470;
@@ -340,7 +370,7 @@ $db_menuinit .= ",'td_ptype' : 'menu_ptype'";
 print <<<EOT
 -->
 			<span class="fr gray" style="padding:0 0 0 .4em;">
-				<select name="p_type" style="width:75px"{$subtype}><option value="">分类</option>
+				<select name="p_type" style="width:80px"{$subtype}><option value="">分类</option>
 <!--
 EOT;
 foreach ($t_typedb as $key => $value) {
@@ -358,7 +388,7 @@ EOT;
 EOT;
 if ($t_sub_exits == 1) {print <<<EOT
 -->
-				<select name="p_sub_type" id="p_sub_type" style="width:75px"><option value="">分类</option></select>
+				<select name="p_sub_type" id="p_sub_type" style="width:80px"><option value="">分类</option></select>
 <script language="JavaScript">
 var ptype = '$ptype';
 var psubtype = '$psubtype';
@@ -390,7 +420,7 @@ $input_w = 395;
 print <<<EOT
 -->
 			<span class="fr gray" style="padding:0 0 0 .4em;">
-				<select name="standpoint" style="width:75px">
+				<select name="standpoint" style="width:80px">
 <!--
 EOT;
 if($debatestand != 2){
@@ -571,6 +601,12 @@ EOT;
 -->
 	</div></div>
     <div style="width:220px;right:0px;display;none;position:absolute;right:0px;top:20px">
+	<div id="dialogMainBox" style="background:#FFF;z-index:20000;display:none;position:absolute;width:300px;border:1px solid #87BCD8; padding:0 0 5px 5px; right:115px;top:27px;">
+	<div class="fr"><img src="$imgpath/close.gif" onclick="$('dialogMainBox').style.display='none'" style="cursor:pointer;"></div>
+	<div id="dialogBox" style="padding:5px;"></div>
+	<div style="width:100%;text-align:center; padding:5px;" ><input class="btn" type="button" value="确 定" tabindex="4" onclick="$('dialogMainBox').style.display = 'none'" id="dialogOkBtn" />
+	<input class="bt" type="button" value="取 消" name="Button" onclick="$('dialogMainBox').style.display = 'none'" /></div>
+	</div>
 		<div><img id="show_tip_img" src="$imgpath/showAll.gif" style="margin:0px 5px -3px 0px"><a href="javascript:;" onclick="changeShowTip(this)" style="padding-bottom:10px">显示全部设置</a></div>
 		<div id="optionItems" class="editor-set" style="display:none">
 			<div class="editor-set-wrap fr">
@@ -586,7 +622,7 @@ EOT;
 				<a href="javascript:;" style="display:none" class="edita"  onmouseover2="try{if(this.className!='item_on'){this.className='item_hover'}else{return }}catch(e){}" onclick="showDialogBox(event,'setTop',this)" onmouseout2="if(this.className!='item_on'){this.className='item'}" id="setTop_item"   oldText="置顶设置">置顶设置</a><input type="hidden" id="saved_topped" name="topped" value="0">
 <!--
 EOT;
-if ($isGM || $pwforum->foruminfo['allowencode'] && $_G['allowencode']) {
+if ($isGM || $pwforum->forumset['allowencode'] && $_G['allowencode']) {
 print <<<EOT
 -->
 				<a href="javascript:;" style="display:none" class="edita" title="点击修改设置" id="encodePost_item"   onclick="showDialogBox(event,'encodePost',this);getEncodeCheck();" onmouseout2="if(this.className!='item_on'){this.className='item'}"  oldText="加密贴设置">加密贴设置</a><input type="hidden" id="saved_encode_tip_status">
@@ -796,7 +832,7 @@ print <<<EOT
 <!--
 EOT;
 if (!$htmlhide) {
-	if ($isGM || $pwforum->foruminfo['allowencode'] && $_G['allowencode']) {
+	if ($isGM || $pwforum->forumset['allowencode'] && $_G['allowencode']) {
 print <<<EOT
 -->
 	<div id="encodePost">
@@ -887,15 +923,50 @@ if ($mutiupload > 0) {print <<<EOT
 EOT;
 }}print <<<EOT
 -->
-<div class="fl">批量上传附件 <span id="attsize" class="s1">(有效文件类型:$uploadfilesize)</span></div>
+<div class="relative">
+<div class="tab-margin">
+<ul class="cc tab-btns">
+	<li class="fl tab-current" id="formUploadBtn"><a href="javascript:;" onclick="return false;">普通上传</a></li>
+	<li class="fl" id="batUploadBtn"><a href="javascript:;" onclick="return false;">批量上传</a></li>
+</ul>
 <div class="c"></div>
-<div id="flashUploadPanel" style="margin:10px 0 0 -3px;"></div>
+<script type="text/javascript">
+$('formUploadBtn').onclick=function()
+{
+	var a=$('attach').getElementsByTagName("tr");
+	$('formUpload').style.display='';
+	$('batUpload').style.display='none'
+	a[a.length-1].style.display='';
+	$('batUploadBtn').className="fl";
+	this.className="fl tab-current";
+};
+$('batUploadBtn').onclick=function()
+{
+	var a=$('attach').getElementsByTagName("tr");
+	$('formUpload').style.display='none';
+	$('batUpload').style.display=''
+	a[a.length-1].style.display='none';
+	$('formUploadBtn').className="fl";
+	this.className="fl tab-current";
+};
+</script>
 </div>
+<div class="tab-content">
+<table width="100%" height="120">
+<tr><td class="vt">
+<div class="p10">
+<div id="batUpload" style="display:none;">
+	<div style="display:none">批量上传附件 <span id="attsize" class="s1">(有效文件类型:$uploadfilesize)</span></div>
+	<div class="c"></div>
+	<div style="color:$headfonttwo;">批量上传附件 (图片、文件等，可多选)</div>
+	<div style="width:100%;padding:5px 0 10px"><div id="flashUploadPanel" style="width:196px;height:24px;"></div></div>
+</div>
+<div class="c"></div>
 <!--
 EOT;
 if($attach){print <<<EOT
 -->
-				<div style="margin:0 200px 10px 20px" class="cc">该帖包含附件<span class="gray">(不想保留的附件去掉√)</span> :
+				<div class="cc">该帖包含附件<span class="gray">(不想保留的附件去掉√)</span> :
 					<table class="tr_p10">
 						<tr>
 							<td width="3%"></td>
@@ -917,18 +988,19 @@ oldAtt.init();
 EOT;
 }if($isGM || $db_allowupload && $_G['allowupload']){print <<<EOT
 -->
-<div style="margin:0 220px 10px 20px;" class="cc">
-	<table width="400" id="uploadFileInfo" style="display:none;margin-bottom:10px" class="tr3">
-    <tr><td>文件名</td><td width="15%">大小</td><td width="20%">上传进度</td><td width="5%">删</td></tr><tbody id="qlist"></tbody>
-    </table>
+<div class="cc">
+	<table id="uploadFileInfo" class="uploadFileInfo" style="display:none;margin-bottom:10px;">
+    <tr class="s1"><td>文件名</td><td width="15%">大小</td><td width="20%">上传进度</td><td width="5%">删</td></tr>
+		<tbody id="qlist"></tbody>
+  </table>
 	<table class="tr_p10">
-		<tr valign="top">
-			<td height="24" style="padding-right:3em" width="35%">普通上传附件 <span class="s1">(图片、文件等)</span></td>
-			<td width="20%">描述</td>
-			<td width="10%">售/密</td>
-			<td width="10%">积分</td>
-			<td width="8%">价格</td>
-			<td></td>
+		<tr valign="top" id="formUpload" style="color:$headfonttwo;">
+			<td width="200">普通上传附件 (图片、文件等)</td>
+			<td width="180">描述</td>
+			<td width="65">售/密</td>
+			<td width="65">积分</td>
+			<td width="60">价格</td>
+			<td width="100">&nbsp;</td>
 		</tr>
 		<tbody id="attach"></tbody>
 	</table>
@@ -943,6 +1015,13 @@ EOT;
 }print <<<EOT
 -->
 </div>
+	<div style="border-bottom:1px dashed $tablecolor;width:100%;height:1px;overflow:hidden;"></div>
+	<div class="mt10 s1" title="$uploadfilesize">允许上传附件类型: $uploadfilesize</div>
+</div>
+</td></tr></table>
+</div>
+</div>
+</div>
 <table cellPadding="0" cellSpacing="0" width="100%">
 <!--
 EOT;
@@ -950,26 +1029,26 @@ if($db_iftag && ($action=='new' || $action=='modify' && $pid=='tpc')){print <<<E
 -->
 	<script type="text/javascript" language="JavaScript" src="js/pw_tags.js"></script>
 	<tr>
-		<td colspan="2"><div style="margin:0px 20px;"><div style="height:24px;">标签Tag&nbsp;<span class="s1">(标签间用空格隔开)</span></div><input id="atc_tags" class="input" name="atc_tags" size="40" value="$tags" tabindex="3" style="font:14px Tahoma;padding-left:2px" autocomplete="off" onfocus="tag.init();" /> <input type="button" class="bt" value="自动提取" onclick="tag.get()" /> <a style="cursor:help" class="gray" title="标签是您给您的文章指定的关键字，设置适当的标签能便于他人快速的找到您的文章">什么是标签？</a><br />
+		<td colspan="2"><div style="margin:10px 20px 0;"><div style="height:24px;">标签Tag&nbsp;<span class="s1">(标签间用空格隔开)</span></div><input id="atc_tags" class="input" name="atc_tags" size="40" value="$tags" tabindex="3" style="font:14px Tahoma;padding-left:2px" autocomplete="off" onfocus="tag.init();" /> <input type="button" class="bt" value="自动提取" onclick="tag.get()" /> <a style="cursor:help" class="gray" title="标签是您给您的文章指定的关键字，设置适当的标签能便于他人快速的找到您的文章">什么是标签？</a><br />
 		<fieldset id="tagmenu" style="border:1px solid $tdcolor;width:500px;padding:3px;margin:2px 0;display:none;"><legend>热门标签</legend><div style="height:80px;overflow-Y:auto;"></div></fieldset></div></td>
 	</tr>
 <!--
 EOT;
 }if(($db_gdcheck & 4 && $winddb['postnum'] < $db_postgd) || $winddb['postnum'] < $postq && $db_question){print <<<EOT
 -->
-	<tr class="tr3">
-		<th colspan="2">
+	<tr>
+		<td colspan="2">
 			<div class="editor-mwidth">
 				<div class="marginLeft">
 <!--
 EOT;
 if(($db_gdcheck & 4) && $winddb['postnum'] < $db_postgd){print <<<EOT
 -->
-					<div class="fl tac" style="padding:6px;width:275px;">
-						<fieldset id="smiliebox" style="border:1px solid $tdcolor;height:45px">
+					<div class="fl p10" style="width:275px;">
+						<fieldset id="smiliebox" style="border:1px solid $tdcolor;">
 							<legend>认证码</legend>
-							<input class="input" type="text" name="gdcode" size="8" tabindex="2" onfocus="try{opencode('menu_gd',this)}catch(e){}" /><span id="ckcode" style="cursor:pointer; margin-left:3px" onclick="this.previousSibling.focus();">点此显示验证码</span>
-							<div class="menu" id="menu_gd" style="visibility:hidden;"><img src="ck.php?" align="absmiddle" style="cursor:pointer;" id="ckcode" alt="看不清楚，换一张" /></div>
+							<div style="padding:5px 8px;"><input class="input" type="text" name="gdcode" size="8" tabindex="2" onfocus="try{opencode('menu_gd',this)}catch(e){}" />&nbsp;<span id="ckcode" style="cursor:pointer; margin-left:3px" onclick="this.previousSibling.focus();">点此显示验证码</span>
+							<div class="menu" id="menu_gd" style="visibility:hidden;"><img src="ck.php?" align="absmiddle" style="cursor:pointer;" id="ckcode" alt="看不清楚，换一张" /></div></div>
 						</fieldset>
 					</div>
 <!--
@@ -977,11 +1056,12 @@ EOT;
 }if($winddb['postnum'] < $postq && $db_question){
 $qkey = array_rand($db_question);print <<<EOT
 -->
-					<div class="fl tac" style="padding:6px;">
-						<fieldset id="smiliebox" style="border:1px solid $tdcolor;height:45px;padding:0 5px;">
-							<legend>验证问题</legend>问题:{$db_question[$qkey]} &nbsp;答案:{$db_answer[$qkey]}
+					<div class="fl p10">
+						<fieldset id="smiliebox" style="border:1px solid $tdcolor;">
+							<legend>验证问题</legend>
+							<div style="padding:5px 8px;">问题:{$db_question[$qkey]} &nbsp;答案:{$db_answer[$qkey]}
 							<input class="input" type="text" name="qanswer" />
-							<input type="hidden" name="qkey" value="$qkey" />
+							<input type="hidden" name="qkey" value="$qkey" /></div>
 						</fieldset>
 					</div>
 <!--
@@ -990,14 +1070,14 @@ EOT;
 -->
 				</div>
 			</div>
-		</th>
+		</td>
 	</tr>
 <!--
 EOT;
 }print <<<EOT
 -->
 </table>
-<div style="margin:20px">
+<div style="margin:5px 20px 20px;">
 	<input class="btn b" style="padding:0 1em;*padding:0;width:70px;height:25px;" type="submit" value="发布" name="Submit" tabindex="4" />
 	<span><a href="javascript:;" onclick="gopreview();">预览帖子</a>&nbsp;&nbsp;<a href="javascript:;" onClick="savedraft();">存为草稿</a></span>
 </div></div>
@@ -1072,7 +1152,6 @@ document.FORM.Submit.disabled = false;
 
 function checkpost(obj) {
 	if (obj.p_type != null && obj.p_type.value==0 && cate==1) {
-		obj.atc_title.setAttribute("hasError", 1);
 		showDialog("error","没有选择主题分类",2);
 		obj.atc_title.focus();
 		return false;
@@ -1099,6 +1178,9 @@ function checkpost(obj) {
 		editor.focusEditor();
 		return false;
 	}
+	try{obj.atc_title.removeAttribute("hasError");
+	obj.atc_content.removeAttribute("hasError");}catch(e){}
+
 	document.FORM.Submit.disabled = true;
 	cnt++;
 	if (cnt != 1) {

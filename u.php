@@ -157,7 +157,8 @@ if (empty($action)) {
 				$message		= array(
 					'toUser'	=> $rt['awardee'],
 					'subject'	=> 'metal_cancel',
-					'content'	=> 'metal_cancel_text'
+					'content'	=> 'metal_cancel_text',
+					'other'		=> array('medalname' => $_MEDALDB[$rt['level']]['name'])
 				);
 				pwSendMsg($message);
 			}

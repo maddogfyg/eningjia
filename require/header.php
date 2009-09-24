@@ -2,7 +2,7 @@
 !function_exists('readover') && exit('Forbidden');
 !defined('USED_HEAD') && define('USED_HEAD', 1);
 
-extract(L::style());
+extract(L::style('',$skinco));
 
 @include(D_P."data/bbscache/apps_list_cache.php");
 !$appsdb && $appsdb = array();
@@ -36,7 +36,6 @@ foreach ($db_navinfo as $key => $value) {
 		$db_menuinit .= ",'td_".$key."' : 'menu_".$key."'";
 	}
 }
-
 if (!in_array(SCR,array('register','login'))) {
 	$shortcutforum = pwGetShortcut();
 }
@@ -50,9 +49,11 @@ if ($groupid == 'guest' && $db_regpopup == '1') {
 
 $db_skindb = array();
 empty($db_styledb) && $db_styledb['wind'] = array('0' => 'wind','1' => '1');
-foreach ($db_styledb as $key => $value) {
-	$cname = $value[0] ? $value[0] : $key;
-	$value[1] === '1' && $db_skindb[$key] = $cname;
+if(is_array($db_styledb)){
+    foreach ($db_styledb as $key => $value) {
+            $cname = $value[0] ? $value[0] : $key;
+            $value[1] === '1' && $db_skindb[$key] = $cname;
+    }
 }
 $skincount = count($db_skindb);
 if ($skincount > 1){
@@ -70,7 +71,6 @@ if (file_exists(D_P."data/style/{$tplpath}_css.htm")) {
 } else {
 	$css_path = D_P.'data/style/wind_css.htm';
 }
-
 require PrintEot('header');
 unset($css_path,$s_url,$pwModeCss);
 ?>

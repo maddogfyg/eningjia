@@ -52,7 +52,7 @@ if ($_POST['step'] != 2) {
 		$sltstyles = '';
 		if ($fp = opendir(D_P.'data/style/')) {
 			while (($skinfile = readdir($fp))!==false) {
-				if (preg_match('/([^\.]+?)\.php$/i',$skinfile,$rt) && (!empty($db_styledb[$rt[1]]) || $db_styledb[$rt[1]][1])) {
+				if (preg_match('/([^\.]+?)\.php$/i',$skinfile,$rt) && is_array($db_styledb) && (!empty($db_styledb[$rt[1]]) || $db_styledb[$rt[1]][1])) {
 					$skinname = $db_styledb[$rt[1]][0] ? $db_styledb[$rt[1]][0] : $rt[1];
 					if ($rt[1]==$db_defaultstyle) {
 						$sltstyles .= '<option value="'.$rt[1].'" SELECTED>'.$skinname.'</option>';

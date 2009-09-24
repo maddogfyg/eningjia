@@ -122,7 +122,7 @@ var newAtt = {
 		img.src = path+"?ra="+Math.random();
 		img.onload = function(){
 			getObj('viewimg').innerHTML =  '<div style="padding:6px;"><img src="' + img.src + '"' + ((this.width>maxwh || this.height>maxwh) ? (this.width > this.height ? ' width' : ' height') + '="' + maxwh + '"' : '') + ' /></div>';
-			read.open('viewimg','att_' + id,3);
+			read.open('viewimg','attachment_' + id,3);
 		};
 	},
 	
@@ -306,13 +306,11 @@ var flashAtt = {
 		div.id  = 'flash';
 		var flashvar = 'url=' + getObj('headbase').href + '/job.php' + '&mutiupload=' + (allowmutinum - mutiupload);
 		if (is_ie) {
-			var html = '<object id="mutiupload" name="mutiupload" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="250" height="46"><param name="movie" value="' +  imgpath + '/upload.swf" /><param name="FlashVars" value="' + flashvar + '"/><param name="allowScriptAccess" value="always" /><param name="wmode" value="transparent" /></object>';
+			var html = '<object id="mutiupload" name="mutiupload" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="196" height="24"><param name="movie" value="' +  imgpath + '/upload.swf" /><param name="FlashVars" value="' + flashvar + '"/><param name="allowScriptAccess" value="always" /><param name="wmode" value="transparent" /></object>';
 		} else {
-			var html = '<embed type="application/x-shockwave-flash" src="' + imgpath + '/upload.swf" width="250" height="46" id="mutiupload" name="mutiupload" allowScriptAccess="always" wmode="transparent" FlashVars="' + flashvar + '" />';
+			var html = '<embed type="application/x-shockwave-flash" src="' + imgpath + '/upload.swf" width="196" height="24" id="mutiupload" name="mutiupload" allowScriptAccess="always" wmode="transparent" FlashVars="' + flashvar + '" />';
 		}
 		html += '';
-		div.className="fl";
-		div.style.marginTop="-15px";
 		getObj('flashUploadPanel').appendChild(div);//getObj('attsize').parentNode.insertBefore(div,getObj('attsize'));
 		div.innerHTML = html;
 		flashAtt.flashObj = document['mutiupload'];
@@ -380,7 +378,7 @@ var flashAtt = {
 				}
 				for (var i in att) {
 					var s = getObj('att_mode').firstChild.cloneNode(true);
-					s.id = 'att_' + i;
+					s.id = 'attachment_' + i;
 					s.getElementsByTagName('select')[0].name = 'flashatt[' + i + '][special]';
 					s.getElementsByTagName('select')[1].name = 'flashatt[' + i + '][ctype]';
 					s.getElementsByTagName('input')[2].name = 'flashatt[' + i + '][needrvrc]';
@@ -584,6 +582,7 @@ var photoflashAtt = {
 				photolist[i].error = '';
 			values += getObj('pintro_' + i).value+'|';
 		}
+		values = encodeURI(values);
 		photoflashAtt.photoflashObj.beginUpload("filenames="+values.slice(0,-1));
 	},
 

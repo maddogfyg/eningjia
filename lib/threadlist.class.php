@@ -3,7 +3,7 @@
  * 贴子列表页
  */
 class PW_ThreadList {
-
+	var $_db;
     var $_connect = FALSE;          #缓存连接标识
     var $_tableName = "pw_threads"; #数据表名
     var $_number = 1000;            # 获取数据个数
@@ -14,6 +14,7 @@ class PW_ThreadList {
 
     function PW_ThreadList() {
         $this->_init();
+		$this->_db = $GLOBALS['db'];
     }
 
     function _init() {
@@ -85,7 +86,8 @@ class PW_ThreadList {
         array_unshift($result,$threadId);
         if($result) {
             $key = $this->_getKey($forumId);
-            $this->_getMemcacheConnection()->set($key,$result,$this->_expire);
+			$memcacheConnection = $this->_getMemcacheConnection();
+            $memcacheConnection->set($key,$result,$this->_expire);
         }
         return $result;
     }
@@ -114,10 +116,11 @@ class PW_ThreadList {
         }
         unset($result[$k]);
         $key = $this->_getKey($forumId);
+		$memcacheConnection = $this->_getMemcacheConnection();
         if($result){
-            $this->_getMemcacheConnection()->set($key,$result,$this->_expire);
+            $memcacheConnection->set($key,$result,$this->_expire);
         }else{
-            $this->_getMemcacheConnection()->delete($key);
+            $memcacheConnection->delete($key);
         }
         return $result;
     }
@@ -135,7 +138,8 @@ class PW_ThreadList {
             return null;
         }
         $key = $this->_getKey($forumId);
-        return $this->_getMemcacheConnection()->delete($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+        return $memcacheConnection->delete($key);
     }
 
     /**
@@ -155,11 +159,12 @@ class PW_ThreadList {
 
     function _getThreadIdsByForumId($forumId) {
         $key = $this->_getKey($forumId);
-        $result = $this->_getMemcacheConnection()->get($key);
+		$memcacheConnection = $this->_getMemcacheConnection();
+        $result = $memcacheConnection->get($key);
         if($result === FALSE) {
             $result = $this->_getThreadIdsByForumIdNoCache($forumId);
             if($result) {
-                $this->_getMemcacheConnection()->set($key,$result,$this->_expire);
+                $memcacheConnection->set($key,$result,$this->_expire);
             }
         }
         return $result;
@@ -170,18 +175,18 @@ class PW_ThreadList {
     }
 
     function _getThreadIdsByForumIdNoCache($forumId) {
-        $query = $this->_getConnection()->query("SELECT tid FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId)."AND ifcheck=1 ".($GLOBALS['db_topped'] ? 'AND topped<2' : '')." ORDER BY topped DESC, lastpost DESC LIMIT ".$this->_number);
+        $query = $this->_db->query("SELECT tid FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId)."AND ifcheck=1 ".($GLOBALS['db_topped'] ? 'AND topped<2' : '')." ORDER BY topped DESC, lastpost DESC LIMIT ".$this->_number);
         $result = array();
-        while ( $rt = $this->_getConnection ()->fetch_array ( $query ) ) {
+        while ( $rt = $this->_db->fetch_array ( $query ) ) {
             $result [] = $rt['tid'];
         }
         return $result;
     }
 
     function _getThreadsByFroumId($forumId,$offset,$limit) {
-        $query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId)."AND ifcheck=1 ".($GLOBALS['db_topped'] ? 'AND topped<2' : '')." ORDER BY topped DESC, lastpost DESC LIMIT $offset,$limit");
+        $query = $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE fid=".pwEscape($forumId)."AND ifcheck=1 ".($GLOBALS['db_topped'] ? 'AND topped<2' : '')." ORDER BY topped DESC, lastpost DESC LIMIT $offset,$limit");
         $result = array();
-        while ( $rt = $this->_getConnection ()->fetch_array ( $query ) ) {
+        while ( $rt = $this->_db->fetch_array ( $query ) ) {
             $result [] = $rt;
         }
         return $result;
@@ -191,9 +196,9 @@ class PW_ThreadList {
         if(!is_array($threadIds)){
             return null;
         }
-        $query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE tid IN (".pwImplode($threadIds,false).") ORDER BY topped DESC, lastpost DESC");
+        $query = $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE tid IN (".pwImplode($threadIds,false).") ORDER BY topped DESC, lastpost DESC");
         $result = array();
-        while ( $rt = $this->_getConnection ()->fetch_array ( $query ) ) {
+        while ( $rt = $this->_db->fetch_array ( $query ) ) {
             $result [] = $rt;
         }
         return $result;

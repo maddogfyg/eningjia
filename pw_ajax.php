@@ -655,11 +655,11 @@ if ($action == 'leaveword') {
 	$ckuser = $db->get_value("SELECT m.username FROM pw_friends f LEFT JOIN pw_members m ON f.uid=m.uid WHERE f.uid=".pwEscape($fuid)." AND f.friendid=".pwEscape($winduid));
 	if ($ckuser) {
 		$db->update('DELETE FROM pw_friends WHERE uid='.pwEscape($fuid)." AND friendid=".pwEscape($winduid));
-		$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE uid=".pwEscape($fuid));
+		$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE uid=".pwEscape($fuid)." WHERE f_num>0");
 		$ckuser2 = $db->get_value("SELECT friendid FROM pw_friends WHERE uid=".pwEscape($winduid)." AND friendid=".pwEscape($fuid));
 		if ($ckfuid2) {
 			$db->update('DELETE FROM pw_friends WHERE uid='.pwEscape($winduid)." AND friendid=".pwEscape($fuid));
-			$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE uid=".pwEscape($winduid));
+			$db->update("UPDATE pw_memberdata SET f_num=f_num-1 WHERE uid=".pwEscape($winduid)." WHERE f_num>0");
 		}
 		$msg = array(
 			'toUser'	=> $ckuser,
@@ -1074,7 +1074,7 @@ if ($action == 'leaveword') {
 		$debate['voteids'] .= "$winduid,";
 		$db->update("UPDATE pw_debatedata SET vote=vote+1,voteids=".pwEscape($debate['voteids'],false)."WHERE pid=".pwEscape($pid)."AND tid=".pwEscape($tid));
 		$vote = $debate['vote']+1;
-		Showmsg('debate_success');
+		Showmsg('debate_agree');
 	}
 } elseif ($action == 'mutiatt') {
 
@@ -1437,129 +1437,124 @@ if ($action == 'leaveword') {
 	}
 } elseif ($action == 'showcard') {
 
-	InitGP(array('uid'),'GP','2');
-	@include_once(D_P.'data/bbscache/o_config.php');
+	InitGP(array('uids'),'GP');
 	@include_once(D_P.'data/bbscache/apps_list_cache.php');
+	$uids = explode(',',$uids);
+	!$uids && Showmsg('guest_notcard');
 
-	!$uid && Showmsg('guest_notcard');
-	!$db_maxnum && $db_maxnum = 13;
+	/*app*/
+	$db_maxnum = 12;//第三方app一页显示个数
 
 	!$appsdb && $appsdb = array();
 	$db_appsdb = $app_array = array();
 
-	$query = $db->query("SELECT appid,appname FROM pw_userapp WHERE uid=" . pwEscape($uid));//开通的APP
+	$query = $db->query("SELECT uid,appid,appname FROM pw_userapp WHERE uid IN(" . pwImplode($uids).")");//开通的APP
 	while ($rt = $db->fetch_array($query)) {
-		$app_array[$rt['appid']] = $rt;
+		$app_array[$rt['uid']][$rt['appid']] = $rt;
 	}
 
 	foreach ($appsdb as $value) {
 		if ($value['appstatus'] == 1 && $value['status'] == 1) {
-			if ($app_array[$value['appid']]) {
-				$value['ifshow'] = 1;
-			} else {
-				$value['ifshow'] = 0;
+			foreach ($uids as $val) {
+				if ($app_array[$val][$value['appid']]) {
+					$value['ifshow'] = 1;
+				} else {
+					$value['ifshow'] = 0;
+				}
+				$db_appsdb[$val][$value['appid']]['ifshow'] = $value['ifshow'];
+				$db_appsdb[$val][$value['appid']]['appid'] = $value['appid'];
+				$db_appsdb[$val][$value['appid']]['name'] = $value['name'];
 			}
-			$db_appsdb[$value['appid']]['ifshow'] = $value['ifshow'];
-			$db_appsdb[$value['appid']]['appid'] = $value['appid'];
-			$db_appsdb[$value['appid']]['name'] = $value['name'];
 		}
 	}
 
 	if (!$db_appsdb || !$db_appbbs || !$db_appifopen) {
 		$db_appsdb = array();
 	}
+	/*app*/
 
+	/*个人数据*/
+	require_once(R_P.'require/showimg.php');
+	@include_once(D_P.'data/bbscache/level.php');
+	$userdb = array();
+	$app_with_count = array('topic','diary','photo','owrite','group','share');
+	$query = $db->query("SELECT m.uid,m.username,m.groupid,m.memberid,m.icon,m.oicq,m.aliww,m.honor,md.lastpost,md.thisvisit,md.f_num,ud.visits,ud.tovisits,ud.diary_lastpost,ud.photo_lastpost,ud.owrite_lastpost,ud.group_lastpost,ud.share_lastpost FROM pw_members m LEFT JOIN pw_memberdata md ON m.uid=md.uid LEFT JOIN pw_ouserdata ud ON m.uid=ud.uid WHERE m.uid IN(" . pwImplode($uids).")");
+	while ($rt = $db->fetch_array($query)) {
+		list($rt['icon']) = showfacedesign($rt['icon'],1,'s');
+		$rt['ismyfriend'] = 0;
+		$rt['systitle'] = $rt['groupid'] == '-1' ? '' : $ltitle[$rt['groupid']];
+		$rt['memtitle'] = $ltitle[$rt['memberid']];
+		foreach ($app_with_count as $key => $value) {
+			$posttime = '';
+			$rt['appcount'][$value] = getPostnumByType($value,$rt);
+		}
+
+		$userdb[$rt['uid']] = $rt;
+	}
+	
+	$query = $db->query("SELECT friendid FROM pw_friends WHERE uid=" . pwEscape($winduid) . " AND friendid IN(" . pwImplode($uids).") AND status='0'");
+	while ($rt = $db->fetch_array($query)) {
+		$userdb[$rt['friendid']]['ismyfriend'] = 1;
+	}
+	/*个人数据*/
+	
+	/*帖子、相册、日志、记录*/
 	$userinfo = array();
-	$weektime = $timestamp - 7*24*3600;
-	$ifthreads = $ifdiary = $ifwrite = $ifphotos = true;
-	$threads = $diary = $write = $photos = array();
-	/*最新帖子*/
-	$threads = $db->get_one("SELECT tid,subject,postdate FROM pw_threads WHERE authorid=".pwEscape($uid)." AND postdate>".pwEscape($weektime)." ORDER BY postdate DESC");
-	!$threads && $ifthreads = false;
-	if ($ifthreads) {
-		$pw_tmsgs = GetTtable($threads['tid']);
-		$threads['content'] = $db->get_value("SELECT content FROM $pw_tmsgs WHERE tid=".pwEscape($threads['tid']));
-		$threads['content'] = substrs(stripWindCode($threads['content']),100,N);
-		$threads['type'] = 'topic';
-		$userinfo[$threads['postdate']] = $threads;
+	$pids = '';
+	$usercache = L::loadDB('Usercache');
+	$userinfo = $usercache->getByUid($uids);
 
-		$attimages = array();
-		$query = $db->query("SELECT attachurl,ifthumb FROM pw_attachs WHERE tid=".pwEscape($threads['tid'],false)." AND pid=0 AND type='img' LIMIT 4");
-		while ($rt = $db->fetch_array($query)) {
-			$a_url = geturl($rt['attachurl'],'show',$rt['ifthumb']);
-			if ($a_url != 'nopic') {
-				$attimages[$rt['attachurl']] = is_array($a_url) ? $a_url[0] : $a_url;
-			}
+	foreach ($userinfo as $uid => $value) {
+		if ($value['photos']) {
+			$pids .= $pids ? ','.$value['photos']['value'] : $value['photos']['value'];
+			$userinfo[$uid]['photos']['value'] = array();
 		}
-	}
-
-	/*最新日志*/
-	$diary = $db->get_one("SELECT did,subject,postdate,content FROM pw_diary WHERE uid=".pwEscape($uid)." AND postdate>".pwEscape($weektime)." ORDER BY postdate DESC");
-	!$diary && $ifdiary = false;
-	if ($ifdiary) {
-		$diary['content'] = substrs(stripWindCode($diary['content']),100,N);
-		$diary['type'] = 'diary';
-		$userinfo[$diary['postdate']] = $diary;
-
-		$diaryimages = array();
-		$query = $db->query("SELECT attachurl,ifthumb FROM pw_attachs WHERE did=".pwEscape($diary['did'],false)." AND type='img' LIMIT 4");
-		while ($rt = $db->fetch_array($query)) {
-			$a_url = geturl('diary/'.$rt['attachurl'],'show',$rt['ifthumb']);
-			if ($a_url != 'nopic') {
-				$diaryimages[$rt['attachurl']] = is_array($a_url) ? $a_url[0] : $a_url;
-			}
-		}
-	}
-
-	/*最新记录*/
-	$write = $db->get_one("SELECT postdate,content FROM pw_owritedata WHERE uid=".pwEscape($uid)." AND postdate>".pwEscape($weektime)." ORDER BY postdate DESC");
-	!$write && $ifwrite = false;
-	if ($ifwrite) {
-		$write['content'] = substrs(stripWindCode($write['content']),100,N);
-		$write['type'] = 'write';
-		$userinfo[$write['postdate']] = $write;
 	}
 
 	/*最新照片*/
-	$query = $db->query("SELECT cp.pid,cp.path,ca.aname,ca.lasttime,ca.aid FROM pw_cnphoto cp LEFT JOIN pw_cnalbum ca USING(aid) WHERE ca.ownerid=".pwEscape($uid)." AND atype=0 AND ca.lasttime>".pwEscape($weektime)." ORDER BY ca.lasttime DESC,cp.uptime DESC LIMIT 0,4");
-	while ($rt = $db->fetch_array($query)) {
-		$photos['aid'] = $rt['aid'];
-		$photos['postdate'] = $rt['lasttime'];
-		$photos['aname'] = $rt['aname'];
-		$photos['type'] = 'photos';
-		$rt['path'] = getphotourl($rt['path'],$rt['ifthumb']);
-		$photos['photo'][] = $rt;
+	if ($pids) {
+		$pids = explode(',',$pids);
+		$query = $db->query("SELECT cp.pid,cp.path,ca.aname,ca.lasttime,ca.aid,ca.ownerid FROM pw_cnphoto cp LEFT JOIN pw_cnalbum ca USING(aid) WHERE cp.pid IN(".pwImplode($pids).")");
+		while ($rt = $db->fetch_array($query)) {
+			$rt['path'] = getphotourl($rt['path'],$rt['ifthumb']);
+			$userinfo[$rt['ownerid']]['photos']['value']['aname'] = $rt['aname'];
+			$userinfo[$rt['ownerid']]['photos']['value']['aid'] = $rt['aid'];
+			$userinfo[$rt['ownerid']]['photos']['value']['postdate'] = $rt['lasttime'];
+			$userinfo[$rt['ownerid']]['photos']['value']['photo'][] = $rt;
+		}
 	}
-	!$photos && $ifphotos = false;
-	if ($ifphotos) {
-		$userinfo[$photos['postdate']] = $photos;
+	/*帖子、相册、日志、记录*/
+
+	/*数据合并*/
+	foreach ($uids as $info) {
+		$usercachedb[$info] = $userdb[$info];
+		$usercachedb[$info]['app'] = $db_appsdb[$info];
+		
+		foreach ($userinfo[$info] as $key => $value) {
+			$a_url = '';
+			if ($key == 'topic') {
+				foreach ($value['value']['attimages'] as $k => $val) {
+					$a_url = geturl($val['attachurl'],'show',$val['ifthumb']);
+					if ($a_url != 'nopic') {
+						$userinfo[$info][$key]['attimages'][$k] = is_array($a_url) ? $a_url[0] : $a_url;
+					}
+				}
+			} elseif ($key == 'diary') {
+				foreach ($value['value']['attimages'] as $k => $val) {
+					$a_url = geturl('diary/'.$val['attachurl'],'show',$val['ifthumb']);
+					if ($a_url != 'nopic') {
+						$userinfo[$info][$key]['attimages'][$k]  = is_array($a_url) ? $a_url[0] : $a_url;
+					}
+				}
+			}
+			
+			$userinfo[$info][$value['value']['postdate']] = $userinfo[$info][$key];
+			$userinfo[$info][$value['value']['postdate']]['type'] = $key;
+			krsort($userinfo[$info]);
+		}
+		$usercachedb[$info]['appinfo'] = $userinfo[$info];
 	}
-	krsort($userinfo);
-
-	$userdb = array();//个人数据
-	$userdb = $db->get_one("SELECT m.uid,m.username,m.groupid,m.memberid,m.icon,md.lastpost,md.thisvisit,ud.diary_lastpost,ud.photo_lastpost,ud.owrite_lastpost,ud.group_lastpost,ud.share_lastpost FROM pw_members m LEFT JOIN pw_memberdata md ON m.uid=md.uid LEFT JOIN pw_ouserdata ud ON m.uid=ud.uid WHERE m.uid=".pwEscape($uid));
-
-	$ismyfriend = isFriend($winduid,$uid);
-
-	require_once(R_P.'require/showimg.php');
-	list($usericon) = showfacedesign($userdb['icon'],1,'s');
-
-	include_once(D_P.'data/bbscache/level.php');
-	$systitle = $userdb['groupid'] == '-1' ? '' : $ltitle[$userdb['groupid']];
-	$memtitle = $ltitle[$userdb['memberid']];
-
-	$app_with_count = array('topic','diary','photo','owrite','group','share');
-	foreach ($app_with_count as $key => $value) {
-		$posttime = '';
-		$appcount[$value] = getPostnumByType($value);
-	}
-
-	$write = $db->get_one("SELECT content,postdate FROM pw_owritedata WHERE uid=".pwEscape($uid,false)."ORDER BY postdate DESC LIMIT 1");//记录
-	$write['content'] = substrs($write['content'],70);
-	list($write['posttime'],$write['postdate']) = getLastDate($write['postdate']);
-
-	$friend = $db->get_one("SELECT md.uid,md.f_num,ud.visits,ud.tovisits FROM pw_memberdata md LEFT JOIN pw_ouserdata ud ON md.uid=ud.uid WHERE md.uid=".pwEscape($uid,false));//访问数据
-
+	/*数据合并*/
 	require_once PrintEot('ajax');ajax_footer();
 
 } elseif ($action == 'addfriendtype') {
@@ -1660,7 +1655,7 @@ if ($action == 'leaveword') {
 		require_once PrintEot('ajax');ajax_footer();
 	}
 } elseif ($action == 'pcmember') {
-	InitGP(array('page','tid','jointype','payway','ifend'));
+	InitGP(array('page','tid','jointype','payway','ifend','pcid'));
 
 	$isadminright = $jointype == 3 ? 0 : 1;
 	require_once(R_P.'lib/postcate.class.php');
@@ -2066,16 +2061,16 @@ function isFriend($uid,$friend) {
 	return false;
 }
 
-function getPostnumByType($type) {
-	global $timestamp,$userdb;
+function getPostnumByType($type,$rt) {
+	global $timestamp;
 	$posttime = '';
 	if ($type == 'topic') {
-		if ($timestamp - $userdb['lastpost'] < 604800) {
-			$posttime = get_date($userdb['lastpost'],'m-d');
+		if ($timestamp - $rt['lastpost'] < 604800) {
+			$posttime = get_date($rt['lastpost'],'m-d');
 		}
 	} else {
-		if ($timestamp - $userdb[$type.'_lastpost'] < 604800) {
-			$posttime = get_date($userdb[$type.'_lastpost'],'m-d');
+		if ($timestamp - $rt[$type.'_lastpost'] < 604800) {
+			$posttime = get_date($rt[$type.'_lastpost'],'m-d');
 		}
 	}
 	return $posttime;

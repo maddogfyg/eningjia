@@ -26,7 +26,7 @@ if (strpos ( $q, '..' ) !== false)
 if($m == 'o') $pwModeImg = "$imgpath/apps";
 
 # app
-if ($m == 'o' && $q && ! in_array ( $q, array ('user', 'friend', 'browse','invite','board','myapp','home' ) )) {
+if ($m == 'o' && $q && ! in_array ( $q, array ('user', 'friend', 'browse','invite','board','myapp','home','app' ) )) {
 	require_once 'apps.php';
 } else {
 

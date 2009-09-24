@@ -20,6 +20,7 @@ class RateIndex {
     var $_db_rategroup;
     var $_showResult = FALSE;
     var $_noAjax = FALSE;
+    var $_hotSource = TRUE; #是否来源于hot
     var $_db_hackdb;
 
     function RateIndex($register) {
@@ -61,13 +62,15 @@ class RateIndex {
             return '';
         }
         //用户权限
-        $message = $this->_checkPower ( $this->_getRateGroupSet () );
+		$groupSets = $this->_getRateGroupSet ();
+        $message = $this->_checkPower ( $groupSets );
         if (TRUE !== $message ) {
             $this->_showMessage ( $message );
         }
         $anonymity = ($this->_groupId == 2 && $groupSets [$this->_groupId] > 0) ? TRUE : FALSE;
         //检查作者与用户信息的正确性
-        $this->_tips = $this->_getRateService ()->addRate ( $this->_uid, $this->_objectId, $this->_optionId, $this->_typeId, $this->_ip, $anonymity );
+		$rateService = $this->_getRateService();
+        $this->_tips = $rateService->addRate ( $this->_uid, $this->_objectId, $this->_optionId, $this->_typeId, $this->_ip, $anonymity );
         $this->_showResult = TRUE;
     }
 
@@ -82,7 +85,8 @@ class RateIndex {
         if (TRUE !== $message ) {
             $this->_showHotMessage ( $message );
         }
-        $this->_getRateService ()->addRate ( $this->_uid, $this->_objectId, $this->_optionId, $this->_typeId, $this->_ip, FALSE );
+		$rateService = $this->_getRateService();
+        $rateService->addRate ( $this->_uid, $this->_objectId, $this->_optionId, $this->_typeId, $this->_ip, FALSE );
         $this->_showHotMessage ( $this->_language('rate_success') );
     }
 
@@ -96,9 +100,13 @@ class RateIndex {
         if (! $this->_isOpenRate ()) {
             return $this->_language('rate_error');
         }
-        $rate = $this->_getRateService ()->getsRateByUserId ( $this->_uid, $this->_objectId, $this->_typeId );
+		$rateService = $this->_getRateService();
+        $rate = $rateService->getsRateByUserId ( $this->_uid, $this->_objectId, $this->_typeId );
         if($rate) {
             return $this->_language('rate_rated');
+        }
+        if( $this->_uid == $this->_authorid){
+            return $this->_language('rate_self');
         }
         # 管理员不受限制
         if ($groupId == 3) {
@@ -116,7 +124,7 @@ class RateIndex {
         //检查当前用户名可评价次数
         if ($groupSets [$groupId] >= 1 && $this->_uid) {
         //检查用户已评价次数
-            $haveTimes = $this->_getRateService ()->countByUserId ( $this->_uid );
+            $haveTimes = $rateService->countByUserId ( $this->_uid );
             if ($haveTimes < 0) {
                 return $this->_language('rate_error');
             }
@@ -135,7 +143,7 @@ class RateIndex {
                 return $this->_language('rate_unknow_ip');
             }
             //检查用户IP是否存在
-            $haveTimes = $this->_getRateService ()->countByIp ( $this->_ip );
+            $haveTimes = $rateService->countByIp ( $this->_ip );
             if ($haveTimes < 0) {
                 return $this->_language('rate_error');
             }
@@ -150,6 +158,7 @@ class RateIndex {
         $message = array();
         $message['rate_error'] = '抱歉，你不能评价，请与管理员联系';
         $message['rate_success'] = '恭喜，评价成功!';
+        $message['rate_self'] = "抱歉，属于自己的不能评价";
         $message['rate_today_times_limit'] = "抱歉，你今天的评价次数达到上限";
         $message['rate_need_login'] = '抱歉，你不能评价，请先 <a href="login.php" class="s3">登陆</a>';
         $message['rate_unknow_ip'] = '抱歉，无法确认你的身份，你不能评价，请先 <a href="login.php" class="s3">登陆</a>';
@@ -174,15 +183,17 @@ class RateIndex {
             return '';
         }
         list ( $typeId, $objectId, $optionId, $elementId, $userId, $authorId ) = array ($this->_typeId, $this->_objectId, $this->_optionId, $this->_elementid, $this->_uid, $this->_authorid );
+		$typename = getLangInfo('other','rate_type_'.$typeId);
         list ( $rateConfigs, $imagesUrl, $bbsUrl, $ajaxUrl ) = $this->_buildVoteParams ();
+		$rateService = $this->_getRateService();
         //游客
         if(!$this->_uid) {
             $groupId = ($this->_groupId == "guest") ? 2 : $this->_groupId;
             $groupSets = $this->_getRateGroupSet ();
-            $anonymity = ($groupSets [$groupId] > 0 && $this->_getRateService ()->getsByIp ( $this->_ip, $objectId, $typeId )) ? TRUE : FALSE;
+            $anonymity = ($groupSets [$groupId] > 0 && $rateService->getsByIp ( $this->_ip, $objectId, $typeId )) ? TRUE : FALSE;
         }
         //是否已评价
-        $showVote = ($this->_showResult || $this->_getRateService ()->getsRateByUserId ( $userId, $objectId, $typeId ) || $authorId == $userId || $anonymity) ? FALSE : TRUE;
+        $showVote = ($this->_showResult || $rateService->getsRateByUserId ( $userId, $objectId, $typeId ) || $authorId == $userId || $anonymity) ? FALSE : TRUE;
         //如果已评价
         if (! $showVote) {
             list($typeTitle,$hotHref) = $this->_getTypeParams($typeId);
@@ -204,7 +215,8 @@ class RateIndex {
         $bbsUrl = $this->_bbsUrl . "/";
         $imagesUrl = $this->_getDefaultImageUrl ();
         $ajaxUrl = $bbsUrl . "hack.php?H_name=rate&action=ajax";
-        $rateConfigs = $this->_getRateService ()->getsRateConfigByTypeId ( $typeid );
+		$rateService = $this->_getRateService();
+        $rateConfigs = $rateService->getsRateConfigByTypeId ( $typeid );
         return array ($rateConfigs, $imagesUrl, $bbsUrl, $ajaxUrl );
     }
 
@@ -215,7 +227,8 @@ class RateIndex {
     # 分步骤组装
     function _buildResultHTML($rateConfigs) {
     //组装评价结果
-        list ( $rateResults, $total ) = $this->_getRateService ()->getRateResultByTypeId ( $this->_typeId, $this->_objectId );
+		$rateService = $this->_getRateService();
+        list ( $rateResults, $total ) = $rateService->getRateResultByTypeId ( $this->_typeId, $this->_objectId );
         $resultHTML = "";
         foreach ( $rateConfigs as $config ) {
             if ($config ['isopen'] == 0) {
@@ -244,7 +257,8 @@ class RateIndex {
     }
 
     function _buildWeekResultHtml($rateConfigs) {
-        $weekResult = $this->_getRateService ()->getRateByWeek ( $this->_typeId );
+		$rateService = $this->_getRateService();
+        $weekResult = $rateService->getWeekData($this->_typeId,$this->_hotSource);
         if (! $weekResult) {
             return null;
         }
@@ -270,7 +284,7 @@ class RateIndex {
         $filePath = $this->_getReteConfigFilePath ( $this->_typeId );
         if (! file_exists ( $filePath ) || time () - filemtime ( $filePath ) > 3600) {
             $weekHTML = $this->_buildWeekResultHtml ( $rateConfigs );
-            $weekHTML && writeover ( $filePath, $weekHTML );
+            writeover ( $filePath, $weekHTML );//write ignore null or not
         } else {
             $weekHTML = readover ( $filePath );
         }

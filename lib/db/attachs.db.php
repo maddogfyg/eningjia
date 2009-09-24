@@ -7,22 +7,22 @@ class PW_AttachsDB extends BaseDB {
 
 	function add($fieldData) {
 		$fieldData = $this->_checkData($fieldData);
-		$this->_getConnection()->update("INSERT INTO ".$this->_tableName. " SET " . $this->_getUpdateSqlString ( $fieldData ) );
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("INSERT INTO ".$this->_tableName. " SET " . $this->_getUpdateSqlString ( $fieldData ) );
+		return $this->_db->insert_id();
 	}
 
 	function delete($aids) {
 		if (empty($aids)) return false;
 		if (is_array($aids)) {
-			$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE aid IN (". $this->_getImplodeString($aids).")");
+			$this->_db->update("DELETE FROM ".$this->_tableName." WHERE aid IN (". $this->_getImplodeString($aids).")");
 		} else {
-			$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE aid=".intval($aids));
+			$this->_db->update("DELETE FROM ".$this->_tableName." WHERE aid=".intval($aids));
 		}
 		return true;
 	}
 
 	function delByTid($tid,$pid=null) {
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE tid=".intval($tid).(!is_null($pid) ? " AND pid=".intval($pid) : ""));
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE tid=".intval($tid).(!is_null($pid) ? " AND pid=".intval($pid) : ""));
 		return true;
 	}
 
@@ -40,23 +40,23 @@ class PW_AttachsDB extends BaseDB {
 			}
 		}
 		$data = array();
-		$query = $this->_getConnection()->query($sql);
-		while($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query($sql);
+		while($rt = $this->_db->fetch_array($query)) {
 			$data[$rt['aid']] = $rt;
 		}
 		return $data;
 	}
 
 	function nextImgByUid($uid,$aid) {
-		return $this->_getConnection()->get_value("SELECT aid FROM pw_attachs WHERE uid=".intval($uid)." AND type='img' AND aid<".intval($aid)." ORDER BY aid DESC LIMIT 1");
+		return $this->_db->get_value("SELECT aid FROM pw_attachs WHERE uid=".intval($uid)." AND type='img' AND aid<".intval($aid)." ORDER BY aid DESC LIMIT 1");
 	}
 
 	function prevImgByUid($uid,$aid) {
-		return $this->_getConnection()->get_value("SELECT aid FROM pw_attachs WHERE uid=".intval($uid)." AND type='img' AND aid>".intval($aid)." ORDER BY aid LIMIT 1");
+		return $this->_db->get_value("SELECT aid FROM pw_attachs WHERE uid=".intval($uid)." AND type='img' AND aid>".intval($aid)." ORDER BY aid LIMIT 1");
 	}
 
 	function get($aid) {
-		$data = $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE aid=".intval($aid));
+		$data = $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE aid=".intval($aid));
 		if (!$data) return null;
 		return $data;
 	}
@@ -71,8 +71,8 @@ class PW_AttachsDB extends BaseDB {
 				$where[] = "$key=".$this->_addSlashes($value);
 			}
 		}
-		$query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName.($where ? " WHERE ".implode(' AND ',$where) : ""));
-		while($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query("SELECT * FROM ".$this->_tableName.($where ? " WHERE ".implode(' AND ',$where) : ""));
+		while($rt = $this->_db->fetch_array($query)) {
 			$data[$rt['aid']] = $rt;
 		}
 		return $data;
@@ -82,9 +82,9 @@ class PW_AttachsDB extends BaseDB {
 		if (empty($aids) || empty($data)) return false;
 		$data = $this->_checkData($data);
 		if (is_array($aids)) {
-			$this->_getConnection()->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE aid IN(' . $this->_getImplodeString($aids) . ')');
+			$this->_db->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE aid IN(' . $this->_getImplodeString($aids) . ')');
 		} else {
-			$this->_getConnection()->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE aid=' . intval($aids));
+			$this->_db->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE aid=' . intval($aids));
 		}
 		return true;
 	}
@@ -106,9 +106,9 @@ class PW_AttachsDB extends BaseDB {
 		if (empty($data)) return false;
 		$data = $this->_checkData($data);
 		if (is_array($tids)) {
-			$this->_getConnection()->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE tid IN(' . $this->_getImplodeString($tids) . ')' . (!is_null($pid) ? " AND pid=".intval($pid) : ""));
+			$this->_db->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE tid IN(' . $this->_getImplodeString($tids) . ')' . (!is_null($pid) ? " AND pid=".intval($pid) : ""));
 		} else {
-			$this->_getConnection()->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE tid=' . intval($tids) . (!is_null($pid) ? " AND pid=".intval($pid) : ""));
+			$this->_db->update("UPDATE pw_attachs SET " . pwSqlSingle($data) . ' WHERE tid=' . intval($tids) . (!is_null($pid) ? " AND pid=".intval($pid) : ""));
 		}
 		return true;
 	}
@@ -120,8 +120,8 @@ class PW_AttachsDB extends BaseDB {
 		if ($step == 0)
 			return 0;
 		$step = $step > 0 ? "+" . $step : $step;
-		$this->_getConnection()->update("UPDATE " . $this->_tableName . " SET $fieldName=$fieldName" . $step . " WHERE aid=" . intval($aid) . " LIMIT 1" );
-		return $this->_getConnection()->affected_rows();
+		$this->_db->update("UPDATE " . $this->_tableName . " SET $fieldName=$fieldName" . $step . " WHERE aid=" . intval($aid) . " LIMIT 1" );
+		return $this->_db->affected_rows();
 	}
 
 	function getStruct() {

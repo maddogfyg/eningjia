@@ -9,7 +9,6 @@ $block	= $stopic_service->getBlockById($block_id);
 
 if (!$step) {
 	$unit	= $stopic_service->getStopicUnitByStopic($stopic_id,$html_id);
-	writeover(D_P.'data/text.txt',print_r($unit,1));
 	if (!$unit) {
 		$unit	= array('stopic_id'=>$stopic_id,'html_id'=>$html_id,'block_id'=>$block_id,'title'=>'');
 		$stopic_service->addUnit($unit);

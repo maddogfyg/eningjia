@@ -56,13 +56,16 @@ if (!$_POST['step']) {
 } elseif ($_POST['step'] == 2) {
 
 	InitGP(array('selid'),'P');
-	if (!$selid = checkselid($selid)) {
-		$basename="javascript:history.go(-1);";
+
+	if (!$selids = checkselid($selid)) {
+		$basename = "javascript:history.go(-1);";
 		adminmsg('operate_error');
 	}
+
 	if ($type == 'pass') {
+
 		$fids  = array();
-		$query = $db->query("SELECT fid FROM pw_threads WHERE $sql AND tid IN($selid)");
+		$query = $db->query("SELECT fid FROM pw_threads WHERE $sql AND tid IN($selids)");
 		while ($rt = $db->fetch_array($query)) {
 			$fids[$rt['fid']] ++;
 		}
@@ -76,46 +79,41 @@ if (!$_POST['step']) {
 					. ',lastpost=' . pwEscape($lastpost)
 				. ' WHERE fid=' . pwEscape($key));
 		}
-		if ($selid) {
-			$db->update("UPDATE pw_threads SET ifcheck='1' WHERE $sql AND tid IN($selid)");
+		if ($selids) {
+			$db->update("UPDATE pw_threads SET ifcheck='1' WHERE $sql AND tid IN($selids)");
 			$threadList = L::loadClass("threadlist");
 			$threadList->refreshThreadIdsByForumId($fid);
 		}
 	} else {
-		$ttable_a = $_tids = array();
-		foreach (explode(',',$selid) as $key => $value) {
-			$ttable_a[GetTtable($value)][] = $value;
+		
+		$delarticle = L::loadClass('DelArticle');
+		if (!$sqlby = $delarticle->sqlFormatByIds($selid)) {
+			$basename = "javascript:history.go(-1);";
+			adminmsg('operate_error');
 		}
-		foreach ($ttable_a as $pw_tmsgs => $value) {
-			if (empty($value)) continue;
-			$value = pwImplode($value);
-			$query = $db->query("SELECT t.tid,t.fid FROM pw_threads t WHERE $sql AND t.tid IN($value)");
-			$tids = array();
-			while ($read = $db->fetch_array($query)) {
-				$tids[] = $read['tid'];
-				$_tids[] = $read['tid'];
-			}
-			if ($tids) {
-				$tids = pwImplode($tids);
-				$db->update("DELETE FROM $pw_tmsgs WHERE tid IN($tids)");
-			}
-		}
-		# $selid && $db->update("DELETE FROM pw_threads WHERE $sql AND tid IN($selid)");
-		# ThreadManager
-		if ($selid) {
-			$threadManager = L::loadClass("threadmanager");
-			$threadManager->deleteByThreadIds($fid,$selid);
-		}
+		$readdb = $delarticle->getTopicDb("$sql AND tid $sqlby");
+		
+		//积分操作
+		require_once(R_P.'require/credit.php');
+		$creditOpKey = "Delete";
+		$forumInfos = array();
+		foreach ($readdb as $tpcData) {
+			if (!isset($forumInfos[$tpcData['fid']])) $forumInfos[$tpcData['fid']] = L::forum($tpcData['fid']);
+			$foruminfo = $forumInfos[$tpcData['fid']];
+			$creditset = $credit->creditset($foruminfo['creditset'],$db_creditset);
 
-		require_once(R_P.'require/updateforum.php');
-		delete_tag($selid);
-		if ($_tids) {
-			$pw_attachs = L::loadDB('attachs');
-			$attachdb = $pw_attachs->getByTid($_tids);
-			require_once(R_P.'require/updateforum.php');
-			delete_att($attachdb);
-			pwFtpClose($ftp);
+			$credit->addLog("topic_$creditOpKey", $creditset[$creditOpKey], array(
+				'uid' => $tpcData['authorid'],
+				'username' => $tpcData['author'],
+				'ip' => $onlineip,
+				'fname' => strip_tags($foruminfo['name']),
+				'operator' => $windid,
+			));
+			$credit->sets($tpcData['authorid'],$creditset[$creditOpKey],false);
 		}
+		$credit->runsql();
+		
+		$delarticle->delTopic($readdb);
 	}
 	adminmsg('operate_success');
 }

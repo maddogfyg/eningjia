@@ -6,10 +6,10 @@ class appmodel {
 	var $db;
 
 	function __construct(&$base) {
-		$this->usermodel($base);
+		$this->appmodel($base);
 	}
 
-	function usermodel(&$base) {
+	function appmodel(&$base) {
 		$this->base =& $base;
 		$this->db =& $base->db;
 	}

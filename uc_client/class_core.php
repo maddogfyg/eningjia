@@ -46,7 +46,7 @@ class UC {
 			$this->onlineip = $_SERVER['REMOTE_ADDR'];
 		}
 		$this->init_db();
-		UC_SERVER == 2 && $this->init_notify();
+		$this->init_notify();
 	}
 
 	function init_db() {
@@ -61,13 +61,13 @@ class UC {
 	}
 
 	function init_notify() {
-		if ($this->config('uc_syncreditexists' . $this->appid)) {
+		if (UC_SERVER == 2 && $this->config('uc_syncreditexists' . $this->appid)) {
 			$credit = $this->load('credit');
 			$credit->synupdate();
 		}
 		if ($this->config('uc_notifyexists' . $this->appid)) {
-			$credit = $this->load('notify');
-			$credit->send();
+			$notify = $this->load('notify');
+			$notify->send();
 		}
 	}
 

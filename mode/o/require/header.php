@@ -24,7 +24,7 @@ if (!defined('MSG')) {
 if($q == 'home') {
 	$baseUrl = 'mode.php?m=' . $m.'&';
 }
-
+$db_menuinit .= ",'td_userinfomore' : 'menu_userinfomore'";
 list($_Navbar,$_LoginInfo) = pwNavBar();
 require_once PrintEot('header');
 unset($_Navbar,$pwModeCss);

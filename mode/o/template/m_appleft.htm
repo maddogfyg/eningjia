@@ -54,7 +54,7 @@ EOT;
 if($app_array){
 foreach ($app_array as $key => $value) {print <<<EOT
 -->
-					<li><a href="apps.php?q=app&id=$value[appid]" ><img src="$server_url/images/icon/s{$value[appid]}.png" align="absmiddle" />{$value[appname]}</a></li>
+					<li><a href="mode.php?m=o&q=app&id=$value[appid]" ><img src="$server_url/images/icon/s{$value[appid]}.png" align="absmiddle" />{$value[appname]}</a></li>
 <!--
 EOT;
 }

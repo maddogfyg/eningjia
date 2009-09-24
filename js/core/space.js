@@ -61,7 +61,3 @@ function bbimg()
 		return true;
 	}
 }
-function showcard(id,uid) {
-	read.obj = getObj(id);
-	try {ajax.send('pw_ajax.php?action=showcard&uid='+uid,'',ajax.get);} catch(e){}
-}

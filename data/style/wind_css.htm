@@ -1,7 +1,7 @@
 <!--<?php
-if($db_showcss && R_P==D_P && file_exists(D_P."data/bbscache/$tplpath.css")){print <<<EOT
+if($db_showcss && R_P==D_P && file_exists(D_P."data/bbscache/".$tplpath."_".$stylepath.".css")){print <<<EOT
 -->
-<link rel="stylesheet" type="text/css" href="data/bbscache/$tplpath.css" />
+<link rel="stylesheet" type="text/css" href="data/bbscache/{$tplpath}_{$stylepath}.css" />
 <!--
 EOT;
 }else{print <<<EOT
@@ -56,12 +56,6 @@ textarea{border: 1px solid; border-color: #c0c0c0 #ededed #ededed #c0c0c0;}
 /*文字ad*/
 .ad-text{margin:0 auto 8px;border:1px solid $tdcolor;border-bottom:0;background:$forumcolorone;}
 .ad-text .tr3 td,.ad-text .tr3 th{border-bottom:1px solid $tdcolor;padding:.4em .6em;}
-/*顶部导航*/
-.topbar{background:#eaeaea url($imgpath/$stylepath/topbar.png) 0 bottom repeat-x;height:27px;overflow:hidden;}
-#nav-operate{border-top:0;padding:4px 0 2px;width:$tablewidth;margin:auto;width:98%;}
-	#nav-operate a{margin-right:5px;color:#333333;}
-	#nav-operate li{float:left;margin-left:1em;zoom:1;}
-	#nav-operate li a{margin-right:0;white-space:nowrap;vertical-align:baseline;}
 
 /*栏目导航*/
 #nav-global,.nav-left,.nav-right{background:url($imgpath/$stylepath/nav-bg.png);}
@@ -116,7 +110,7 @@ textarea{border: 1px solid; border-color: #c0c0c0 #ededed #ededed #c0c0c0;}
 .tr5 td{border-right:1px solid $tdcolor;border-bottom:1px solid $tdcolor;padding-left:.5em;}/*帖子表格*/
 /*浏览页*/
 h1,.read_h1{font-size:16px;margin:15px;color:#3366cc; font-weight:700;line-height:1;}
-.honor{line-height:130%;padding:3px 8px 5px 12px;overflow:hidden;color:#777;}
+.honor{color:#777;padding:0 10px 5px 0;overflow:hidden;}
 .tpc_content{font-family:Arial;padding:0 15px 3em 15px;margin:0;line-height:2em;}
 .tpc_content font{line-height:1.5em;}
 .tpc_content a{text-decoration:none;color:#0070AF;}
@@ -163,9 +157,6 @@ blockquote{padding-left:1em;}
 .menu-post{border:2px solid $tdcolor;padding:1px;background:$tablecolor;}
 .menu-post .menu-b{border:1px solid #fff;background:$forumcolorone;}
 .menu-b .h{border-bottom:1px solid $headborder;}
-.menu-half li{width:46%;float:left;}
-.menu-half li a{float:left;}
-.menu-post .menu-half li{padding:3px 0 3px 10px;}
 
 /*弹出框 popout*/
 .popoutContent{background:$forumcolorone;border:1px solid $tablecolor;}

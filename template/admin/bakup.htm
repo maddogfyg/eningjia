@@ -40,12 +40,31 @@ if($admintype=='bakout'){
 EOT;
 $id=0;
 foreach($pwdb as $key=>$value){
-$id++;print <<<EOT
+	$id++;
+print <<<EOT
 -->
 <tr class="tr3">
 <td align="center">$id</td>
 <td>$value</td>
-<td align="center"><input type="checkbox" name="tabledb[]" value="$tabledb[$key]" onclick="pwJsCheck(this)" /></td>
+<td align="center">
+<!--
+EOT;
+	if (isset($existTables[$value])) {
+print <<<EOT
+-->
+	<input type="checkbox" name="tabledb[]" value="$tabledb[$key]" onclick="pwJsCheck(this)" />
+<!--
+EOT;
+	} else {
+print <<<EOT
+-->
+	<font color="#888">已删</font>
+<!--
+EOT;
+	}
+print <<<EOT
+-->
+</td>
 </tr>
 <!--
 EOT;

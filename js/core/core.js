@@ -128,6 +128,20 @@ function PW_popEvent (obj)
 function getObj(id) {
 	return document.getElementById(id);
 }
+function getElementsByClassName (className, parentElement){
+	if (typeof(parentElement)=='object') {
+		var elems = parentElement.getElementsByTagName("*");
+	} else {
+		var elems = (document.getElementById(parentElement)||document.body).getElementsByTagName("*");
+	}
+	var result=[];
+	for (i=0; j=elems[i]; i++) {
+	   if ((" "+j.className+" ").indexOf(" "+className+" ")!=-1) {
+			result.push(j);
+	   }
+	}
+	return result;
+}
 function ietruebody() {
 	return (document.compatMode && document.compatMode!="BackCompat")? document.documentElement : document.body;
 }
@@ -159,25 +173,25 @@ function showcustomquest(qid){
 }
 function showCK(){
 	getObj('ckcode').style.display="";
+	getObj('ckcode').style.zIndex="1000000";
 	if (getObj('ckcode').src.indexOf('ck.php') == -1) {
 		getObj('ckcode').src = 'ck.php?nowtime=' + new Date().getTime();
 	}
 }
 function setTab(m,n){
- var tli=document.getElementById("menu"+m).getElementsByTagName("li");
- var mli=document.getElementById("main"+m).getElementsByTagName("div");
- for(i=0;i<tli.length;i++){
-  tli[i].className=i==n?"hover":"";
-  mli[i].style.display=i==n?"block":"none";
- }
+	var tli=document.getElementById("menu"+m).getElementsByTagName("li");
+	var mli=document.getElementById("main"+m).getElementsByTagName("div");
+	for(i=0;i<tli.length;i++){
+		tli[i].className=i==n?"hover":"";
+		mli[i].style.display=i==n?"block":"none";
+	}
 }
-
 function changeState() {
 	var msg = ajax.request.responseText;
 	if (msg == 1){
 		getObj('stealth').className = '';
 		getObj('iconimg').title = HEADER_HIDE;
-		getObj('online_state').innerHTML = '<img src="'+IMG_PATH+'/stealth.gif" align="absmiddle" />隐身';
+		getObj('online_state').innerHTML = '<img src="'+IMG_PATH+'/stealth.png" align="absmiddle" />隐身';
 	}else{
 		getObj('stealth').className = 'hide';
 		getObj('iconimg').title = HEADER_ONLINE;
@@ -227,7 +241,6 @@ function issrc(o) {
 	return false;
 }
 
-
 function imgResize(o, size) {
 	if (o.width > o.height) {
 		if (o.width > size) o.width = size;
@@ -270,26 +283,69 @@ function showConInfo(uid,cyid){
 	ajax.send('mode.php?m=o&q=group&a=uintro&cyid='+cyid+'&uid='+uid,'',ajax.get);
 }
 
-Class = function(aBaseClass, aClassDefine)
-{
-	function class_()
-	{
+userCard = {
+	t1	 : null,
+	t2	 : null,
+	menu : null,
+	uids : '',
+	data : null,
+	init : function() {
+		var els = getElementsByClassName('userCard');
+		for (i = 0; i < els.length; i++) {
+			if (els[i].id) {
+				var sx = els[i].id.split('_');
+				userCard.uids += (userCard.uids ? ',' : '') + sx[3];
+				els[i].onmouseover = function() {
+					var _ = this;
+					clearTimeout(userCard.t2);
+					userCard.t1 = setTimeout(function(){userCard.show(_.id);}, 500);
+				}
+				els[i].onmouseout = function() {
+					clearTimeout(userCard.t1);
+					if (userCard.menu) userCard.t2 = setTimeout(function(){userCard.menu.close();},500);
+				}
+			}
+		}
+	},
+	show : function(id) {
+		var sx = id.split('_');
+		if (userCard.data == null) {
+			try {
+				ajax.send($('headbase').href + 'pw_ajax.php?action=showcard&uids=' + userCard.uids, '', function() {
+					userCard.data = elementBind('div');
+					userCard.data.innerHTML = ajax.runscript(ajax.request.responseText);
+					userCard.show(id);
+				})
+			} catch(e){}
+			return;
+		}
+		if (userCard.data.hasChildNodes()) {
+			for (var i = 0; i < userCard.data.childNodes.length; i++) {
+				if (userCard.data.childNodes[i].nodeType == 1 && userCard.data.childNodes[i].id != '' && userCard.data.childNodes[i].id.substr(9) == sx[3]) {
+					userCard.menu ? 0 : userCard.menu = new PwMenu('userCard');
+					userCard.menu.obj = $(sx[1] + '_' + sx[2]) || $(id);
+					userCard.menu.setMenu(userCard.data.childNodes[i].outerHTML, '', 1);
+					userCard.menu.menupz(userCard.menu.obj);
+				}
+			}
+		}
+	}
+}
+
+Class = function(aBaseClass, aClassDefine) {
+	function class_() {
 		this.Inherit = aBaseClass;
-		for (var member in aClassDefine)
-		{
-			this[member] = aClassDefine[member];
+		for (var member in aClassDefine) {
+			try{this[member] = aClassDefine[member];}catch(e){}		//针对opera,safri浏览器的只读属性的过滤
 		}
 	}
 	class_.prototype = aBaseClass;
 	return  new class_();
 };
-New = function(aClass, aParams)
-{
-	function new_()
-	{
+New = function(aClass, aParams) {
+	function new_()	{
 		this.Inherit = aClass;
-		if (aClass.Create)
-		{
+		if (aClass.Create) {
 			aClass.Create.apply(this, aParams);
 		}
 	}

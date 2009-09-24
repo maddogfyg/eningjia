@@ -41,7 +41,8 @@ EOT;
 EOT;
 if (!empty($boards)){print <<<EOT
 -->
-            <div class="dynamic-dl">
+						<div style="width:530px;padding:10px 0 30px 0;">
+						<div class="o-commnet">
             <div id="createboardbox"></div>
 
 <!--
@@ -50,7 +51,7 @@ foreach ($boards as $value) { print <<<EOT
 -->
             <dl class="cc" id="board_{$value[id]}">
                  <dt>
-                    <a href="u.php?uid=$value[uid]"><img src="$value[face]" class="img-50" /></a>
+                    <a href="u.php?uid=$value[uid]"><img src="$value[face]" class="img-50" style="margin-left:0;" /></a>
                  </dt>
                  <dd class="dd60">
 <!--
@@ -101,7 +102,9 @@ EOT;
 EOT;
 }print <<<EOT
 -->
-           		</div><div class="mt10">$pages</div>
+           		</div>
+							</div>
+							<div class="mt10">$pages</div>
 <!--
 EOT;
 }else{print <<<EOT

@@ -129,21 +129,7 @@ html,body{overflow:hidden;height:100%;}
 		<!--#} else {#-->
 		<a href="login.php" title="登录" class="ml b">登录</a>&nbsp;&nbsp;<a href="$regurl" class="b">注册</a>
 <!--#}} else {#-->
-	<img src="{$_LoginInfo['faceurl']}" id="iconimg" class="img-20" align="absmiddle" /> <a href="u.php?action=show" id="td_userinfo_more" class="b">$windid</a><span class="gray">$gp_grouptitle </span>
-	<!--#if ($_G['allowhide']) {#-->
-	<a style="cursor:pointer;" onclick="ajax.send('pw_ajax.php?action=changestate','',changeState)" id="online_state">
-		<!--#if (GetCookie('hideid') == 1) {#-->
-		<img src="images/stealth.gif" align="absmiddle" />隐身
-		<!--#} else {#-->
-		<img src="images/online.png" align="absmiddle" />在线
-		<!--#}#-->
-	</a>
-<script language="JavaScript">
-HEADER_HIDE='隐身';
-HEADER_ONLINE='在线';
-IMG_PATH="images";
-</script>
-	<!--#}#-->
+	<img src="{$_LoginInfo['faceurl']}" id="iconimg" class="img-20" align="absmiddle" /> <a href="u.php?action=show" id="td_userinfomore" class="b">$windid</a>
     <a href="profile.php" title="设置中心" target="_blank">设置</a>
 	<!--#if(CkInArray($windid,$manager) || $SYSTEM['allowadmincp']){#-->
 	<a href="$db_adminfile" target="_blank">系统设置</a>
@@ -164,6 +150,43 @@ IMG_PATH="images";
 </ul>
 </td></tr></table>
 </div></div>
+<!--#if ($winduid){#-->
+<div id="menu_userinfomore" class="menu-post cc" style="display:none;">
+	<div class="menu-b" style="width:26.5em;">
+		<ul class="menu-half cc">
+		<li>等级: $gp_grouptitle
+<!--#if ($_G['allowhide']) {#-->
+		<li>状态: 
+<span style="cursor:pointer;" onclick="ajax.send('pw_ajax.php?action=changestate','',changeState)" id="online_state">
+<!--#if (GetCookie('hideid') == 1) {#--><img src="images/stealth.png" align="absmiddle" />隐身
+<!--#} else {#--><img src="images/online.png" align="absmiddle" />在线
+<!--#}#--></span>
+<script language="JavaScript">
+HEADER_HIDE='隐身';
+HEADER_ONLINE='在线';
+IMG_PATH="images";
+function changeState() {
+	var msg = ajax.request.responseText;
+	if (msg == 1){
+		getObj('online_state').innerHTML = '<img src="$imgpath/stealth.png" align="absmiddle" />隐身';
+	}else{
+		getObj('online_state').innerHTML = '<img src="$imgpath/online.png" align="absmiddle" />在线';
+	}
+}
+</script>
+			</li>
+<!--#}#-->
+			<li>帖子: $winddb[postnum]</li>
+			<li>今日: $winddb[todaypost]</li>
+			<li>$db_rvrcname: <span class="s2">$userrvrc $db_rvrcunit</span></li>
+			<li>$db_moneyname: <span class="s3">$winddb[money] $db_moneyunit</span></li>
+			<li>$db_creditname: <span class="s3">$winddb[credit] $db_creditunit</span></li>
+			<li>最后登录: <span class="f10">{$_LoginInfo['lastlodate']}</span></li>
+			<li>登录IP: <span class="f10">$onlineip</span></li>
+		</ul>
+	</div>
+</div>
+<!--#}#-->
 <div id="header">
 	<table cellpadding="0" cellspacing="0" width="100%">
 		<tr>

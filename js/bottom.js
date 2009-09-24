@@ -78,11 +78,11 @@ app_bottom.prototype = {
 		list.innerHTML	= "<div class='sbar-title' onclick = 'pw_bottom.hiddenTab();'>\
 		<span class='fr closeicon'><img src='"+img.src+"' /></span><span class='b'>相册&nbsp;</span>\
 	</div>\
-	<DIV style='OVERFLOW: hidden; WIDTH: 680px;height:450px;' class='sbar-box-b'><IFRAME id='pwifm_source' border=0 src='mode.php?m=o&q=photos&a=upload&s=1' frameBorder='0' width='100%' scrolling='no' height='100%'></IFRAME></div>";
+	<DIV style='OVERFLOW: hidden; WIDTH: 550px;height:450px;' class='sbar-box-b'><IFRAME id='pwifm_source' border=0 src='mode.php?m=o&q=photos&a=upload&s=1' frameBorder='0' width='100%' scrolling='no' height='100%'></IFRAME></div>";
 		parent.appendChild(list);
 		list.style.zIndex="-1";
 	getObj("pwifm_source").src="mode.php?m=o&q=photos&a=upload&s=1";
-	   list.style.width="700px";
+	   list.style.width="575px";
 	   
 	},
 		/**
@@ -105,7 +105,7 @@ app_bottom.prototype = {
 <FORM onsubmit="return false;" method=post action="mode.php?m=o&amp;q=write&amp;do=post">\
 <input class="input" style="width:355px;height:50px;margin-bottom:10px;overflow: hidden" id=writetext onfocus="if(this.value == \'想说点什么?\')this.value=\'\'" value=想说点什么? name=text>\
 <div class="c"></div><span id=writetext_warn class="fr gray">限 255 字节</span><input style="VERTICAL-ALIGN:middle;" id=writetosign value=1 CHECKED type=checkbox name=tosign>同步个性签名\
-<div class="c" style="margin-bottom:10px;"></div><input class="btn" style="cursor:pointer;" id=write_button onclick=submitwrite(this.form)  type=button value="   发 布   "></DIV></FORM></div>';
+<div class="c" style="margin-bottom:10px;"></div><input class="btn" style="cursor:pointer;background:#3366cc;border-color:#3366cc;" id=write_button onclick=submitwrite(this.form)  type=button value="   发 布   "></DIV></FORM></div>';
 		parent.appendChild(list);
 		list.style.zIndex="-1";
 		list.style.left="170px";
@@ -207,7 +207,7 @@ app_bottom.prototype = {
 					list.appendChild(div);
 					var ul = elementBind('ul','newmessagebox','p10');
 					if (rText[1] != '') {
-						var msgs = JSONParse(rText[1]);
+						try{var msgs = JSONParse(rText[1]);
 						if (msgs.length > 5) {
 							ul.className = 'mes-height';
 						}
@@ -217,7 +217,7 @@ app_bottom.prototype = {
 									handle.creatMess(msgs[i],ul);
 								}
 							}
-						}
+						}}catch(e){}
 					} else {
 						var li = elementBind('li');
 						li.innerHTML = '<a href="message.php" target="_blank">您没有未读消息</a>';
@@ -271,7 +271,7 @@ app_bottom.prototype = {
 			list = elementBind('div','','startbar-menuright');
 			setTimeout(function(){ajax.send('pw_ajax.php?action=pwb_friend','u='+winduid,function(){
 				var rText = ajax.request.responseText.split('\t');
-				if (rText[0] == 'success') {
+				if (rText[0] == 'success') {try{
 					var h2 = elementBind('div','','sbar-title');
 					h2.innerHTML= '<span class="fr"><img src="images/wind/index/cate_open.gif" /></span><span class="b">在线好友</span>';
 					h2.onclick = function () {
@@ -282,15 +282,16 @@ app_bottom.prototype = {
 					list.appendChild(div);
 					var ul = elementBind('ul','','cc');
 					div.appendChild(ul);
+					
 					if (rText[1] != '') {
-						var friends = JSONParse(rText[1]);
+						try{var friends = JSONParse(rText[1]);
 						if (typeof(friends)=='object') {
 							for (var i in friends) {
 								if (typeof(friends[i])=='object') {
 									handle.creatFriend(friends[i],ul);
 								}
 							}
-						}
+						}}catch(e){}
 					} else {
 						var li = elementBind('li');
 						li.innerHTML = '<div>没有好友在线上 / <a href="mode.php?m=o&q=friend">查看所有好友</a></div>';
@@ -298,7 +299,7 @@ app_bottom.prototype = {
 					}
 					handle.friendTemp = list;
 					delElement('load_temp');
-					parent.appendChild(list);
+					parent.appendChild(list);}catch(e){alert(e.message||e)}
 				} else {
 					ajax.guide();
 				}

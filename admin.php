@@ -52,7 +52,7 @@ if (!$adminjob) {
 	$pwAppImg = "mode/$adminname/images";
 	$basename = "$admin_file?adminjob=apps&admintype=$admintype";
 	require_once Pcv(A_P.'admin.php');
-} elseif ($adminjob == 'content' && ($rightset['tpccheck'] && $type == 'tpc' || $rightset['postcheck'] && $type == 'post' || (int)$rightset['superdel']['message'] == 1 && $type == 'message')) {
+} elseif ($adminjob == 'content' && ($rightset['tpccheck'] && $type == 'tpc' || $rightset['postcheck'] && $type == 'post' || (int)$rightset['message'] == 1 && $type == 'message')) {
 	require_once(R_P.'admin/content.php');
 } elseif (managerRight($adminjob) || adminRight($adminjob,$admintype)) {
 	require_once Pcv(R_P.'admin/'.$adminjob.'.php');

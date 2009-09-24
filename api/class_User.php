@@ -58,6 +58,13 @@ class User {
 		return new ApiResponse(1);
 	}
 
+	function deluser($uids) {
+		$user = L::loadClass('ucuser');
+		$user->delUserByIds($uids);
+
+		return new ApiResponse(1);
+	}
+
 	function synlogin($user) {
 		global $timestamp,$uc_key;
 		list($winduid, $windid, $windpwd) = explode("\t", $this->base->strcode($user, false));

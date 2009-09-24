@@ -190,7 +190,7 @@ EOT;
 print<<<EOT
 -->
 <div id="share_box">
-	<form name="FORM" method="post" action="apps.php?q=sharelink" onsubmit="return false;">
+	<form name="shareFORM" method="post" action="apps.php?q=sharelink" onsubmit="return false;">
 	<div style="width:480px;">
 		<div class="h" style="cursor:move" onmousedown="read.move(event);">
 			<div class="pr cc" style="height:30px;">
@@ -355,7 +355,7 @@ EOT;
 print<<<EOT
 -->
 <div id="recommend_box" style="display:none">
-	<form name="FORM" method="post" action="operate.php?action=share&ajax=1" onsubmit="return false;">
+	<form name="recommendFORM" method="post" action="operate.php?action=share&ajax=1" onsubmit="return false;">
 		<input type="hidden" name="step" value="2" />
 		<div style="width:480px;">
 			<div class="h" style="cursor:move" onmousedown="read.move(event);">
@@ -473,7 +473,25 @@ EOT;
 	} else {
 print <<<EOT
 -->
-					<textarea rows="6" style="width:300px" name="atc_content" onkeydown="ajax.quickpost(event,this.form)">您好！我在用户[url={$db_bbsurl}/u.php?uid={$uid}]{$username}[/url]的个人空间发现这个信息，认为很有价值，特推荐给您。\n\n主要信息:\n$title\n\n描述:\n$descrip\n\n希望您能喜欢。</textarea>
+<textarea rows="6" style="width:300px" name="atc_content" onkeydown="ajax.quickpost(event,this.form)">
+<!--
+EOT;
+if($isAnonymous){
+print <<<EOT
+-->
+您好！我发现这个信息很有价值，特推荐给您。\n\n主要信息:\n$title\n\n描述:\n$descrip\n\n希望您能喜欢。
+<!--
+EOT;
+}else{
+print <<<EOT
+-->
+您好！我在用户[url={$db_bbsurl}/u.php?uid={$uid}]{$username}[/url]的个人空间发现这个信息，认为很有价值，特推荐给您。\n\n主要信息:\n$title\n\n描述:\n$descrip\n\n希望您能喜欢。                                   
+<!--
+EOT;
+}
+print <<<EOT
+-->
+</textarea>
 <!--
 EOT;
 	}

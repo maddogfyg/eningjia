@@ -144,7 +144,8 @@ if (empty($a)) {print <<<EOT
 -->
 <!--
 EOT;
-if ($ifadmin) {print <<<EOT
+	if ($ifadmin) {
+print <<<EOT
 -->
 				<div class="p10">
 					<a class="app-post2" href="{$basename}a=create&cyid=$cyid">创建相册</a>
@@ -152,14 +153,16 @@ if ($ifadmin) {print <<<EOT
 				</div>
 <!--
 EOT;
-}print <<<EOT
+	}
+print <<<EOT
 -->
       	<div class="c"></div>
 					<ul id="list-box" class="cc list-box-a">
 <!--
 EOT;
-if (!empty($album)) {
-foreach ($album as $key => $value) {print <<<EOT
+	if (!empty($album)) {
+		foreach ($album as $key => $value) {
+print <<<EOT
 -->
 	<li>
 	<dl>
@@ -170,29 +173,34 @@ foreach ($album as $key => $value) {print <<<EOT
 														共{$value[photonum]}张照片
 <!--
 EOT;
-if ($value['private']) {print <<<EOT
+			if ($value['private']) {
+print <<<EOT
 -->
 						仅群内可见<br />
 <!--
 EOT;
-} else {print <<<EOT
+			} else {
+print <<<EOT
 -->
 						所有用户可见<br />
 <!--
 EOT;
-}
-if (!$value['forbidden']) {print <<<EOT
+			}
+			if (!$value['forbidden']) {
+print <<<EOT
 -->
 														<span class="none"><a href="{$basename}a=upload&cyid=$cyid&aid=$value[aid]"  class="black uline">上传照片</a>
 <!--
 EOT;
-}
-if ($ifadmin) {print <<<EOT
+			}
+			if ($ifadmin) {
+print <<<EOT
 -->
 						| <a href="{$basename}a=edit&cyid=$cyid&aid=$value[aid]"  class="black uline">编辑相册</a> | <a href="{$basename}a=delalbum&cyid=$cyid&aid=$value[aid]" onclick="return ajaxurl(this)" title="删除" class="del">删除</a>
 <!--
 EOT;
-}print <<<EOT
+			}
+print <<<EOT
 -->  
 						</span>
 	</dd>
@@ -200,7 +208,7 @@ EOT;
 	</li>
 <!--
 EOT;
-}
+		}
 print <<<EOT
 -->
 	<script language="JavaScript" src="js/core/changeview.js"></script>
@@ -209,12 +217,14 @@ print <<<EOT
 	</script>
 <!--
 EOT;
-} else {print <<<EOT
+	} else {
+print <<<EOT
 -->
 		<div class="tac">暂时没有相册信息</div>
 <!--
 EOT;
-}print <<<EOT
+	}
+print <<<EOT
 -->          
 					</ul>
 					<div class="mt10">$pages</div>
@@ -600,14 +610,22 @@ window.onReady(getallowflash,getObj('aidsel_info').value);
 </script>
 <!--
 EOT;
-} elseif ($a == 'selalbum') {print <<<EOT
+} elseif ($a == 'selalbum') {
+print <<<EOT
 -->
 <div class="c"></div>
 <div class="o-info-a mt10"><a href="{$basename}cyid=$cyid&a=upload">返回相册上传</a> | <a href="{$basename}cyid=$cyid&a=upload&job=flash">批量上传</a> | <a href="{$basename}cyid=$cyid">返回相册</a> <span style="margin-left:2em">提示：请进入相册选择照片</span></div>
+
+<!--
+EOT;
+	if (!empty($album)) {
+print <<<EOT
+-->
 <ul class="cc list-box-b">
 <!--
 EOT;
-foreach ($album as $key => $value) {print <<<EOT
+		foreach ($album as $key => $value) {
+print <<<EOT
 -->
 	<li>
 		<dl>
@@ -618,9 +636,25 @@ foreach ($album as $key => $value) {print <<<EOT
 	</li>
 <!--
 EOT;
-}print <<<EOT
+		}
+print <<<EOT
 -->
 </ul>
+<!--
+EOT;
+	} else {
+print <<<EOT
+-->
+	<div class="tac">
+		<p>&nbsp;</p>
+		你还没有创建个人相册
+	</div>
+<!--
+EOT;
+	}
+print <<<EOT
+-->
+
 <div class="c"></div>
 <!--
 EOT;

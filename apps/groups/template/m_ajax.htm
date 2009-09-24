@@ -5,7 +5,7 @@ if ($a == 'del') {print <<<EOT
 function o_del() {
 	var rText = ajax.request.responseText.split('\\t');
 	if (rText[0] == 'del') {
-		getObj('lou_' + rText[1]).parentNode.removeChild(getObj('lou_' + rText[1]));
+		getObj('article_' + rText[1]).parentNode.removeChild(getObj('article_' + rText[1]));
 	} else if (rText[0] == 'jump') {
 		window.location.href = '{$basename}cyid=$cyid&a=thread';
 	} else {
@@ -15,6 +15,7 @@ function o_del() {
 </script>
 	<form action="{$basename}a=$a&cyid=$cyid" onsubmit="return false;" method="post">
 	<input type="hidden" name="tid" value="$tid" />
+	<input type="hidden" name="pid" value="$pid" />
 	<input type="hidden" name="step" value="3" />
 	<div style="width:200px;" class="cc">
 		<div class="p10 b f14">您确定要删除该贴吗？</div>

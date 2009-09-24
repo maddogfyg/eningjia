@@ -711,7 +711,7 @@ EOT;
 				<div class="y-bg3"></div>
 				<div class="y-bg4">
 					<div class="p10 cc">
-						<form id="creator" name="creator" action="$db_registerfile?" method="post" enctype="multipart/form-data">
+						<form id="creator" name="creator" action="$db_registerfile?" method="post" enctype="multipart/form-data" onsubmit="return setFaceLen()">
 						<input type="hidden" name="step" value="finish" />
 						<input type="hidden" name="verify" value="$verifyhash" />
 						<input type="hidden" name="option" value="3" />
@@ -769,10 +769,12 @@ EOT;
 											</div>
 											<div id="face2" style="float:left;width:100%;margin-top:1%;display:none;">
 											<table><tr>
-											<td>头像链接 <input name="httpurl[0]" class="input" type="text" size="40" /> 必须以 http://开头</td></tr>
+											<td>头像链接 <input name="httpurl[0]" id="httpurl_url" class="input" type="text" size="40" /> 必须以 http://开头</td></tr>
 											<td>头像宽度 <input name="httpurl[1]" class="input" size="2" maxlength="3" /> 必须是 1 -- $db_imgwidth 之间的一个整数。</td></tr>
 											<td>头像高度 <input name="httpurl[2]" class="input" size="2" maxlength="3" /> 必须是 1 -- $db_imgheight 之间的一个整数。<b>头像高度留空，则根据宽度自适应</b></td></tr>
 											</tr></table>
+											<input type="hidden" id="httpurl_w" name="httpurl[3]" />
+											<input type="hidden" id="httpurl_h" name="httpurl[4]" />
 											</div>
 											<div id="face3" style="float:left;width:100%;margin-top:1%;display:none;">
 											<embed width="560" height="450" src="js/face.swf?$icon_encode_url" pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"  type="application/x-shockwave-flash" />
@@ -819,6 +821,23 @@ function CkFaceType(value){
 	}
 }
 CkFaceType('1');
+
+function setFaceLen() {
+	var v = 0;
+	var facetype = document.getElementsByName('facetype');
+	for (i = 0; i < facetype.length; i++) {
+		if (facetype[i].checked === true) {
+			v = facetype[i].value;break
+		}
+	}
+	if (v == 2) {
+		var img = new Image();
+		img.src = getObj('httpurl_url').value;
+		getObj('httpurl_w').value = img.width;
+		getObj('httpurl_h').value = img.height;
+	}
+	return true;
+}
 function showimage(imgpath,value){
 	var path = imgpath + '/face/';
 	facepath(path,value,false);

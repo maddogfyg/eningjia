@@ -154,7 +154,8 @@ function usertool(uid,id) {
 function fontsize(text,id){
 	getObj("read_"+id).className = text;
 }
-if (totalpage > 1) {
+
+if (typeof totalpage != 'undefined' && totalpage > 1) {
 	document.onkeydown = function(e) {
 		var e = is_ie ? window.event : e;
 		var tagname = is_ie ? e.srcElement.tagName : e.target.tagName;
@@ -247,6 +248,7 @@ function checkUrl(obj) {
 		if (suburl != url) {
 			urladd = '...';
 		}
+		getObj("pw_box").innerHTML='';
 		setTimeout(function(){read.open('checkurl',obj.id,1,11);},500);
 		getObj('suburl').innerHTML = suburl + urladd;
 		getObj('trueurl').href = url;

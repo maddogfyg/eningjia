@@ -1,6 +1,6 @@
 <!--<?php print <<<EOT
 -->
-<div class="cc mb10">
+<div class="cc">
 	<div class="w-720 fl">
 		<div class="w-350 fl">
 			<div class="tal">
@@ -82,9 +82,9 @@
 		<!--#$sideLou = 0;#-->
 		<!--#list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Layer.area.IndexSide',-1,++$sideLou);#-->
 		<!--#if($htmlAdvert){#-->
-		<div class="mb10 mt10">$htmlAdvert</div>
+		<div class="mt10">$htmlAdvert</div>
 		<!--#}#-->
-		<div class="boxD  mb10">
+		<div class="boxD mt10">
 			<h2>版块排行</h2>
 			<div style="padding:10px;" class="list-imgB">
 				<pw id="版块排行" tplid="8" />
@@ -92,9 +92,9 @@
 		</div>
 		<!--#list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Layer.area.IndexSide',-1,++$sideLou);#-->
 		<!--#if($htmlAdvert){#-->
-		<div class="mb10">$htmlAdvert</div>
+		<div class="mt10">$htmlAdvert</div>
 		<!--#}#-->
-		<div class="boxD mb10">
+		<div class="boxD mt10">
 			<h2>会员排行</h2>
 			<div style="padding:10px;" class="list-imgB">
 				<pw id="用户排行" tplid="12" />
@@ -102,9 +102,9 @@
 		</div>
 		<!--#list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Layer.area.IndexSide',-1,++$sideLou);#-->
 		<!--#if($htmlAdvert){#-->
-		<div class="mb10">$htmlAdvert</div>
+		<div class="mt10">$htmlAdvert</div>
 		<!--#}#-->
-		<div class="pr boxB cc">
+		<div class="pr boxB cc mt10">
 			<span class="cirA1"></span><span class="cirA2"></span><span class="cirA3"></span><span class="cirA4"></span>
 			<h2>社区公告</h2>
 			<div style="padding-bottom:11px;" class="p10 box">
@@ -121,9 +121,9 @@
 		</div>
 	</div>
 </div>
-
+<div class="c"></div>
 <!--#if($db_indexlink==1){#-->
-	<div class="pr boxB cc mb10" style="padding-bottom:1px;">
+	<div class="pr boxB cc mt10" style="padding-bottom:1px;">
 	<span class="cirA1"></span><span class="cirA2"></span><span class="cirA3"></span><span class="cirA4"></span>
 	<h4 class="mb10">
 	<!--#if($db_ifselfshare && $groupid!='guest'){#-->
@@ -141,7 +141,7 @@
 	<!--#}}#-->
 	</div>
 	<div class="links cc">$sharelink[1]</div>
-	</div></div>
+	</div>
 <!--#}#-->
 <!--
 EOT;

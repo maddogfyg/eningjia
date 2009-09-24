@@ -337,11 +337,7 @@ if ($action == 'showping') {
 				'subject'	=> $atc['subject'],
 				'reason'	=> $atc_content
 			));
-			$credit->set($atc['authorid'],$cid,$addpoint,false);
-			if ($db_autoban && $addpoint < 0) {
-				require_once(R_P.'require/autoban.php');
-				autoban($atc['authorid']);
-			}
+			$credit->set($atc['authorid'], $cid, $addpoint, false);
 
 			if (!is_numeric($pid)) {
 				$db->update("UPDATE pw_threads SET ifmark=ifmark+".pwEscape($addpoint)." WHERE tid=".pwEscape($tid));
@@ -411,6 +407,12 @@ if ($action == 'showping') {
 		}
 		$credit->runsql();
 
+		if ($db_autoban && $addpoint < 0) {
+			require_once(R_P.'require/autoban.php');
+			foreach ($atcdb as $pid => $atc) {
+				autoban($atc['authorid']);
+			}
+		}
 		if ($foruminfo['allowhtm'] && $page==1) {
 			$StaticPage = L::loadClass('StaticPage');
 			$StaticPage->update($tid);
@@ -580,17 +582,17 @@ if ($action == 'showping') {
 			$title = "[url=$db_bbsurl/u.php?action=show&uid=$userdb[uid]] $userdb[username] [/url]";
 		} elseif ($type == 'topic') {
 			$pw_tmsgs = GetTtable($id);
-			$topicdb = $db->get_one("SELECT t.tid,t.subject,t.authorid,t.author,t.postdate,tm.content FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON t.tid=tm.tid WHERE t.tid=".pwEscape($id));
+			$topicdb = $db->get_one("SELECT t.tid,t.subject,t.anonymous,t.ifshield,t.authorid,t.author,t.postdate,tm.content FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON t.tid=tm.tid WHERE t.tid=".pwEscape($id));
 			$tid = $topicdb['tid'];
 			$uid = $topicdb['authorid'];
-			$username = $topicdb['author'];
+			$username = ($topicdb['anonymous'] == 1) ? $db_anonymousname : $topicdb['author'];
+            $isAnonymous = ($topicdb['anonymous'] == 1) ? true : false;
 			$subject = $topicdb['subject'];
 			$postdate = get_date($topicdb['postdate']);
 			$title = "[url=$db_bbsurl/read.php?tid=$tid]$topicdb[subject][/url]";
 			require_once(R_P.'require/bbscode.php');
 			$topicdb['content'] = strip_tags(convert($topicdb['content'],$db_windpost));
-			$descrip = substrs($topicdb['content'],100,'N');
-
+			$descrip = ($topicdb['ifshield'] == 1) ? "" : stripWindCode(substrs($topicdb['content'],100,'N'));
 			$attimages = array();
 			$query = $db->query("SELECT attachurl,ifthumb FROM pw_attachs WHERE tid=".pwEscape($topicdb['tid'],false)." AND type='img' LIMIT 4");
 			while ($rt = $db->fetch_array($query)) {
@@ -606,15 +608,16 @@ if ($action == 'showping') {
 			InitGP(array('tid'));
 			$pw_posts = GetPtable('N',$tid);
 
-			$replydb = $db->get_one("SELECT p.pid,p.tid,p.subject as psubject,p.author,p.authorid,p.postdate,p.content,t.subject as tsubject FROM $pw_posts p LEFT JOIN pw_threads t ON p.tid=t.tid WHERE p.pid=".pwEscape($id));
+			$replydb = $db->get_one("SELECT p.pid,p.tid,p.anonymous,p.ifshield,p.subject as psubject,p.author,p.authorid,p.postdate,p.content,t.subject as tsubject FROM $pw_posts p LEFT JOIN pw_threads t ON p.tid=t.tid WHERE p.pid=".pwEscape($id));
 
 			$uid = $replydb['authorid'];
 			$subject = $replydb['psubject'] ? $replydb['psubject'] : 'Re:'.$replydb['tsubject'];
-			$username = $replydb['author'];
+			$username = ($replydb['anonymous'] == 1) ? $db_anonymousname : $replydb['author'];
+			$isAnonymous = ($replydb['anonymous'] == 1) ? true : false;
 			$postdate = get_date($replydb['postdate']);
 			require_once(R_P.'require/bbscode.php');
 			$replydb['content'] = strip_tags(convert($replydb['content'],$db_windpost));
-			$descrip = substrs($replydb['content'],100,'N');
+			$descrip = ($replydb['ifshield'] == 1) ? "" : stripWindCode(substrs($replydb['content'],100,'N'));
 
 			$attimages = array();
 			$query = $db->query("SELECT attachurl FROM pw_attachs WHERE uid=".pwEscape($uid,false)." AND pid=".pwEscape($id,false)." AND type='img' LIMIT 5");

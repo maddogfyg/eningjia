@@ -73,7 +73,7 @@ class BackGroundManage {
 	}
 	
 	function getBackGroundLists($page = 1, $perPage = 10) {
-		$pictures = $this->stopic_service->getPictures ( $page, $perPage );
+		$pictures = $this->stopic_service->getBackgroundsInPage ( $page, $perPage );
 		if (! $pictures) {
 			return null;
 		}

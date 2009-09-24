@@ -547,7 +547,8 @@ function getAppleftinfo($u,$type=false) {
 	$userdb['rvrc'] /= 10;
 	$ismyfriend = isFriend($winduid,$u);
 	$friendcheck = getstatus($userdb['userstatus'],3,3);
-	$usericon = showfacedesign($userdb['icon'],true);
+//	$usericon = showfacedesign($userdb['icon'],true);
+	list($usericon) = showfacedesign($userdb['icon'], 1, 'm');
 	$usercredit = array(
 		'postnum'	 => $userdb['postnum'],
 		'digests'	 => $userdb['digests'],
@@ -576,7 +577,6 @@ function getAppleftinfo($u,$type=false) {
 		$appcount[$value] = getPostnumByType($value,$userdb,true);
 	}
 	$p_list = $db_plist ? explode(',',$db_plist) : array();
-
 	return array($userdb,$ismyfriend,$friendcheck,$usericon,$usercredit,$totalcredit,$appcount,$p_list);
 }
 

@@ -28,7 +28,7 @@ if ($forumset['link']) {
 }
 
 //门户形式浏览
-if ($foruminfo['ifcms']) {
+if ($foruminfo['ifcms'] && $db_modes['area']['ifopen']) {
 	InitGP(array('viewbbs'));
 	if (!$viewbbs) {
 		require_once R_P. 'mode/area/area_thread.php';exit;
@@ -329,7 +329,7 @@ if ($_G['alloworder']) {
 		$urladd .= "&orderway=$orderway";
 	}
 	$ordersel[$orderway] = 'selected';
-	$condisel[$search] = 'selected';
+
 	if (!in_array($asc,array('DESC','ASC'))) {
 		$asc = $forumset['asc'] ? $forumset['asc'] : 'DESC';
 	} else {
@@ -340,6 +340,7 @@ if ($_G['alloworder']) {
 	$asc = $forumset['asc'] ? $forumset['asc'] : 'DESC';
 	$orderway = $forumset['orderway'] ? $forumset['orderway'] : 'lastpost';
 }
+$condisel[$search] = 'selected';
 
 $numofpage = ceil($count/$db_perpage);
 $numofpage < 1 && $numofpage = 1;
@@ -424,6 +425,7 @@ if ($fcache < 2) {
 			$page  = $numofpage;
 		}
 		$totalpage	= min($numofpage,$db_maxpage);
+		$count == -1 && $count = 0;
 		$pages		= numofpage($count,$page,$numofpage,"thread.php?fid=$fid&pcid=$pcid&topicsearch=$topicsearch&new_searchname=$new_searchname&search=$search&orderway=$orderway&asc=$asc&",$db_maxpage);
 		$tpcdb = array();
 		if ($tiddb){
@@ -435,7 +437,7 @@ if ($fcache < 2) {
 		}
 
 	} elseif ($limit2) {
-		if (empty($urladd) && strtolower($db_datastore) == 'memcache' && !$R) {
+		if (empty($urladd) && strtolower($db_datastore) == 'memcache' && !$R && $offset < 980) {
 			$threadlist = L::loadClass("threadlist");
 			$tmpTpcdb = $threadlist->getThreads($fid,$offset,$limit2);
 			$tpcdb = array_merge((array)$tpcdb,(array)$tmpTpcdb);

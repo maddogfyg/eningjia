@@ -9,6 +9,13 @@ if($admintype=='bakout'){
 	if(empty($action)){
 		require_once(R_P.'admin/table.php');
 		list($pwdb,$otherdb) = N_getTabledb(true);
+		
+		$existTables = array();
+		$query = $db->query("SHOW TABLES");
+		while ($rt = $db->fetch_array($query, MYSQL_NUM)) {
+			$existTables[$rt[0]] = true;
+		}
+		
 		include PrintEot('bakup');exit;
 	} else{
 		$pwServer['REQUEST_METHOD']!='POST' && PostCheck($verify);

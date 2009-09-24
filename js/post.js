@@ -183,7 +183,9 @@ function strlen(str){
 	return len;
 }
 function quickpost(event){
-	if((event.ctrlKey && event.keyCode == 13) || (event.altKey && event.keyCode == 83)){
+	var keyDownCode = (event.which != undefined) ? event.which : event.keyCode;
+
+	if((event.ctrlKey && keyDownCode == 13) || (event.altKey && keyDownCode == 83)){
 		document.FORM.Submit.click();
 	}
 }

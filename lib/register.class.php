@@ -156,6 +156,7 @@ class PW_Register {
 			'email'		=> $this->data['email'],		'groupid'	=> $this->data['groupid'],
 			'memberid'	=> $this->data['memberid'],		'regdate'	=> $timestamp,
 			'yz'		=> $this->data['yz'],			'userstatus'=> $this->data['userstatus'],
+			'newpm'		=> 0,
 		));
 		$this->db->update("REPLACE INTO pw_members SET $pwSQL");
 

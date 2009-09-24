@@ -32,7 +32,12 @@ if ($colony['cnimg']) {
 	$cnimg = $pwModeImg.'/groupnopic.gif';
 }
 if ($colony['banner']) {
+	require_once(R_P.'require/imgfunc.php');
 	list($colony['banner']) = geturl("cn_img/$colony[banner]",'lf');
+	$banner_imginfo = GetImgInfo($colony['banner']);
+	$banner_height = $banner_imginfo['height'];
+	unset($banner_imginfo);
+	$banner_height > 200 && $banner_height = 200;
 }
 if ($colony['ifcyer']) {
 	if ($timestamp - $colony['lastvisit'] > 3600) {
@@ -245,7 +250,7 @@ if (empty($a)) {
 						if (is_array($a_url)) {
 							$atype = 'pic';
 							$dfurl = '<br>'.cvpic($a_url[0], 1, $db_windpost['picwidth'], $db_windpost['picheight'], $at['ifthumb']);
-							$rat = array('aid' => $at['aid'], 'img' => $dfurl, 'dfadmin' => $dfadmin, 'desc' => $at['desc']);
+							$rat = array('aid' => $at['aid'], 'img' => $dfurl, 'dfadmin' => $dfadmin, 'desc' => $at['descrip']);
 						} elseif ($a_url == 'imgurl') {
 							$atype = 'picurl';
 							$rat = array('aid' => $at['aid'], 'name' => $at['name'], 'dfadmin' => $dfadmin, 'verify' => md5("showimg{$tid}{$read[pid]}{$fid}{$at[aid]}{$GLOBALS[db_hash]}"));
@@ -660,10 +665,10 @@ if (empty($a)) {
 
 	define('AJAX',1);
 	define('F_M',true);
-	InitGP(array('tid'), null, 2);
-	$rt = $db->get_one("SELECT t.authorid,t.author FROM pw_argument a LEFT JOIN pw_threads t ON a.tid=t.tid WHERE a.tid=" . pwEscape($tid) . ' AND a.cyid=' . pwEscape($cyid));
+	InitGP(array('tid', 'pid'), null, 2);
+	$rt = $db->get_one("SELECT t.authorid,t.author,t.ptable FROM pw_argument a LEFT JOIN pw_threads t ON a.tid=t.tid WHERE a.tid=" . pwEscape($tid) . ' AND a.cyid=' . pwEscape($cyid));
 
-	if (empty($rt) || $rt['authorid'] != $winduid && !$ifadmin) {
+	if (empty($rt) || !$ifadmin) {
 		Showmsg('data_error');
 	}
 	if (empty($_POST['step'])) {
@@ -672,22 +677,96 @@ if (empty($a)) {
 		ajax_footer();
 
 	} else {
+		
+		if ($pid && is_numeric($pid)) {
+			
+			$pw_posts = GetPtable($rt['ptable']);
+			$reply = $db->get_one("SELECT pid,fid,tid,aid,author,authorid,postdate,subject,content,anonymous,ifcheck FROM $pw_posts WHERE tid='$tid' AND pid=" . pwEscape($pid));
+			if (empty($reply)) {
+				Showmsg('data_error');
+			}
+			$reply['ptable'] = $rt['ptable'];
+			!$reply['subject'] && $reply['subject'] = substrs($reply['content'],35);
+			$reply['postdate'] = get_date($reply['postdate']);
+			
+			require_once(R_P.'require/msg.php');
+			require_once(R_P.'require/writelog.php');
+			require_once(R_P.'lib/forum.class.php');
+			require_once(R_P.'require/credit.php');
+			$pwforum = new PwForum($colony['classid']);
+			$creditset = $credit->creditset($pwforum->creditset, $db_creditset);
+			$d_key = 'Deleterp';
+			$credit->addLog("topic_$d_key", $creditset[$d_key], array(
+				'uid'		=> $reply['authorid'],
+				'username'	=> $reply['author'],
+				'ip'		=> $onlineip,
+				'fname'		=> strip_tags($pwforum->name),
+				'operator'	=> $windid
+			));
+			$credit->sets($reply['authorid'],$creditset[$d_key],false);
+			$msg_delrvrc  = abs($creditset[$d_key]['rvrc']);
+			$msg_delmoney = abs($creditset[$d_key]['money']);
 
-		$db->update("DELETE FROM pw_argument WHERE tid=" . pwEscape($tid));
-		countPosts('-1');
-		require_once(R_P.'require/credit.php');
-		$o_groups_creditset = unserialize($o_groups_creditset);
-		$creditset = getCreditset($o_groups_creditset['Deletearticle'],false);
-		$creditset = array_diff($creditset,array(0));
-		if (!empty($creditset)) {
-			require_once(R_P.'require/postfunc.php');
-			$credit->sets($rt['authorid'],$creditset,true);
-			updateMemberid($rt['authorid'],false);
+			$msg = array(
+				'toUser'	=> $reply['author'],
+				'subject'	=> 'delrp_title',
+				'content'	=> 'delrp_content',
+				'other'		=> array(
+					'manager'	=> $windid,
+					'fid'		=> $pwforum->fid,
+					'tid'		=> $tid,
+					'subject'	=> substrs($reply['subject'],28),
+					'postdate'	=> $reply['postdate'],
+					'forum'		=> strip_tags($pwforum->name),
+					'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
+					'admindate'	=> get_date($timestamp),
+					'reason'	=> ''
+				)
+			);
+			pwSendMsg($msg);
+
+			$log = array(
+				'type'      => 'delete',
+				'username1' => $reply['author'],
+				'username2' => $windid,
+				'field1'    => $pwforum->fid,
+				'field2'    => '',
+				'field3'    => '',
+				'descrip'   => 'delrp_descrip',
+				'timestamp' => $timestamp,
+				'ip'        => $onlineip,
+				'tid'		=> $tid,
+				'forum'		=> $pwforum->name,
+				'subject'	=> substrs($val['subject'],28),
+				'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
+				'reason'	=> ''
+			);
+			writelog($log);
+
+			$credit->runsql();
+			$delarticle = L::loadClass('DelArticle');
+			$delarticle->delReply(array($reply), true, $db_recycle);
+			echo "del\t$pid";
+
+		} else {
+
+			$db->update("DELETE FROM pw_argument WHERE tid=" . pwEscape($tid));
+			countPosts('-1');
+			require_once(R_P.'require/credit.php');
+			$o_groups_creditset = unserialize($o_groups_creditset);
+			$creditset = getCreditset($o_groups_creditset['Deletearticle'],false);
+			$creditset = array_diff($creditset,array(0));
+			if (!empty($creditset)) {
+				require_once(R_P.'require/postfunc.php');
+				$credit->sets($rt['authorid'],$creditset,true);
+				updateMemberid($rt['authorid'],false);
+			}
+			if ($creditlog = unserialize($o_groups_creditlog)) {
+				addLog($creditlog['Deletearticle'], $rt['author'], $rt['authorid'], 'groups_Deletearticle');
+			}
+			echo 'jump';
 		}
-		if ($creditlog = unserialize($o_groups_creditlog)) {
-			addLog($creditlog['Deletearticle'],$rt['author'],$rt['authorid'],'groups_Deletearticle');
-		}
-		echo 'jump';ajax_footer();
+		ajax_footer();
 	}
 } elseif ($a == 'edit') {
 
@@ -872,11 +951,11 @@ if (empty($a)) {
 			'addtime'	=> $timestamp
 		)));
 
-		pwAddFeed($winduid, 'colony', '', array(
+		pwAddFeed($winduid, 'colony', $cyid, array(
 			'lang'		=> 'colony_pass',
 			'colonyid'	=> $cyid,
 			'cname'		=> $colony['cname'],
-			'link'		=> "{$db_bbsurl}/{#APPS_BASEURL#}cyid=$cyid"
+			'link'		=> "{$db_bbsurl}/{#APPS_BASEURL#}q=group&cyid=$cyid"
 		));
 		$db->update("UPDATE pw_colonys SET members=members+1 WHERE id=" . pwEscape($cyid));
 		if ($colony['ifcheck'] == 2) {

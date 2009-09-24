@@ -40,7 +40,7 @@ $ismyfriend = isFriend($winduid,$u);
 $friendcheck = getstatus($userdb['userstatus'],3,3);
 $userdb['honor'] = substrs($userdb['honor'],90);
 //$usericon = showfacedesign($userdb['icon'],true);
-list($usericon) = showfacedesign($userdb['icon'], 1, 'm');
+list($usericon,,,,,,, $imglen) = showfacedesign($userdb['icon'], 1, 'm');
 
 if ($userdb['onlinetime']) {
 	$userdb['onlinetime'] = floor($userdb['onlinetime']/3600);
@@ -66,7 +66,7 @@ $p_list = $db_plist ? explode(',',$db_plist) : array();
 $totalcredit = CalculateCredit($usercredit,unserialize($db_upgrade));
 $userdb['rvrc'] = floor($userdb['rvrc']/10);
 if (!$userdb['todaypost'] || $userdb['lastpost'] < $tdtime) $userdb['todaypost'] = 0;
-$averagepost = floor($userdb['postnum']/(ceil(($timestamp - $userdb['regdate'])/(3600*24))));
+$averagepost = round($userdb['postnum']/(ceil(($timestamp - $userdb['regdate'])/(3600*24))), 2);
 $userdb['regdate'] = get_date($userdb['regdate'],'Y-m-d');
 $userdb['lastvisit'] = get_date($userdb['lastvisit'],'Y-m-d');
 $userdb['onlineip']= explode('|',$userdb['onlineip']);

@@ -1155,8 +1155,52 @@ foreach($credit->cType as $key => $value){print <<<EOT
 EOT;
 }print <<<EOT
 -->
-</table><br />
+	<tr class="tr3" align="center">
+		<td></td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('reg');">全选</a>
+		</td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('topic');">全选</a>
+		</td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('credit');">全选</a>
+		</td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('reward');">全选</a>
+		</td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('hack');">全选</a>
+		</td>
+		<td>
+			<a href="javascript:void(0);" onclick="creditSelectByType('other');">全选</a>
+		</td>
+	</tr>
+</table>
+<br />
 </div>
+<script language="javascript">
+function creditSelectByType(typeName) {
+	var checkStatus = getCreditCheckAllStatus(typeName) ? false : true;
+	var checkElements = getObj("stypepass").getElementsByTagName("input");
+	var regStr = new RegExp('^creditlog.' + typeName + '.', "gi");
+	for (var i=0; i<checkElements.length; i++) {
+		if (checkElements[i].type == 'checkbox' && checkElements[i].name.match(regStr)) {
+			checkElements[i].checked = checkStatus;
+		}
+	}
+}
+function getCreditCheckAllStatus(typeName) {
+	var checkElements = getObj("stypepass").getElementsByTagName("input");
+	var regStr = new RegExp('^creditlog.' + typeName + '.', "gi");
+	for (var i=0; i<checkElements.length; i++) {
+		if (checkElements[i].type == 'checkbox' && checkElements[i].name.match(regStr)) {
+			if (!checkElements[i].checked) return false;
+		}
+	}
+	return true;
+}
+</script>
 <div id="stypesupple" style="display:$display;">
 <h3>充值积分设置</h3>
 <table width="100%" cellspacing="0" cellpadding="0">

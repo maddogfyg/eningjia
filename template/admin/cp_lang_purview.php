@@ -103,7 +103,7 @@ $purview = array(
 	'ystats'		=> array('量子恒道统计',"$admin_file?adminjob=ystats&action=config"),
 	'diyoption'		=> array('常用选项定制',"$admin_file?adminjob=diyoption"),
 	'msphinx'        => array('Sphinx全文索引',"$admin_file?adminjob=advanced&admintype=msphinx"),
-	'mmemcache'      => array('Memcahce缓存',"$admin_file?adminjob=advanced&admintype=mmemcache"),
+	'mmemcache'      => array('Memcache缓存',"$admin_file?adminjob=advanced&admintype=mmemcache"),
 	'optimize'		=> array('站点优化方案',"$admin_file?adminjob=optimize"),
 	'maketemplate'	=> array('模块生成',"$admin_file?adminjob=maketemplate"),
 	//'all'			=> array('所有选项',"$admin_file?adminjob=settings&admintype=all"),

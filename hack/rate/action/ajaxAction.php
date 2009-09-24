@@ -38,14 +38,16 @@ class AjaxAction {
 	function _add() {
 		list ( $title, $icon, $typeid, $isopen, $jumpUrl ) = $this->_checkData ();
 		$fieldData = array ("title" => $title, "icon" => $icon, "typeid" => $typeid, "isopen" => $isopen, "creator" => $this->_adminName );
-		$result = $this->_getRateService ()->addRateConfig ( $fieldData );
+		$rateService = $this->_getRateService();
+		$result = $rateService->addRateConfig ( $fieldData );
 		(! $result) ? Showmsg ( "对不起，增加评价选项失败", $jumpUrl ) : Showmsg ( "恭喜你，增加评价选项成功!", $jumpUrl );
 	}
 
 	function _update() {
 		list ( $title, $icon, $typeid, $isopen, $jumpUrl ) = $this->_checkData ();
 		$fieldData = array ("title" => $title, "icon" => $icon, "typeid" => $typeid, "isopen" => $isopen, "updater" => $this->_adminName );
-		$result = $this->_getRateService ()->updateRateConfig ( $fieldData, $this->_id );
+		$rateService = $this->_getRateService();
+		$result = $rateService->updateRateConfig ( $fieldData, $this->_id );
 		(! $result) ? Showmsg ( "对不起，更新评价选项失败", $jumpUrl ) : Showmsg ( "恭喜你，更新评价选项成功!", $jumpUrl );
 	}
 
@@ -83,7 +85,8 @@ class AjaxAction {
 
 	function _buildUpdateHtml() {
 		$id = $this->_id;
-		$rateConfig = $this->_getRateService ()->getRateConfig ( $this->_typeId,$this->_id );
+		$rateService = $this->_getRateService();
+		$rateConfig = $rateService->getRateConfig ( $this->_typeId,$this->_id );
 		foreach ( array (1, 0 ) as $v ) {
 			$isopen [$v] = ($v == $rateConfig ['isopen']) ? "checked=checked" : "";
 		}

@@ -29,11 +29,11 @@ InitGP(array('info_type'));
 
 if (empty($_POST['step'])) {
 
-	list($iconurl,$icontype,$iconwidth,$iconheight,$iconfile) = showfacedesign($userdb['icon'],true,'m');
+	list($iconurl,$icontype,$iconwidth,$iconheight,$iconfile,,,$iconsize) = showfacedesign($userdb['icon'], true);
 	include_once(D_P.'data/bbscache/dbreg.php');
 	require_once(R_P.'require/forum.php');
 	$customdata = $custominfo = $sexselect = $yearslect = $monthslect = $dayslect = array();
-	$ifpublic = $iconsize = $groupselect = $httpurl = $email_Y = $email_N = '';
+	$ifpublic = $groupselect = $httpurl = $email_Y = $email_N = '';
 	$ifsign = false;
 	!in_array($info_type, array('base','trade','link','face','safe','other')) && $info_type = 'base';
 	getstatus($userdb['userstatus'],7) && $ifpublic = 'checked';
@@ -59,10 +59,10 @@ if (empty($_POST['step'])) {
 	$getbirthday = explode('-',$userdb['bday']);
 	$yearslect[(int)$getbirthday[0]] = $monthslect[(int)$getbirthday[1]] = $dayslect[(int)$getbirthday[2]] = 'selected';
 
-	$width2 = $iconwidth;
-	$height2 = $iconheight;
-	$iconwidth && $iconsize = " width=\"$iconwidth\"";
-	$iconheight && $iconsize .= " height=\"$iconheight\"";
+	//$width2 = $iconwidth;
+	//$height2 = $iconheight;
+	//$iconwidth && $iconsize = " width=\"$iconwidth\"";
+	//$iconheight && $iconsize .= " height=\"$iconheight\"";
 	if ($icontype == 2) {
 		$httpurl = $iconurl;
 	}
@@ -78,7 +78,7 @@ if (empty($_POST['step'])) {
 	//系统头像
 	$img = @opendir("$imgdir/face");
 	while ($imgname = @readdir($img)) {
-		if ($imgname != "." && $imgname != ".." && $imgname != "" && eregi("\.(gif|jpg|png|bmp)$",$imgname)) {
+		if ($imgname!='.' && $imgname!='..' && $imgname!='' && preg_match('/\.(gif|jpg|png|bmp)$/i',$imgname)) {
 			$num++;
 			$imgname_array[] = $imgname;
 			if ($num >= 10) break;
@@ -288,13 +288,9 @@ if (empty($_POST['step'])) {
 		$proicon = $httpurl[0];
 		$httpurl[1] = (int)$httpurl[1];
 		$httpurl[2] = (int)$httpurl[2];
-		if (empty($httpurl[1]) && empty($httpurl[2])) {
-			list($iconwidth,$iconheight) = getimagesize($proicon);
-		} else {
-			list($iconwidth,$iconheight) = getfacelen($httpurl[1],$httpurl[2]);
-		}
-		$user_a[2] = $iconwidth;
-		$user_a[3] = $iconheight;
+		$httpurl[3] = (int)$httpurl[3];
+		$httpurl[4] = (int)$httpurl[4];
+		list($user_a[2], $user_a[3]) = flexlen($httpurl[1], $httpurl[2], $httpurl[3], $httpurl[4]);
 		$usericon = setIcon($proicon, $facetype, $user_a);
 		unset($httpurl);
 	}
@@ -313,7 +309,7 @@ if (empty($_POST['step'])) {
 			"INSERT INTO pw_memberinfo SET uid=".pwEscape($winduid).','.$pwSQL
 		);
 	}
-	unset($upmemdata,$upmeminfo,$iconurl,$icontype,$iconwidth,$iconheight, $iconfile, $iconpig, $facetype, $customfield);
+	unset($upmemdata,$upmeminfo, $facetype, $customfield);
 	//other
 	$prohomepage && substr($prohomepage,0,4)!='http' && $prohomepage = "http://$prohomepage";
 

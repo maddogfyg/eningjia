@@ -275,7 +275,7 @@ WYSIWYD.prototype.setMode = function(mode) {
 			this._textArea.value = htmltocode(this.getHTML());
 			this._iframe.style.display = "none";
 			this._textArea.style.display = "block";
-			this._textArea.style.width = "100%";
+			is_ie?this._textArea.style.width = "100%":0;
 			break;
 	    case "wysiwyg":
 			if (this._htmlArea == null && !IsElement('htmlarea')) {
@@ -712,7 +712,7 @@ WYSIWYD.prototype.insertHTML = function(html) {
 	if (is_ie) {
 		this.selRangeText?this.selRange.pasteHTML(html):(this._doc.focus()&this._doc.selection.createRange().pasteHTML(html));
 	} else {
-		 var fragment = this._doc.createDocumentFragment();
+		var fragment = this._doc.createDocumentFragment();
 		var div = this._doc.createElement("div");
 		div.innerHTML = html;
 		while (div.firstChild) {
@@ -962,7 +962,6 @@ function quoteme() {
 	text = editor.getsel();
 	if (editor._editMode=='wysiwyg') {
 		text = htmltocode(text);
-		alert(text);
 		sm = "[quote]"+text+"[/quote]";
 		sm = codetohtml(sm);
 	} else {
@@ -1547,8 +1546,20 @@ function addattach(attid) {
 		if (!path.match(/\.(jpg|gif|png|bmp|jpeg)$/ig)) {
 			path = imgpath + '/' + stylepath + '/file/zip.gif';
 		}
-		var img = imgmaxwh(path,320);
-		editor.insertHTML('<img src="'+img.src+'" type="attachment_'+attid+'" width="'+img.width+'" />');
+		img = imgmaxwh(path,320);
+		
+		setTimeout(function(){
+			var temp = '<img src="'+img.src+'" type="attachment_'+attid;
+			if (img.width>320) {
+				img.width = 320;
+			}
+			if (img.width) {
+				temp += '" width="'+img.width+'" />';
+			} else {
+				temp += '" />';
+			}
+			editor.insertHTML(temp);
+		},1000);
 	}
 	closep();
 };

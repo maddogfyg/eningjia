@@ -344,6 +344,12 @@ function showTabs(id,select,element,css) {
 	}
 	ifcheck = false;
 	p_match = select == 'public' ? /^pdelid/ : /^delid/;
+	if(select == 'newmsg') {
+		p_match = /^pdelid|^delid/;
+	}
+	if (select == 'newmsg'){
+		
+	}
 	CheckAll(document.del);
 	return false;
 }
@@ -781,6 +787,7 @@ function inputfriends(){
 		getObj('pwuser').value = friends;
 	}
 }
+document.FORM.Submit.disabled = false;
 </script>
 <!--
 EOT;

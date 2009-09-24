@@ -72,7 +72,7 @@ class creditmodel {
 			$sql = array($uid);
 			foreach ($applist as $key => $app) {
 				if (!$app['uc']) {
-					$sql[] = isset($apps[$key]) ? $apps[$key] : (isset($stats[$uid]) ? $stats[$uid]['app'.$k] : 1);
+					$sql[] = isset($apps[$key]) ? $apps[$key] : (isset($stats[$uid]) ? $stats[$uid]['app'.$key] : 1);
 				}
 			}
 			$pwSQL[] = $sql;
@@ -116,14 +116,14 @@ class creditmodel {
 		}
 		$uids = array_keys($us);
 		$ucds = $this->get($uids);
-
+		$ucds = $this->exchange($ucds, $appid);
 		if ($appid == $this->base->appid && file_exists(R_P . 'api/class_base.php')) {
 			include(R_P . 'api/class_base.php');
 			$api  = new api_client();
-			$resp = $api->dataFormat($api->callback('Cache', 'syncredit', array($ucds)));
+			$resp = $api->dataFormat($api->callback('Credit', 'syncredit', array($ucds)));
 			$success = isset($resp['result']);
 		} else {
-			$resp = $myApp->ucfopen($app['siteurl'], $app['interface'], $app['secretkey'], 'Cache', 'syncredit', array($ucds));
+			$resp = $myApp->ucfopen($app['siteurl'], $app['interface'], $app['secretkey'], 'Credit', 'syncredit', array($ucds));
 			$success = isset($resp['result']);
 		}
 		if ($success) {
@@ -152,7 +152,7 @@ class creditmodel {
 		$cid == 'rvrc' && $value *= 10;
 		$value = intval($value);
 		if (is_numeric($cid)) {
-			$rt = $this->$db->get_one("SELECT uid,value FROM pw_membercredit WHERE uid=" . UC::escape($uid) . ' AND cid=' . UC::escape($cid));
+			$rt = $this->db->get_one("SELECT uid,value FROM pw_membercredit WHERE uid=" . UC::escape($uid) . ' AND cid=' . UC::escape($cid));
 			if ($rt) {
 				$this->db->update("UPDATE pw_membercredit SET value=value+" . UC::escape($value) .  ' WHERE uid=' . UC::escape($uid) . ' AND cid=' . UC::escape($cid));
 				return $rt['value'] + $value;
@@ -166,6 +166,21 @@ class creditmodel {
 			return $this->db->get_value("SELECT $cid FROM pw_memberdata WHERE uid=" . UC::escape($uid));
 		}
 		return null;
+	}
+
+	function exchange($ucds, $appid) {
+		$ucredit = array();
+		if ($appid > 0) {
+			$syncredit = $this->base->config('uc_syncredit');
+			foreach ($ucds as $uid => $setv) {
+				foreach ($setv as $ctype => $value) {
+					if (isset($syncredit[$ctype][$appid])) {
+						$ucredit[$uid][$syncredit[$ctype][$appid]] = $value;
+					}
+				}
+			}
+		}
+		return $ucredit;
 	}
 
 	function get($uids) {

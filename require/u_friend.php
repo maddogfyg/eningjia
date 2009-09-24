@@ -42,7 +42,7 @@ if (empty($job)) {
 	if ($selid) {
 		$db->update('DELETE FROM pw_friends WHERE uid='.pwEscape($userdb['uid'])." AND friendid IN (".pwImplode($selid).")");
 		$count = count($selid);
-		$db->update("UPDATE pw_memberdata SET f_num=f_num-$count WHERE uid=".pwEscape($winduid));
+		$db->update("UPDATE pw_memberdata SET f_num=f_num-$count WHERE uid=".pwEscape($winduid)." AND f_num>=$count");
 	}
 	refreshto('u.php?action=friend','operate_success');
 

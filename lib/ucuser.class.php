@@ -15,7 +15,7 @@ class PW_Ucuser {
 		$this->db =& $db;
 	}
 
-	function ucedit($uid, $oldname, $info) {
+	function edit($uid, $oldname, $info) {
 		require_once(R_P . 'uc_client/uc_client.php');
 		$errmsg  = null;
 		$errcode = array(
@@ -30,6 +30,50 @@ class PW_Ucuser {
 			$this->alterName($uid, $oldname, $info['username']);
 		}
 		return array($ucstatus, $errmsg);
+	}
+
+	function delete($u_arr) {
+		if (empty($u_arr))
+			return false;
+
+		require_once(R_P . 'uc_client/uc_client.php');
+		uc_user_delete($u_arr);
+
+		require_once(R_P.'require/writelog.php');
+		global $admin_name,$timestamp,$onlineip;
+		$udb = array();
+		$query = $this->db->query("SELECT m.uid,m.username,m.groupid FROM pw_members m LEFT JOIN pw_memberdata md ON md.uid=m.uid WHERE m.uid IN(" . pwImplode($u_arr) . ")");
+		while ($rt = $this->db->fetch_array($query)) {
+			$log = array(
+				'type'      => 'deluser',
+				'username1' => $rt['username'],
+				'username2' => $admin_name,
+				'field1'    => 0,
+				'field2'    => $rt['groupid'],
+				'field3'    => '',
+				'descrip'   => 'deluser_descrip',
+				'timestamp' => $timestamp,
+				'ip'        => $onlineip,
+			);
+			writelog($log);
+
+			$udb[] = $rt['uid'];
+		}
+		$this->delUserByIds($udb);
+	}
+
+	function delUserByIds($uids) {
+		if (!$delids = pwImplode($uids)) {
+			return;
+		}
+		$this->db->update("DELETE FROM pw_members WHERE uid IN ($delids)");
+		$this->db->update("DELETE FROM pw_memberdata WHERE uid IN ($delids)");
+		$this->db->update("DELETE FROM pw_memberinfo WHERE uid IN ($delids)");
+		$this->db->update("DELETE FROM pw_banuser WHERE uid IN ($delids)");
+
+		@extract($this->db->get_one("SELECT count(*) AS count FROM pw_members"));
+		@extract($this->db->get_one("SELECT username FROM pw_members ORDER BY uid DESC LIMIT 1"));
+		$this->db->update("UPDATE pw_bbsinfo SET newmember=" . pwEscape($username) . ',totalmember=' . pwEscape($count) . " WHERE id='1'");
 	}
 
 	function alterName($uid, $oldname, $username) {

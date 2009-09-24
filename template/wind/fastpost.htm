@@ -6,10 +6,9 @@ $ifanonymous = ($isGM || $forumset['anonymous'] && $_G['anonymous']) ? '' : "dis
 $creditnames = pwCreditNames();
 print <<<EOT
 -->
-<script type="text/javascript" src="js/session.js"></script>
 <table cellPadding="0" cellSpacing="0" style="display:none">
-	<tbody id="att_mode"><tr><td><input class="input" type="text" name="atc_desc" size="12" /></td>
-		<td><input class="input" type="file" name="attachment_" size="10" /></td>
+	<tbody id="att_mode"><tr><td><input class="input" type="file" name="attachment_" size="10" /></td>
+		<td><input class="input" type="text" name="atc_desc" size="12" /></td>
 		<td><select name="att_special" onchange="newAtt.sel(this);" style="width:70px;"><option value="0"></option><option value="1">加密</option><option value="2">出售</option></select></td>
 		<td><select name="att_ctype" style="width:60px;">
 <!--
@@ -68,12 +67,13 @@ EOT;
 		<select name="atc_credittype" id="attmode_2">
 <!--
 EOT;
+if(is_array($db_sellset['type'])){
 foreach ($db_sellset['type'] as $key => $value) {print <<<EOT
 -->
 			<option value="$value">$creditnames[$value]</option>
 <!--
 EOT;
-}print <<<EOT
+}}print <<<EOT
 -->
 		</select>
 		<br />
@@ -82,12 +82,13 @@ EOT;
 		<select name="atc_enhidetype" id="attmode_1">
 <!--
 EOT;
+if(is_array($db_enhideset['type'])){
 foreach ($db_enhideset['type'] as $key => $value) {print <<<EOT
 -->
 			<option value="$value">$creditnames[$value]</option>
 <!--
 EOT;
-}print <<<EOT
+}}print <<<EOT
 -->
 		</select>
 		<br />
@@ -155,7 +156,7 @@ EOT;
 }elseif($special == 'read_debate'){
 print <<<EOT
 -->
-	<select name="standpoint">
+	<select name="standpoint" id="standpoint">
 		<option value="0" $debate_0>闲聊一下</option>
 <!--
 EOT;
@@ -202,14 +203,14 @@ EOT;
 		</div>
 <!--
 EOT;
-if($db_sitemsg['reply']['0'] && $psot_sta){
+if(isset($db_sitemsg['reply']['0']) && $db_sitemsg['reply']['0'] && $psot_sta){
 print<<<EOT
 -->
 <div class="c"></div>
 <div class="cc"><div class="blockquote fl" style="margin:6px 0 0;width:auto;">{$db_sitemsg[reply][array_rand($db_sitemsg[reply])]}</div></div>
 <!--
 EOT;
-}elseif($db_sitemsg['post']['0']){print<<<EOT
+}elseif(isset($db_sitemsg['post']['0']) && $db_sitemsg['post']['0']){print<<<EOT
 -->
 <div class="c"></div>
 <div class="cc"><div class="blockquote fl" style="margin:6px 0 0;width:auto;">{$db_sitemsg[post][array_rand($db_sitemsg[post])]}</div></div>
@@ -245,12 +246,12 @@ print <<<EOT
 -->
 		<table style="margin-top:10px;">
 			<tr>
-				<td width="18%">描述</td>
-				<td>附件</td>
-				<td width="13%">售/密</td>
-				<td width="13%">积分</td>
-				<td width="11%">价格</td>
-				<td width="28%"></td>
+				<td width="23%">附件</td>
+				<td width="15%">描述</td>
+				<td width="12%">售/密</td>
+				<td width="10%">积分</td>
+				<td width="10%">价格</td>
+				<td width="30%"></td>
 			</tr>
 			<tbody id="attach"></tbody>
 		</table>

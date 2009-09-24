@@ -1,5 +1,5 @@
 <!--
-<?php 
+<?php
 
 print <<<EOT
 -->
@@ -70,13 +70,15 @@ body{font-family: Arial;}
 
 .list-img-a{padding-bottom:10px;}
 .list-img-a li{float:left;margin:6px 10px 5px 0;display:inline;}
-.list-img-a li p{line-height:20px;height:20px;overflow:hidden; text-align:center;}
+.list-img-a li p{line-height:20px;height:20px;overflow:hidden; text-align:center; text-indent:0;}
 
 .h{border-bottom:1px solid #abc8ea;background:#e8f5fb;text-align:left;color:#3366cc;padding:2px .5em 0; line-height:220%;}
 .h span{font-weight:normal;}
 .h h2{font-weight:bold}
 .h a{font-family:Arial;color:#3366cc}
 .h span a,.h span{color:#3366cc;}
+
+body {-moz-user-select:none;}
 </style>
 <table width="100%">
 	<tr class="tr3">
@@ -116,6 +118,7 @@ $tpl_content
 </table>
 
 <script language="JavaScript" src="js/global.js"></script>
+<script language="JavaScript" src="js/core/core.js"></script>
 <script language="JavaScript" src="js/pw_ajax.js"></script>
 <script language="javascript" src="apps/stopic/js/getelementpos.js"></script>
 <script language="javascript" src="apps/stopic/js/drag.js"></script>

@@ -124,6 +124,7 @@ $tabledb = array(
 	'pw_topicmodel',
 	'pw_trade',
 	'pw_tradeorder',
+	'pw_usercache',
 	'pw_usergroups',
 	'pw_usertool',
 	'pw_ucapp',

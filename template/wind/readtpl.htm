@@ -56,7 +56,16 @@ $msgsound
 				<td width="380"></td>
 				<td>
 					<ul class="fr">
-						$db_head
+<!--
+EOT;
+foreach($db_headnav as $value){
+if ($value['pos'] == '-1' || strpos(",{$value['pos']},",',bbs,') !== false) {print <<<EOT
+-->
+						<li>{$value['html']}</li>
+<!--
+EOT;
+}}print <<<EOT
+-->
 					</ul>
 				</td>
 			</tr>
@@ -212,22 +221,12 @@ EOT;
 .warning a:hover{background:#F00; color:#fff; padding:0;}
 .sigline {margin-top:10px;margin-left:15px;background: url($imgpath/$stylepath/read/sigline.gif) right bottom no-repeat;margin-right:30em;height:5px;}
 .signature {padding:10px 15px 0;height:expression(this.scrollHeight>parseInt(this.currentStyle.maxHeight)?this.currentStyle.maxHeight:"auto");}
-.user-pic {margin-left:11px;}
 .user-pic img {border: 1px solid $tdcolor;background:#fff;padding:3px;}
 .small {font-size:12px}
 .middle {font-size:14px}
 .big {font-size:18px}
-.dig {font-size:12px;background:#ffffee url($imgpath/$stylepath/read/readicon.png) .3em -164px no-repeat;padding:0 .4em 0 1.6em;cursor: pointer;color:#666;border:1px solid #ffd0a8;height:18px;line-height:18px;margin:12px 5px 10px 15px;}
+.dig{font-size:12px;background-color:#ffffee; background-position:-22px -57px;padding:0 .4em 0 1.6em;cursor: pointer;color:#666;border:1px solid #ffd0a8;height:18px;line-height:18px;margin:12px 5px 10px 15px;}
 .dig:hover {text-decoration:none;border:1px solid #f5a25c;color:#ff6600;}
-.listread a{background:url($imgpath/$stylepath/read/readicon.png);width:16px;height:20px;overflow:hidden;text-indent:-2000em;display:block;margin-right:5px;float:left;}
-.listread .readblog {background-position:0 -120px;}
-.listread .readonline {background-position:0 0px;}
-.listread .readoffline {background-position:0 -20px;}
-.listread .readprofile {background-position:0 -40px;}
-.listread .readmagic {background-position:0 -80px;}
-.listread .readmessage {background-position:0 -60px;}
-.listread .readqq {background-position:0 -100px;}
-.listread .readww {background-position:0 -140px;}
 .readbot {padding:0px;}
 .readbot a{list-style:none;padding:0 0 0 1.5em;margin:0;float:left;cursor:pointer;background:url($imgpath/$stylepath/read/yin.gif) no-repeat;width:3.5em;height:16px;}
 .readbot .r-quote:hover{background-position:0 0;}
@@ -248,17 +247,42 @@ EOT;
 .threadlist a{display:block;float:left;padding:0 9px;border-bottom:0;line-height:25px;height:25px;}
 .threadlist .current{background:#ffffff;border:1px solid #9ec0e1;padding:0 8px;border-bottom:0;}
 .img-50{width:48px;height:48px;}
+
+/*分类信息*/
+.cates{margin:0 0 10px;}
+.cates .cate-list li{padding:2px 0 1px 10px;font-weight:500;color:#444444; list-style:none;}
+.cates .cate-list em{ font-style:normal;width:100px;float:left;}
+.cates .cate-list cite{font-style:normal;}
+.cates input{ vertical-align:middle;}
+.cates .w{margin-right:10px;}
+.cates .two{background:$forumcolortwo;}
+.app-post{background:url($imgpath/app-post.png);display:block;float:left;color:#ffffff;width:78px;height:26px;line-height:25px;padding-left:17px; }
+.app-post:hover{ text-decoration:none; background-position:0 -50px;}
+
+/*flash*/
+.flash{position:relative;}
+.flash img{height:100%;width:100%;}
+.flash ul {position:absolute;right:8px;bottom:8px;z-index:3;}
+.flash ul li {list-style:none;float:left;width:18px;height:13px;line-height:13px;text-align:center;margin-left:2px;background:#ffffff;}
+.flash ul li a {display:block;width:18px;height:13px;font-size:10px;font-family:Tahoma;color:#333333;}
+.flash ul li a:hover,.flash ul li a.sel {color:#fff;text-decoration:none;background:#ffa900;}
+
+/*ping*/
+.score{margin:10px 15px;padding-top:10px;border-top:1px dashed $tdcolor;line-height:22px;}
+.score td{padding:2px 10px 2px 5px;}
+.score th{padding:6px 0 0;}
+.score tr:hover{background:$forumcolortwo;}
+.score a{color:#3366cc;}
 </style>
-<div id="breadCrumb"> $msg_guide <a href="read.php?fid=$fid&tid=$tid&toread=1">(转到动态网页)</a> &raquo; <a href="rss.php?tid=$tid" target="_blank" title="Rss订阅本帖最新内容"><img src="$imgpath/$stylepath/rss.png" align="absbottom" style="margin-bottom:2px;" alt="rss" /></a>
+<div id="breadCrumb" class="cc"> $msg_guide <a href="read.php?fid=$fid&tid=$tid&toread=1">(转到动态网页)</a> &raquo; <a href="rss.php?tid=$tid" target="_blank" title="Rss订阅本帖最新内容"><img src="$imgpath/$stylepath/rss.png" align="absbottom" style="margin-bottom:2px;" alt="rss" /></a>
 </div>
-<div class="c"></div>
 <!--ads begin-->
 <!--
 EOT;
-list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Forum.TextRead',$fid,0,'read');
+list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Forum.TextRead',$fid);
 if($htmlAdvert){print <<<EOT
 -->
-<div class="ad-text mt">
+<div class="ad-text">
 	<table width="100%" cellspacing="0" cellpadding="0">
 <!--
 EOT;
@@ -312,7 +336,7 @@ EOT;
 }print <<<EOT
 -->
 <span class="fr"><a href="post.php?action=reply&fid=$fid&tid=$tid"><img src="$imgpath/$stylepath/reply.png" /></a></span>
-<span class="pages fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&goto=previous" class="fn">上一主题</a><span style="border-left:1px solid $tdcolor;" class="f_one fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&goto=next" class="fn">下一主题</a></span></span>
+<span class="pages fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&goto=previous" class="fn">上一主题</a><span class="f_one fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&goto=next" class="fn">下一主题</a></span></span>
 <span class="fl">$pages</span>
 <div class="c"></div>
 </div>
@@ -378,7 +402,6 @@ EOT;
 </div>
 <!--
 EOT;
-$style = 'style="border-top:0"';
 foreach($readdb as $key=>$read){
 if($read){
 list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Forum.Layer.TidAmong',$fid,$key,'read');
@@ -390,101 +413,65 @@ EOT;
 }print <<<EOT
 -->
 	$read[jupend]
-	<div class="t5" $style>
+	<div class="t5">
 		<table cellspacing="0" cellpadding="0" width="100%" style="table-layout:fixed;">
 			<tr class="tr1">
-				<th style="width:185px;padding:0 0 2em 0;" rowspan="2" class="r_two">
-				<div style="line-height:24px;padding:5px 5px 0 12px;"> <div class="listread fl">
+				<td style="width:185px;vertical-align:top;" rowspan="2" class="r_two">
+				<div style="padding:8px 0 20px 8px;">
+				<div class="cc" style="padding-bottom:3px;"><b class="fl black"><a href="u.php?action=show&uid=$read[authorid]" target="_blank">$read[author]</a></b>
 <!--
 EOT;
-if($db_showonline && checkOnline($read['thisvisit'])){print <<<EOT
+if($db_showonline && checkOnline($userdb['thisvisit'])){print <<<EOT
 -->
-						<a onclick="sendmsg('$db_bbsurl/pw_ajax.php?action=addfriend&touid=$read[authorid]','','sf_$read[lou]')" style="cursor:pointer;"  title="加为好友" class="readonline" />
-加为好友
-						</a>
+					<span class="card-online" title="在线">在线</span>
 <!--
 EOT;
-}elseif($db_showonline){print <<<EOT
+}else{print<<<EOT
 -->
-						<a onclick="sendmsg('$db_bbsurl/pw_ajax.php?action=addfriend&touid=$read[authorid]','','sf_$read[lou]')" style="cursor:pointer" class="readoffline" title="加为好友" />
-加为好友
-						</a>
+					<span class="card-offline" title="离线">离线</span>
 <!--
 EOT;
 }print <<<EOT
 -->
-						</div> <b class="fl black"><a href="u.php?action=show&uid=$read[authorid]" target="_blank">$read[author]</a></b>
-						<div class="c"></div>
-					</div>
+				</div>
 <!--
 EOT;
 if($read['honor']){print <<<EOT
 -->
-					<div class="honor" style="padding-top:0;">$read[honor]</div>
+				<div class="honor">$read[honor]</div>
 <!--
 EOT;
 }print <<<EOT
 -->
-<style type="text/css">
-.pw-card{ width:16px; height:14px; background:url($imgpath/card-name.png) no-repeat; position:absolute; margin-left:0px; text-indent:-2000em}
-.img-50{width:48px;height:48px;}
-</style>
 					<div class="user-pic">
-						<table style="border:0;">
+						<table>
 							<tr>
 								<td width="1">
-									<a href="u.php?action=show&uid=$read[authorid]" target="_blank" style="cursor:pointer;" onmouseover="getObj('card_$read[lou]').style.display=''" onmouseout="getObj('card_$read[lou]').style.display='none'">$read[face]</a>
+<!--
+EOT;
+if (isset($db_modes['o']['ifopen']) && $db_modes['o']['ifopen']) {print<<<EOT
+-->
+									<a href="u.php?action=show&uid=$read[authorid]" target="_blank" id="card_sf_{$read[pid]}_{$read[authorid]}" class="userCard">$read[face]</a>
+<!--
+EOT;
+}else{print<<<EOT
+-->
+									<a href="u.php?action=show&uid=$read[authorid]" target="_blank">$read[face]</a>
+<!--
+EOT;
+}print<<<EOT
+-->
 								</td>
-								<td valign="bottom" width="1"><a class="pw-card" id="card_{$read[lou]}" onmouseover="getObj('card_$read[lou]').style.display=''" onmouseout="getObj('card_$read[lou]').style.display='none'" onclick="showcard('sf_$read[lou]','$read[authorid]')" style="margin-left:-22px;margin-top:-20px;cursor:pointer;display:none;" title="查看名片">查看名片</a></td>
-								<td style="vertical-align:top"><span id="sf_$read[lou]"></span></td>
+								<td width="1" style="vertical-align:top"><span id="sf_$read[pid]"></span></td>
 							</tr>
 						</table>
 					</div>
-<script language="javascript">
-function showcard(id,uid) {
-	read.obj = getObj(id);
-	try {ajax.send('$db_bbsurl/pw_ajax.php?action=showcard&uid='+uid,'',ajax.get);} catch(e){}
-}
-</script>
-					<div style="padding-left:12px;padding-bottom:8px;">
+					<div style="padding:5px 0 2px;">
 					级别: {$read[level]}<br />
 					<img src="$imgpath/$stylepath/level/$read[lpic].gif" style="margin:.2em 0 .2em 0;display:block"/> $read[medals]
-
+					</div>
 					<span class="user-info2">
 						<span class="user-infoWrap2">
-							<div class="listread">
-<!--
-EOT;
-if($db_hackdb['blog'][2] && $bg_ifopen){print <<<EOT
--->
-										<a href="$bg_blogurl/blog.php?bbsuid=$read[authorid]" title="进入个人主页" style="cursor:pointer;" target="_blank" class="readblog">进入个人主页</a>
-<!--
-EOT;
-}print <<<EOT
--->
-										<a href="u.php?action=show&uid=$read[authorid]" style="cursor:pointer;"  title="查看作者资料"  class="readprofile">作者资料</a>
-										<a title="发送短消息" onclick="sendmsg('$db_bbsurl/pw_ajax.php?action=msg&touid=$read[authorid]','','sf_$read[lou]')" style="cursor:pointer;"  class="readmessage">发送短消息</a>
-<!--
-EOT;
-if($groupid!='guest' && $db_hackdb['toolcenter'][1]){print <<<EOT
--->
-										<a title="对该用户使用道具" onclick="sendmsg('$db_bbsurl/pw_ajax.php?action=usertool&uid=$read[authorid]','','sf_$read[lou]')" style="cursor:pointer" class="readmagic">使用道具</a>
-<!--
-EOT;
-}if($read['oicq']){print <<<EOT
--->
-										<a href="http://wpa.qq.com/msgrd?V=1&Uin=$read[oicq]&Site=$db_bbsname&Menu=yes" class="readqq" style="cursor:pointer;" target="_blank" title="QQ:$read[oicq]">QQ联系</a>
-<!--
-EOT;
-}if ($read['aliww']) {print <<<EOT
--->
-										<a title="阿里旺旺:$read[aliww]" href="http://amos.im.alisoft.com/msg.aw?uid=$read[aliww]&site=cntaobao" class="readww" style="cursor:pointer;" target="_blank">阿里旺旺</a>
-<!--
-EOT;
-}print <<<EOT
--->
-							</div>
-							<div class="c" style="width:120px;height:5px;"></div>
 <!--
 EOT;
 if(!$db_readinfo){print<<<EOT
@@ -524,7 +511,7 @@ EOT;
 }print<<<EOT
 -->
 						<span class="user-infoWrap2">
-							<div class="c" style="width:120px;height:5px;"></div>
+							<div class="c"></div>
 							UID: <span class="f12">$read[authorid]</span><br />
 							精华:
 <!--
@@ -605,7 +592,6 @@ EOT;
 							注册时间: <span class="gray">{$read[regdate]}</span><br />
 							最后登录: <span class="gray">{$read[lastlogin]}</span> </span> </span>
 					</div>
-					</div>
 				</th>
 				<th height="100%" class="r_one" valign="top" id="td_$read[pid]" style="padding:0px;border:0;overflow:hidden"> <a name="post_$read[pid]"></a>
 					<div class="tiptop"> <span class="fl">
@@ -635,12 +621,12 @@ EOT;
 }else{
 if($read['lou']==0){print <<<EOT
 -->
-							<a href="read.php?tid=$tid&uid=$read[authorid]" title="只看楼主的所有帖子">只看楼主</a> |
+							<a href="read.php?tid=$tid&uid=$read[authorid]&toread=1" title="只看楼主的所有帖子">只看楼主</a> |
 <!--
 EOT;
 }else{print <<<EOT
 -->
-							<a href="read.php?tid=$tid&uid=$read[authorid]" title="只看该作者的所有回复">只看该作者</a> |
+							<a href="read.php?tid=$tid&uid=$read[authorid]&toread=1" title="只看该作者的所有回复">只看该作者</a> |
 <!--
 EOT;
 }}print <<<EOT
@@ -921,7 +907,7 @@ EOT;
 EOT;
 }print <<<EOT
 -->
-							<a class="r-quote" href="post.php?action=quote&fid=$fid&tid=$tid&pid=$read[pid]&article=$read[lou]&page=$page" onclick="return sendurl(this,4,'',event,'$db_bbsurl/')" id="quote_$read[pid]" title="引用回复这个帖子">引用</a>
+							<a class="r-quote" href="post.php?action=quote&fid=$fid&tid=$tid&pid=$read[pid]&article=$read[lou]&page=$page" onclick="showDialog('warning','只能在动态浏览时才能进行此操作','2');return false;" id="quote_$read[pid]" title="引用回复这个帖子">引用</a>
 <!--
 EOT;
 if($admincheck || $_G['markable']){print <<<EOT
@@ -931,7 +917,7 @@ if($admincheck || $_G['markable']){print <<<EOT
 EOT;
 }if($groupid!='guest' && $read['lou']==0){print <<<EOT
 -->
-							<a class="r-keep" href="javascript:;"  style="cursor:pointer;" onclick="sendmsg('$db_bbsurl/pw_ajax.php?action=favor&tid=$tid&fid=$fid','',this.id)" id="favor" title="收藏为私有">收藏</a>
+							<a class="r-keep" href="javascript:;"  style="cursor:pointer;" onclick="showDialog('warning','只能在动态浏览时才能进行此操作','2');return false;" id="favor" title="收藏为私有">收藏</a>
 <!--
 EOT;
 }print <<<EOT
@@ -973,7 +959,7 @@ if($pwforum->foruminfo['allowtype']){print <<<EOT
 EOT;
 }print <<<EOT
 -->
-	<span class="fr"><a href="post.php?action=reply&fid=$fid&tid=$tid"><img src="$imgpath/$stylepath/reply.png" /></a></span> <span class="pages"><a href="job.php?action=previous&fid=$fid&tid=$tid&fpage=$fpage&goto=previous" class="fn">上一主题</a><span style="border-left:1px solid $tdcolor;" class="f_one fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&fpage=$fpage&goto=next" class="fn">下一主题</a></span></span> <span class="fl">$pages</span>
+	<span class="fr"><a href="post.php?action=reply&fid=$fid&tid=$tid"><img src="$imgpath/$stylepath/reply.png" /></a></span> <span class="pages"><a href="job.php?action=previous&fid=$fid&tid=$tid&fpage=$fpage&goto=previous" class="fn">上一主题</a><span class="f_one fl"><a href="job.php?action=previous&fid=$fid&tid=$tid&fpage=$fpage&goto=next" class="fn">下一主题</a></span></span> <span class="fl">$pages</span>
 	<div class="c"></div>
 </div>
 <div class="c"></div>
@@ -1035,6 +1021,7 @@ var db_urlcheck = '$db_urlcheck';
 EOT;
 }print<<<EOT
 -->
+
 </script>
 <script type="text/javascript" language="JavaScript" src="js/pw_lwd.js"></script>
 <div id="att_mode" style="display:none"><div>威望: <input class="input" type="text" name="atc_downrvrc" value="0" size="1" /> &nbsp;描述: <input class="input" type="text" name="atc_desc" size="20" /> &nbsp;附件: <input class="input" type="file" name="attachment_" /></div></div>
@@ -1064,17 +1051,17 @@ EOT;
 EOT;
 if($db_gdcheck & 4){print <<<EOT
 -->
-	<div class="fl" style="margin-right:15px;">
+	<div style="margin:5px 15px 5px 0;">
 		 认证码: <input class="input" type="text" name="gdcode" size="5" tabindex="6" onfocus="try{opencode('menu_gd',this)}catch(e){}" /><br />
 		<div class="menu" id="menu_gd" style="visibility:hidden;"><img src="ck.php?" align="absmiddle" style="cursor:pointer;" id="ckcode" alt="看不清楚，换一张" /></div></div>
 <!--
 EOT;
-}
-if($db_question && $postq){
+}list(,,$postq)=explode("\t",$db_qcheck);
+if($winddb[postnum] < $postq && $db_question){
 $qkey = array_rand($db_question);
 print <<<EOT
 -->
-<div class="fl">：{$db_question[$qkey]} <input class="input" type="text" name="qanswer" /><input type="hidden" name="qkey" value="$qkey" /></div>
+<div style="margin:5px 15px 5px 0;">验证问题：{$db_question[$qkey]} <input class="input" type="text" name="qanswer" />&nbsp;正确答案:{$db_answer[$qkey]}<input type="hidden" name="qkey" value="$qkey" /></div>
 <!--
 EOT;
 }print <<<EOT
@@ -1090,9 +1077,9 @@ EOT;
 		<input type="hidden" name="_hexie" value="_hexie" />
 		<div style="margin:5px 0">
 		<div style="padding:4px 15px 3px 0;float:right;"><a class="bta" onclick="javascript:checklength(document.FORM,'$db_postmax');">字数检查</a>
-		<a class="bta" onclick="loadData('msg');">恢复数据</a>
+		<!-- <a class="bta" onclick="loadData('msg');">恢复数据</a>
 		<a class="bta" onclick="savedraft();">存为草稿</a>
-		<a class="bta" id="newdraft" onclick="opendraft(this.id);">草稿箱</a></div>
+		<a class="bta" id="newdraft" onclick="opendraft(this.id);">草稿箱</a> --></div>
 		<div style="padding:4px 10px 0 0;float:left;color:#FF0000">按 Ctrl+Enter 直接提交</div>
 		<input class="btn" type="submit" name="Submit" value=" 提 交 " /></div>
 		</td>
@@ -1248,9 +1235,6 @@ EOT;
 <div id="footer">
 <div id="mode-footer" class="mt">
 	<div class="bottom tac">
-		<div class="y-bg"></div>
-		<div class="y-bg2"></div>
-		<div class="y-bg3"></div>
 		<div class="y-bg4 black">
 			<ul>{$GLOBALS['db_foot']}
 				<li><a href="job.php?action=erasecookie&verify=$GLOBALS[loginhash]">清除Cookies</a></li>
@@ -1260,9 +1244,6 @@ EOT;
                 <li><a href="javascript:scroll(0,0)">返回顶部</a></li>
 			</ul>
 		</div>
-		<div class="y-bg3"></div>
-		<div class="y-bg2"></div>
-		<div class="y-bg"></div>
 	</div>
 	<center><small><span id="windspend"><!-- $wind_spend Time now is:$ft_time, $ft_gzip --> $db_icp</span><br />
 	Powered by <a href="http://www.phpwind.net/" target="_blank"><b>PHPWind</b></a> <a href="http://www.phpwind.net/" target="_blank"><b style="color:#FF9900">v$wind_version</b></a> <a href="http://www.phpwind.com/certificate.php?host={$pwServer['HTTP_HOST']}"><b>Certificate</b></a> Code &copy; 2003-09 <a href="http://www.phpwind.com/" target="_blank"><b>PHPWind.com</b></a> Corporation <span id="stats"></span></small>

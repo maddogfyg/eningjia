@@ -410,7 +410,7 @@ if ($action == "banuser") {
 	InitGP(array('selid'));
 	empty($selid) && Showmsg('mawhole_nodata');
 	$pw_tmsgs = GetTtable($tid);
-	$tpcdb = $db->get_one("SELECT t.tid,t.fid,t.author,t.authorid,t.postdate,t.subject,t.topped,t.anonymous,t.ifshield,t.ptable,tm.aid FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON tm.tid=t.tid WHERE t.tid='$tid'");
+	$tpcdb = $db->get_one("SELECT t.tid,t.fid,t.author,t.authorid,t.postdate,t.subject,t.topped,t.anonymous,t.ifshield,t.ptable,t.ifcheck,tm.aid FROM pw_threads t LEFT JOIN $pw_tmsgs tm ON tm.tid=t.tid WHERE t.tid='$tid'");
 	if (!$tpcdb || $tpcdb['fid'] != $fid) {
 		Showmsg('undefined_action');
 	}
@@ -439,7 +439,7 @@ if ($action == "banuser") {
 	}
 	if ($pids) {
 		$pids  = pwImplode($pids);
-		$query = $db->query("SELECT pid,fid,tid,aid,author,authorid,postdate,subject,content,anonymous FROM $pw_posts WHERE tid='$tid' AND fid='$fid' AND pid IN($pids)");
+		$query = $db->query("SELECT pid,fid,tid,aid,author,authorid,postdate,subject,content,anonymous,ifcheck FROM $pw_posts WHERE tid='$tid' AND fid='$fid' AND pid IN($pids)");
 		while ($rt = $db->fetch_array($query)) {
 			if ($groupid != 3 && $groupid != 4) {
 				$authordb = $db->get_one('SELECT groupid FROM pw_members WHERE uid='.pwEscape($rt['authorid']));
@@ -451,6 +451,7 @@ if ($action == "banuser") {
 				$rt['subject'] = substrs($rt['content'],35);
 			}
 			$rt['postdate'] = get_date($rt['postdate']);
+			$rt['ptable'] = $tpcdb['ptable'];
 			$threaddb[] = $rt;
 		}
 	}
@@ -458,7 +459,7 @@ if ($action == "banuser") {
 
 		$reason_sel = '';
 		$reason_a	= explode("\n",$db_adminreason);
-		foreach ($reason_a as $k=>$v) {
+		foreach ($reason_a as $k => $v) {
 			if ($v = trim($v)) {
 				$reason_sel .= "<option value=\"$v\">$v</option>";
 			} else {
@@ -471,225 +472,74 @@ if ($action == "banuser") {
 	} else {
 
 		PostCheck();
-		$_tids = $_pids = array();
 		require_once(R_P.'require/credit.php');
 		$creditset = $credit->creditset($foruminfo['creditset'],$db_creditset);
-
+		
 		foreach ($threaddb as $key => $val) {
-			if ($val['pid'] == 'tpc') {
-				$db->update("UPDATE pw_threads SET ifshield='2' WHERE tid='$tid'");
-				$threadList = L::loadClass("threadlist");
-				$threadList->removeThreadIdsByForumId($fid,$tid);
-
-				$threads = L::loadClass('Threads');
-				$threads->delThreads($tid);
-
-				if ($db_recycle) {
-					$pwSQL = pwSqlSingle(array(
-						'pid'		=> 0,
-						'tid'		=> $tid,
-						'fid'		=> $fid,
-						'deltime'	=> $timestamp,
-						'admin'		=> $windid
-					));
-					$db->update("REPLACE INTO pw_recycle SET $pwSQL");
-				} else {
-					delete_tag($tid);
-				}
-				if ($val['aid']) {
-					$_tids[$val['tid']] = $val['tid'];
-					$_pids[0] = 0;
-				}
-				if ($_POST['ifdel']) {
-					$credit->addLog('topic_Delete',$creditset['Delete'],array(
-						'uid'		=> $val['authorid'],
-						'username'	=> $val['author'],
-						'ip'		=> $onlineip,
-						'fname'		=> strip_tags($forum[$fid]['name']),
-						'operator'	=> $windid
-					));
-					$credit->sets($val['authorid'],$creditset['Delete'],false);
-					$msg_delrvrc  = abs($creditset['Delete']['rvrc']);
-					$msg_delmoney = abs($creditset['Delete']['money']);
-				} else {
-					$msg_delrvrc  = $msg_delmoney = 0;
-				}
-				$credit->setMdata($val['authorid'],'postnum',-1);
-
-				if ($_POST['ifmsg']) {
-					$msg = array(
-						'toUser'	=> $val['author'],
-						'subject'	=> 'deltpc_title',
-						'content'	=> 'deltpc_content',
-						'other'		=> array(
-							'manager'	=> $windid,
-							'fid'		=> $fid,
-							'tid'		=> $tid,
-							'subject'	=> $val['subject'],
-							'postdate'	=> $val['postdate'],
-							'forum'		=> strip_tags($forum[$fid]['name']),
-							'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
-							'admindate'	=> get_date($timestamp),
-							'reason'	=> stripslashes($atc_content)
-						)
-					);
-					pwSendMsg($msg);
-				}
-				$log = array(
-					'type'      => 'delete',
-					'username1' => $val['author'],
-					'username2' => $windid,
-					'field1'    => $fid,
-					'field2'    => '',
-					'field3'    => '',
-					'descrip'   => 'deltpc_descrip',
-					'timestamp' => $timestamp,
-					'ip'        => $onlineip,
-					'tid'		=> $tid,
-					'forum'		=> $forum[$fid]['name'],
-					'subject'	=> substrs($val['subject'],28),
-					'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
-					'reason'	=> $atc_content
-				);
-				writelog($log);
-			} else {
-				!$val['subject'] && $val['subject'] = substrs($val['content'],28);
-				if ($db_recycle) {
-					$db->update("UPDATE $pw_posts SET tid='0',fid='0' WHERE pid=".pwEscape($val['pid']));
-					$pwSQL = pwSqlSingle(array(
-						'pid'		=> $val['pid'],
-						'tid'		=> $tid,
-						'fid'		=> $fid,
-						'deltime'	=> $timestamp,
-						'admin'		=> $windid
-					));
-					$db->update("REPLACE INTO pw_recycle SET $pwSQL");
-				} else {
-					$db->update("DELETE FROM $pw_posts WHERE pid=".pwEscape($val['pid']));
-				}
-				if ($val['aid']) {
-					$_tids[$val['tid']] = $val['tid'];
-					$_pids[$val['pid']] = $val['pid'];
-				}
-				if ($_POST['ifdel']) {
-					$credit->addLog('topic_Deleterp',$creditset['Deleterp'],array(
-						'uid'		=> $val['authorid'],
-						'username'	=> $val['author'],
-						'ip'		=> $onlineip,
-						'fname'		=> strip_tags($forum[$fid]['name']),
-						'operator'	=> $windid
-					));
-					$credit->sets($val['authorid'],$creditset['Deleterp'],false);
-					$msg_delrvrc  = abs($creditset['Deleterp']['rvrc']);
-					$msg_delmoney = abs($creditset['Deleterp']['money']);
-				} else {
-					$msg_delrvrc  = $msg_delmoney = 0;
-				}
-				$credit->setMdata($val['authorid'],'postnum',-1);
-
-				if ($_POST['ifmsg']) {
-					$msg = array(
-						'toUser'	=> $val['author'],
-						'subject'	=> 'delrp_title',
-						'content'	=> 'delrp_content',
-						'other'		=> array(
-							'manager'	=> $windid,
-							'fid'		=> $fid,
-							'tid'		=> $tid,
-							'subject'	=> $val['subject'],
-							'postdate'	=> $val['postdate'],
-							'forum'		=> strip_tags($forum[$fid]['name']),
-							'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
-							'admindate'	=> get_date($timestamp),
-							'reason'	=> stripslashes($atc_content)
-						)
-					);
-					pwSendMsg($msg);
-				}
-				$log = array(
-					'type'      => 'delete',
-					'username1' => $val['author'],
-					'username2' => $windid,
-					'field1'    => $fid,
-					'field2'    => '',
-					'field3'    => '',
-					'descrip'   => 'delrp_descrip',
-					'timestamp' => $timestamp,
-					'ip'        => $onlineip,
-					'tid'		=> $tid,
-					'forum'		=> $forum[$fid]['name'],
-					'subject'	=> $val['subject'],
-					'affect'	=> "{$db_rvrcname}：-{$msg_delrprvrc}，{$db_moneyname}：-{$msg_delmoney}",
-					'reason'	=> stripslashes($atc_content)
-				);
-				writelog($log);
+			if ($val['pid'] != 'tpc' && !$val['subject']) {
+				$val['subject'] = $val['content'];
 			}
+			$istpc = ($val['pid'] == 'tpc');
+
+			if ($_POST['ifdel']) {
+				$d_key = $istpc ? 'Delete' : 'Deleterp';
+				$credit->addLog("topic_$d_key", $creditset[$d_key], array(
+					'uid'		=> $val['authorid'],
+					'username'	=> $val['author'],
+					'ip'		=> $onlineip,
+					'fname'		=> strip_tags($forum[$fid]['name']),
+					'operator'	=> $windid
+				));
+				$credit->sets($val['authorid'],$creditset[$d_key],false);
+				$msg_delrvrc  = abs($creditset[$d_key]['rvrc']);
+				$msg_delmoney = abs($creditset[$d_key]['money']);
+			} else {
+				$msg_delrvrc  = $msg_delmoney = 0;
+			}
+			if ($_POST['ifmsg']) {
+				$msg = array(
+					'toUser'	=> $val['author'],
+					'subject'	=> $istpc ? 'deltpc_title' : 'delrp_title',
+					'content'	=> $istpc ? 'deltpc_content' : 'delrp_content',
+					'other'		=> array(
+						'manager'	=> $windid,
+						'fid'		=> $fid,
+						'tid'		=> $tid,
+						'subject'	=> substrs($val['subject'],28),
+						'postdate'	=> $val['postdate'],
+						'forum'		=> strip_tags($forum[$fid]['name']),
+						'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
+						'admindate'	=> get_date($timestamp),
+						'reason'	=> stripslashes($atc_content)
+					)
+				);
+				pwSendMsg($msg);
+			}
+			$log = array(
+				'type'      => 'delete',
+				'username1' => $val['author'],
+				'username2' => $windid,
+				'field1'    => $fid,
+				'field2'    => '',
+				'field3'    => '',
+				'descrip'   => $istpc ? 'deltpc_descrip' : 'delrp_descrip',
+				'timestamp' => $timestamp,
+				'ip'        => $onlineip,
+				'tid'		=> $tid,
+				'forum'		=> $forum[$fid]['name'],
+				'subject'	=> substrs($val['subject'],28),
+				'affect'	=> "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
+				'reason'	=> stripslashes($atc_content)
+			);
+			writelog($log);
 		}
 		$credit->runsql();
-
-		if ($_tids && $_pids) {
-			$pw_attachs = L::loadDB('attachs');
-			$attachdb = $pw_attachs->getByTid($_tids,$_pids);
-			delete_att($attachdb,!$db_recycle);
-			pwFtpClose($ftp);
-		}
-		P_unlink(R_P."$db_htmdir/$fid/".date('ym',$tpcdb['postdate'])."/$tid.html");
-
-		$rt = $db->get_one("SELECT count(*) AS replies FROM $pw_posts WHERE tid='$tid' AND ifcheck='1'");
-		$replies = $rt['replies'];
-		if ($db_guestread) {
-			require_once(R_P.'require/guestfunc.php');
-			clearguestcache($tid,$replies);
-		}
+		
 		$refreshto = "read.php?tid=$tid";
-		if (!$replies) {
-			$tpcdb['anonymous'] && $tpcdb['author'] = $db_anonymousname;
-			if ($deltpc) {
-				if ($db_recycle) {
-					$db->update("UPDATE pw_threads SET fid='0' WHERE tid='$tid'");
-					$threadList = L::loadClass("threadlist");
-					$threadList->removeThreadIdsByForumId($fid,$tid);
-
-					$threads = L::loadClass('Threads');
-					$threads->delThreads($tid);
-				} else {
-					# $db->update("DELETE FROM pw_threads WHERE tid='$tid'");
-					# ThreadManager
-					$threadManager = L::loadClass("threadmanager");
-					$threadManager->deleteByThreadId($fid,$tid);
-					$db->update("DELETE FROM $pw_tmsgs WHERE tid='$tid'");
-
-					$threads = L::loadClass('Threads');
-					$threads->delThreads($tid);
-				}
-				$refreshto = "thread.php?fid=$fid";
-			} else {
-				$db->update("UPDATE pw_threads SET replies='0',lastpost=postdate,lastposter=".pwEscape($tpcdb['author'])." WHERE tid='$tid'");
-				# memcache refresh
-				$threadList = L::loadClass("threadlist");
-				$threadList->updateThreadIdsByForumId($fid,$tid);
-
-				$threads = L::loadClass('Threads');
-				$threads->delThreads($tid);
-			}
-		} else {
-			$pt = $db->get_one("SELECT postdate,author,anonymous FROM $pw_posts WHERE tid='$tid' ORDER BY postdate DESC LIMIT 1");
-			$pt['anonymous'] && $pt['author'] = $db_anonymousname;
-			$pwSQL = pwSqlSingle(array(
-				'replies'	=> $replies,
-				'lastpost'	=> $pt['postdate'],
-				'lastposter'=> $pt['author']
-			),false);
-			$db->update("UPDATE pw_threads SET $pwSQL WHERE tid='$tid'");
-			# memcache refresh
-			$threadList = L::loadClass("threadlist");
-			$threadList->updateThreadIdsByForumId($fid,$tid);
-
-			$threads = L::loadClass('Threads');
-			$threads->delThreads($tid);
+		$delarticle = L::loadClass('DelArticle');
+		if ($delarticle->delReply($threaddb, true, $db_recycle)) {
+			$refreshto = "thread.php?fid=$fid";
 		}
-		updateforum($fid);
-
 		if ($tpcdb['topped'] && $deltpc) {
 			updatetop();
 		}

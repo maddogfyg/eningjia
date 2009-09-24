@@ -4,14 +4,6 @@ body{color:#555; font-size:12px; font-family:Verdana;}
 
 #header,#main{width:960px;margin:5px auto;}
 
-/*top*/
-.topbar{background:#eaeaea url(top-bar.png) 0 bottom repeat-x;height:27px;overflow:hidden;}
-#nav-operate{padding:4px 0 2px;width:$tablewidth;margin:0 auto;width:98%;}
-	#nav-operate a{margin-right:5px;color:#333333;}
-	#nav-operate li{float:left;margin-left:1em;zoom:1;}
-	#nav-operate li a{margin-right:0;white-space:nowrap;vertical-align:baseline;}
-	#nav-operate .face{height:16px;width:16px;}
-
 .nav{background:url(nav-bg-con.png) 0 0 repeat-y;}
 .nav-bg{background:url(nav-bg-top.png) 0 top no-repeat;padding-top:5px;}
 .nav-bg2{background:url(nav-bg-bot.png) 0 bottom no-repeat;padding-bottom:5px;}
@@ -35,9 +27,6 @@ body{color:#555; font-size:12px; font-family:Verdana;}
 .search .s-btn{ float:left;margin-left:10px;border:none;}
 
 /*Patch*/
-.mr10{margin-right:10px;}
-.mt10{margin-top:10px;}
-.p10{padding:10px;}
 .p5{padding:5px 0;}
 
 /*flash*/
@@ -76,9 +65,9 @@ body{color:#555; font-size:12px; font-family:Verdana;}
 .menu{position:absolute;background:#fff;border:1px solid #d7e6f2;}
 .menu a{display:block;padding:4px 8px;}
 /*下拉框*/
-.menu-post{border:2px solid #d5e6ed;padding:1px;background:#87bcd8;}
-.menu-post .menu-b{border:1px solid #fff;background:#dff6ff;}
-.menu-b .h{border-bottom:1px solid #a9d5e9;}
+.menu-post{border:2px solid #d5e6ed;padding:1px;background:#9fb7e7;}
+.menu-post .menu-b{border:1px solid #fff;background:#ffffff;}
+.menu-b .h{border-bottom:1px solid #abc8ea;}
 .menu-half li{width:46%;float:left;}
 .menu-half li a{float:left;}
 .user-table td{padding:1em 1em .5em 2em;}
@@ -109,3 +98,8 @@ body{color:#555; font-size:12px; font-family:Verdana;}
 
 .area-list-tree{padding:5px 0;}
 .area-list-tree li{float:left;width:10em;margin-right:10px;height:18px;line-height:18px;overflow:hidden;}
+
+.btn{border-color:#3366cc;margin-right:1em;color:#fff;background:#3366cc;}
+.btn{border-width:1px;cursor:pointer;padding:.1em 1em;*padding:0 1em;font-size:9pt; line-height:130%; overflow:visible;}
+.input{border: 1px solid; border-color: #c0c0c0 #ededed #ededed #c0c0c0;padding:2px 0px 2px 1px;font-size:1.0em;vertical-align:middle;color:#000;}
+textarea{border: 1px solid; border-color: #c0c0c0 #ededed #ededed #c0c0c0;}

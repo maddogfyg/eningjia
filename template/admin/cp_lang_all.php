@@ -70,14 +70,12 @@ $lang['all'] = array (
 'mode_o_nav_friend'	=> '朋友',
 'mode_o_nav_browse'	=> '随便看看',
 
-'mode_bbs_nav'		=> "统计排行,sort,sort.php,root\n"
-						. "社区应用,app,,root\n"
+'mode_bbs_nav'		=> "社区应用,app,,root\n"
+						. "最新帖子,lastpost,search.php?sch_time=newatc,root\n"
+						. "精华区,digest,search.php?digest=1,root\n"
 						. "社区服务,hack,,root\n"
 						. "会员列表,member,member.php,root\n"
-						. "最新帖子,lastpost,search.php?sch_time=all&orderway=lastpost&asc=desc&newatc=1,root\n"
-						. "精华区,digest,search.php?digest=1,root\n"
-						. "搜索,search,search.php,root\n"
-						. "帮助,faq, faq.php,root\n"
+						. "统计排行,sort,sort.php,root\n"
 						. "基本信息,sort_basic,sort.php,sort\n"
 						. "到访IP统计,sort_ipstate,sort.php?action=ipstate,sort\n"
 						. "管理团队,sort_team,sort.php?action=team,sort\n"
@@ -87,7 +85,6 @@ $lang['all'] = array (
 						. "版块排行,sort_forum,sort.php?action=forum,sort\n"
 						. "帖子排行,sort_article,sort.php?action=article,sort\n"
 						. "标签排行,sort_taglist,job.php?action=taglist,sort\n"
-						,
 
 );
 ?>

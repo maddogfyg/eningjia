@@ -86,6 +86,7 @@ class PW_Memcache {
 	 */
 	function delete($key) {
 		if (!$this->isConnected()) return false;
+		$key = $this->_getKeyPrefix($key);
 		return $this->cache->delete($key,10);
 	}
 
@@ -114,6 +115,7 @@ class PW_Memcache {
 	 */
 	function set($key,$value,$expire=30) {
 		if (!$this->isConnected()) return false;
+		$key = $this->_getKeyPrefix($key);
 		return $this->cache->set($key,$value,MEMCACHE_COMPRESSED,$expire);
 	}
 
@@ -125,7 +127,18 @@ class PW_Memcache {
 	 */
 	function get($keys) {
 		if (!$this->isConnected()) return false;
-		return $this->cache->get($keys);
+		if (is_array($keys)) {
+			$data = array();
+			foreach ($keys as $key) {
+				$result = $this->_get($key);
+				if($result){
+					$data[$key] = $result;
+				}
+			}
+			return $data;
+		} else {
+			return $this->_get($keys);
+		}
 	}
 
 	/**
@@ -154,6 +167,19 @@ class PW_Memcache {
 			return true;
 		}
 		return false;
+	}
+	function _getKeyPrefix($key){
+		static $_prefix=null;
+		if (!$_prefix) {
+			$_prefix = substr(md5($GLOBALS['db_hash']),18,5);
+		}
+		return $_prefix.'_'.$key;
+	}
+
+	function _get($key) {
+		if (!$this->isConnected()) return false;
+		$key = $this->_getKeyPrefix($key);
+		return $this->cache->get($key);
 	}
 }
 ?>

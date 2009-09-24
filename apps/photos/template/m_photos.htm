@@ -148,14 +148,15 @@ EOT;
 <!--
 EOT;
 }print <<<EOT
---></div>
+-->
+		</div>
         <ul class="cc list-img-3">
 <!--
 EOT;
 if ($cnpho) {
 foreach ($cnpho as $key => $value) {print <<<EOT
 -->
-                    <li><table><tr><td class="tac"><a href="{$basename}a=view&pid=$value[pid]"><img src="$value[path]" /></a></td></tr></table>
+                    <li><table><tr><td class="tac"><a href="{$basename}a=view&pid=$value[pid]"><img src="$value[path]" onload="if(this.width>100){this.width = 100;}"/></a></td></tr></table>
                         <!--<div class="lh18-b" id="ff" title="$value[pintro]">$value[sub_pintro]</div>-->
                             <p>共{$value[c_num]}条评论
 <!--

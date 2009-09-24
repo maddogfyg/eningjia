@@ -12,6 +12,8 @@ list($faceurl) = showfacedesign($winddb['icon'],1,'s');
 empty($action) && $action = 'index';
 $pro_tab = $action;
 
+$db_menuinit .= ",'td_userinfomore' : 'menu_userinfomore'";
+
 if (file_exists(R_P . "require/profile/{$action}.php")) {
 	require_once(R_P . "require/profile/{$action}.php");
 } else {

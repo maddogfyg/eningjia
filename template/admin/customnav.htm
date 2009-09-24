@@ -118,7 +118,14 @@ EOT;
 </ul>
 <div class="c"></div>
 <form action="$basename" method="post">
-<h2>社区导航自定义</h2>
+<!--
+EOT;
+foreach($navtitle as $key=>$value){
+if ($key == $type) {
+	$nav_type = $value;
+}}print<<<EOT
+-->
+<h2>{$nav_type}导航自定义</h2>
 <table width="100%" cellspacing="0" cellpadding="0">
 <!--
 EOT;
@@ -399,7 +406,7 @@ EOT;
 <form action="$basename" method="post" name="FORM">
 <input name="type" type="hidden" value="$type" />
 <input name="action" type="hidden" value="editview" />
-<h2>社区模式导航列表</h2>
+<h2>圈子模式导航列表</h2>
 <table width="100%" cellspacing="0" cellpadding="0">
 	<tr class="tr3 s3">
 		<td width="6%"><a onclick="CheckAll(document.FORM)" style="cursor:pointer;">启用</a></td>
@@ -448,7 +455,7 @@ EOT;
 <form action="$basename" name="FORM" method="post">
 <input name="type" type="hidden" value="$type" />
 <input name="action" type="hidden" value="editview" />
-<h2><b>社区模式导航列表</b></h2>
+<h2><b>论坛模式导航列表</b></h2>
 <table cellpadding="0" cellspacing="0" width="100%">
 <tr class="tr3 s3">
 	<td width="5%"><a onclick="CheckAll(document.FORM)" style="cursor:pointer;">启用</a></td>

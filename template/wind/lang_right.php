@@ -48,7 +48,7 @@ $lang['right'] = array (
 			<input type="radio" value="0" name="group[show]" $show_N />否'
 		),
 		'allowreport' => array(
-			'title'	=> '可使用报告功能',
+			'title'	=> '可使用举报功能',
 			'html'	=> '<input type="radio" value="1" name="group[allowreport]" $allowreport_Y />是
 			<input type="radio" value="0" name="group[allowreport]" $allowreport_N />否'
 		),

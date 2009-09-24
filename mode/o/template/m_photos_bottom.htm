@@ -56,11 +56,12 @@ print <<<EOT
 			{
 				try
 				{
-					var tds = obj.contentWindow.document.getElementsByTagName('td') || [];
+					var tds = obj.contentWindow.document.getElementsByTagName('span') || [];
 					var tipText = '';
+					
 					for (var i = 0; i < tds.length; i++)
 					{
-						if (tds[i].className == 'tac p10')
+						if (tds[i].className == 'f14')
 						{
 							tipText = tds[i].innerHTML.replace(/<.+?>/g, '');
 							break;
@@ -90,8 +91,7 @@ print <<<EOT
 		<input type="hidden" name="step" value="3" />
 		<input type="hidden" name="verify" value="$verifyhash" />
 		<div class="photo-one" style="width:620px;padding:15px;margin:0;">
-		<div class="mb10"><span id="allowflash"></span></div>
-		<div class="fr"><h2>提示：</h2><p class="gray">单张照片不得大于{$o_maxfilesize}kb</p></div>
+		<div class="mb10"><span id="allowflash"></span>&nbsp;<span class="gray">(单张照片不得大于{$o_maxfilesize}kb)</span></div>
 <!--
 EOT;
 if ($options) {print <<<EOT

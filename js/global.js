@@ -9,23 +9,23 @@
  *@param String id 对话框的id，若不传递，则默认为pw_box
  */
 PWMENU_ZINDEX=0;
-function PwMenu(id){
-	this.pid  = null;
-	this.obj  = null;
-	this.w	  = null;
-	this.h	  = null;
-	this.t	  = 0;
-	this.menu = null;
-	this.mid=id;
-	this.init(id);
 
+function PwMenu(id){
+	this.pid	= null;
+	this.obj	= null;
+	this.w		= null;
+	this.h		= null;
+	this.t		= 0;
+	this.menu	= null;
+	this.mid	= id;
+	this.init(id);
 }
 
 PwMenu.prototype = {
 
 	init : function(id) {
-		this.menu	= getPWBox(id);
-		var _=this;
+		this.menu = getPWBox(id);
+		var _ = this;
 		document.body.insertBefore(this.menu,document.body.firstChild);
 		_.menu.style.zIndex=PWMENU_ZINDEX+10+"";
 		PWMENU_ZINDEX+=10;
@@ -34,7 +34,7 @@ PwMenu.prototype = {
 	guide : function() {
 		this.menu=this.menu||getPWBox(this.mid);
 		this.menu.className = '';
-		this.menu.innerHTML = '<div class="popout"><table  border="0" cellspacing="0" cellpadding="0"><tbody><tr><td class="bgcorner1"></td><td class="pobg1"></td><td class="bgcorner2"></td></tr><tr><td class="pobg4"></td><td><div class="popoutContent" style="padding:20px;"><img src="'+imgpath+'/loading.gif" align="absmiddle" /> 正在加载数据...</div></td><td class="pobg2"></td></tr><tr><td class="bgcorner4"></td><td class="pobg3"></td><td class="bgcorner3"></td></tr></tbody></table></div>';
+		this.menu.innerHTML = '<div class="popout"><table border="0" cellspacing="0" cellpadding="0"><tbody><tr><td class="bgcorner1"></td><td class="pobg1"></td><td class="bgcorner2"></td></tr><tr><td class="pobg4"></td><td><div class="popoutContent" style="padding:20px;"><img src="'+imgpath+'/loading.gif" align="absmiddle" /> 正在加载数据...</div></td><td class="pobg2"></td></tr><tr><td class="bgcorner4"></td><td class="pobg3"></td><td class="bgcorner3"></td></tr></tbody></table></div>';
 		this.menupz(this.obj);
 	},
 
@@ -51,13 +51,14 @@ PwMenu.prototype = {
 		},100);
 	},
 
-	setMenu : function(element,type){
+	setMenu : function(element,type,border){
 
 		if (type) {
 			this.menu=this.menu||getPWBox(this.mid);
 			var thisobj = this.menu;
 		} else {
-			var thisobj = getPWContainer(this.mid);
+			var thisobj = getPWContainer(this.mid,border);
+			
 		}
 		if (typeof(element) == 'string') {
 			thisobj.innerHTML = element;
@@ -104,8 +105,11 @@ PwMenu.prototype = {
 		clearTimeout(read.t);
 		if (typeof type == "undefined") type = 1;
 		if (typeof pz == "undefined") pz = 0;
-		this.setMenu(getObj(idName).innerHTML,1);
-		this.menu.className = getObj(idName).className;
+		if (typeof idName == 'string') {
+			idName = getObj(idName);
+		}
+		this.setMenu(idName.innerHTML,1);
+		this.menu.className = idName.className;
 		this.menupz(object,pz);
 		var _=this;
 		if (type != 2) {
@@ -179,7 +183,6 @@ PwMenu.prototype = {
 		var _=this;
 		function setopen(a,b) {
 			if (getObj(a)) {
-
 				getObj(a).onmouseover=function(){_.open(b,a);callBack?callBack(b):0};
 				try{getObj(a).parentNode.onfocus = function(){_.open(b,a);callBack?callBack(b):0};}catch(e){}
 			}
@@ -267,13 +270,20 @@ function keyCodes(e) {
 		read.close();
 	}
 }
-function opencode(menu,td) {
+
+function opencode(menu,td) {	
 	if (read.IsShow() && read.menu.firstChild.id == 'ckcode') return;
 	read.open(menu,td,2,11);
 	getObj('ckcode').src = 'ck.php?nowtime=' + new Date().getTime();
+
 	document.body.attachEvent("onmousedown",function(e) {
 		var o = is_ie ? window.event.srcElement : e.target;
                 var f = is_ie ? false : true;//firefox  e.type = click by lh
+				
+		if( o!=getObj('ckcode') && o!=td )
+		{
+		  return !!closep();
+		}
 		if (o == td || (f && e.type == "click")) {
 			return;
 		} else if (o.id == 'ckcode') {
@@ -295,7 +305,7 @@ function getPWBox(type){
 	return pw_box;
 }
 
-function getPWContainer(id){
+function getPWContainer(id,border){
 	if (typeof(id)=='undefined') id='';
 	if (getObj(id||'pw_box')) {
 		var pw_box = getObj(id||'pw_box');
@@ -305,7 +315,12 @@ function getPWContainer(id){
 	if (getObj(id+'box_container')) {
 		return getObj(id+'box_container');
 	}
-	pw_box.innerHTML = '<div class="popout"><table  border="0" cellspacing="0" cellpadding="0"><tbody><tr><td class="bgcorner1"></td><td class="pobg1"></td><td class="bgcorner2"></td></tr><tr><td class="pobg4"></td><td><div class="popoutContent" id="'+id+'box_container"></div></td><td class="pobg2"></td></tr><tr><td class="bgcorner4"></td><td class="pobg3"></td><td class="bgcorner3"></td></tr></tbody></table></div>';
+	
+	if (border == 1) {
+		pw_box.innerHTML = '<div class="popout"><div id="'+id+'box_container"></div></div>';
+	} else {
+		pw_box.innerHTML = '<div class="popout"><table border="0" cellspacing="0" cellpadding="0"><tbody><tr><td class="bgcorner1"></td><td class="pobg1"></td><td class="bgcorner2"></td></tr><tr><td class="pobg4"></td><td><div class="popoutContent" id="'+id+'box_container"></div></td><td class="pobg2"></td></tr><tr><td class="bgcorner4"></td><td class="pobg3"></td><td class="bgcorner3"></td></tr></tbody></table></div>';
+	}
 	var popoutContent = getObj(id+'box_container');
 	return popoutContent;
 }
@@ -430,19 +445,4 @@ function showDialog(type,message,autohide,callback) {
 	if (autohide) {
 		window.setTimeout("closep()", (autohide * 1000));
 	}
-}
-
-function getElementsByClassName (className, parentElement){
-	if (typeof(parentElement)=='object') {
-		var elems = parentElement.getElementsByTagName("*");
-	} else {
-		var elems = (document.getElementById(parentElement)||document.body).getElementsByTagName("*");
-	}
-	var result=[];
-	for (i=0; j=elems[i]; i++) {
-	   if ((" "+j.className+" ").indexOf(" "+className+" ")!=-1) {
-			result.push(j);
-	   }
-	}
-	return result;
 }

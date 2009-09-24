@@ -446,7 +446,7 @@ if ($admintype == 'article') {
 
 	if (empty($action)) {
 
-		$groupselect = "<option value='-1'>".getLangInfo('all','reg_member')."</option>";
+		$groupselect = "<option value='-1'>" . getLangInfo('all','reg_member') . "</option>";
 		$query = $db->query("SELECT gid,gptype,grouptitle FROM pw_usergroups WHERE gid>2 AND gptype<>'member' ORDER BY gid");
 		while ($group = $db->fetch_array($query)) {
 			$groupselect .= "<option value=$group[gid]>$group[grouptitle]</option>";
@@ -454,6 +454,7 @@ if ($admintype == 'article') {
 		include PrintEot('superdel');exit;
 
 	} elseif ($action == 'del') {
+
 		InitGP(array('groupid','schname','schemail','postnum','onlinetime','userip','regdate','schlastvisit','orderway','asc','lines','item'));
 		InitGP(array('page'),'GP',2);
 
@@ -516,7 +517,7 @@ if ($admintype == 'article') {
 			if ($numofpage && $page > $numofpage) {
 				$page = $numofpage;
 			}
-			$pages=numofpage($count,$page,$numofpage,"$admin_file?adminjob=superdel&admintype=delmember&action=$action&groupid=$groupid&schname=".rawurlencode($schname)."&schemail=$schemail&postnum=$postnum&onlinetime=$onlinetime&regdate=$regdate&schlastvisit=$schlastvisit&orderway=$orderway&asc=$asc&lines=$lines&");
+			$pages = numofpage($count,$page,$numofpage, "$admin_file?adminjob=superdel&admintype=delmember&action=$action&groupid=$groupid&schname=" . rawurlencode($schname)."&schemail=$schemail&postnum=$postnum&onlinetime=$onlinetime&regdate=$regdate&schlastvisit=$schlastvisit&orderway=$orderway&asc=$asc&lines=$lines&");
 			$start = ($page-1)*$lines;
 			$limit = "LIMIT $start,$lines";
 			$delid = $schdb = array();
@@ -542,7 +543,6 @@ if ($admintype == 'article') {
 		}
 		if ($_POST['step'] == 2 || $_POST['direct']) {
 			@set_time_limit(300);
-			require_once(R_P.'require/writelog.php');
 			InitGP(array('item'),'P');
 			$item = array_sum($item);
 			!$item && adminmsg('operate_error');
@@ -551,172 +551,33 @@ if ($admintype == 'article') {
 			}
 			!$delid && adminmsg('operate_error');
 			$delids = pwImplode($delid);
-
-			$query = $db->query("SELECT m.uid,m.username,m.groupid,m.regdate,m.userstatus,md.postnum FROM pw_members m LEFT JOIN pw_memberdata md ON md.uid=m.uid WHERE m.uid IN($delids)");
-
-			while ($member = $db->fetch_array($query)) {
-				$threadcount = $postcount = '';
-				if($item & 2){
-					$db_guestread && require_once(R_P.'require/guestfunc.php');
-					$ptable_a = $delnum = $delaids = $specialdb = $deltids = $fidarray = $tmsgsarray = array();
-					$query2 = $db->query("SELECT tid,fid,authorid,replies,postdate,special,ptable,ifupload FROM pw_threads WHERE authorid=".pwEscape($member['uid'],false));
-					while ($threaddb = $db->fetch_array($query2)) {
-						$deltids[] = $threaddb['tid'];
-						if(!in_array($threaddb['fid'],$fidarray)){
-							$fidarray[] = $threaddb['fid'];
-						}
-						$ptable_a[$threaddb['ptable']] = 1;
-						$pw_tmsgs = GetTtable($threaddb['tid']);
-						$tmsgsarray[] = $pw_tmsgs;
-						$aiddb = $db->get_value("SELECT aid FROM $pw_tmsgs WHERE tid=".pwEscape($threaddb['tid'],false));
-						if ($aiddb) {
-							$attachs = unserialize(stripslashes($aiddb));
-							foreach ($attachs as $key => $value) {
-								is_numeric($key) && $delaids[] = $key;
-								P_unlink("$attachdir/$value[attachurl]");
-								$value['ifthumb'] && P_unlink("$attachdir/thumb/$value[attachurl]");
-							}
-						}
-						switch ($threaddb['special']) {
-							case 1:
-							case 2:
-							case 3:
-							case 4:
-								$specialdb[$threaddb['special']][] = $threaddb['tid'];break;
-						}
-						$pw_posts = GetPtable($threaddb['ptable']);
-						if ($threaddb['ifupload']) {
-							$query3 = $db->query("SELECT aid FROM $pw_posts WHERE tid=".pwEscape($threaddb['tid'],false));
-							while (@extract($db->fetch_array($query3))) {
-								if ($aid) {
-									$attachs = unserialize(stripslashes($aid));
-									foreach ($attachs as $key => $value) {
-										is_numeric($key) && $delaids[] = $key;
-										P_unlink("$attachdir/$value[attachurl]");
-										$value['ifthumb'] && P_unlink("$attachdir/thumb/$value[attachurl]");
-									}
-								}
-							}
-						}
-						$htmurl = $db_htmdir.'/'.$threaddb['fid'].'/'.date('ym',$postdate).'/'.$threaddb['tid'].'.html';
-						if (file_exists(R_P.$htmurl)) {
-							P_unlink(R_P.$htmurl);
-						}
-						$db_guestread && clearguestcache($threaddb['tid'],$threaddb['replies']);
-
-						//统计用户的回复数
-						$query4 = $db->query("SELECT authorid FROM $pw_posts WHERE tid=".pwEscape($threaddb['tid'],false));
-						while($rt4 = $db->fetch_array($query4)){
-							$delnum[$rt4['authorid']]++;
-						}
-					}
-					if (isset($specialdb[1])) {
-						$pollids = pwImplode($specialdb[1]);
-						$db->update("DELETE FROM pw_polls WHERE tid IN($pollids)");
-					}
-					if (isset($specialdb[2])) {
-						$actids = pwImplode($specialdb[2]);
-						$db->update("DELETE FROM pw_activity WHERE tid IN($actids)");
-						$db->update("DELETE FROM pw_actmember WHERE actid IN($actids)");
-					}
-					if (isset($specialdb[3])) {
-						$rewids = pwImplode($specialdb[3]);
-						$db->update("DELETE FROM pw_reward WHERE tid IN($rewids)");
-					}
-					if (isset($specialdb[4])) {
-						$tradeids = pwImplode($specialdb[4]);
-						$db->update("DELETE FROM pw_trade WHERE tid IN($tradeids)");
-					}
-					if ($delaids) {
-						$delaids = pwImplode($delaids);
-						$db->update("DELETE FROM pw_attachs WHERE aid IN($delaids)");
-					}
-					$threadcount = $db->get_value("SELECT COUNT(*) FROM pw_threads WHERE authorid=".pwEscape($member['uid'],false));
-					$db->update("UPDATE pw_memberdata SET postnum=postnum-".pwEscape($threadcount,false)."WHERE uid=".pwEscape($member['uid'],false));
-					# $db->update("DELETE FROM pw_threads WHERE authorid=".pwEscape($member['uid'],false));
-					# ThreadManager
-                                        $threadManager = L::loadClass("threadmanager");
-					$threadManager->deleteByAuthorId($member['uid']);
-
-					$deltids = pwImplode($deltids);
-					foreach ($ptable_a as $key => $val) {
-						$pw_posts = GetPtable($key);
-						$db->update("DELETE FROM $pw_posts WHERE tid IN ($deltids)");
-					}
-					foreach ($tmsgsarray as $key => $value) {
-						$db->update("DELETE FROM $value WHERE tid IN ($deltids)");
-					}
-					require_once(R_P.'require/updateforum.php');
-					delete_tag($deltids);
-					/**
-					* 数据更新
-					*/
-					foreach ($fidarray as $fid) {
-						updateforum($fid);
-					}
-					foreach ($delnum as $key => $value){
-						$db->update("UPDATE pw_memberdata SET postnum=postnum-".pwEscape($value)."WHERE uid=".pwEscape($key));
-					}
+			
+			if ($item & 2) {
+				$delarticle = L::loadClass('DelArticle');
+				$delarticle->delTopicByUids($delid);
+			}
+			if ($item & 4) {
+				$delarticle = L::loadClass('DelArticle');
+				$delarticle->delReplyByUids($delid);
+			}
+			if ($item & 8) {
+				$middb = array();
+				$query = $db->query("SELECT mid FROM pw_msg WHERE fromuid IN($delids) OR touid IN($delids)");
+				while ($rt = $db->fetch_array($query)) {
+					$middb[] = $rt['mid'];
 				}
-				if($item & 4){
-					if(empty($threadcount)){
-						$threadcount = $db->get_value("SELECT COUNT(*) FROM pw_threads WHERE authorid=".pwEscape($member['uid'],false));
-					}
-					$postcount = $postnum - $threadcount;
-					$ptable_a = array('pw_posts');
-					if($db_plist){
-						$p_list=explode(',',$db_plist);
-						foreach($p_list as $val){
-							$ptable_a[] = 'pw_posts'.$val;
-						}
-					}
-					if($ptable_a){
-						foreach ($ptable_a as $key => $value) {
-							$db->update("DELETE FROM $value WHERE authorid=".pwEscape($member['uid'],false));
-						}
-					}
-					$db->update("UPDATE pw_memberdata SET postnum=postnum-".pwEscape($postcount,false)."WHERE uid=".pwEscape($member['uid'],false));
-					$db->update("DELETE FROM pw_attachs WHERE uid=".pwEscape($member['uid'],false)."AND pid<>'0'");
+				$mids = pwImplode($middb,false);
+				if ($mids) {
+					$db->update("DELETE FROM pw_msg WHERE mid IN ($mids)");
+					require_once(R_P.'require/msg.php');
+					delete_msgc($mids);
 				}
-				if($item & 8){
-					$middb = array();
-					$query2 = $db->query("SELECT mid FROM pw_msg WHERE fromuid=".pwEscape($member['uid'],false)."OR touid=".pwEscape($member['uid'],false));
-					while ($rt = $db->fetch_array($query2)) {
-						$middb[] = $rt['mid'];
-					}
-					$mids = pwImplode($middb,false);
-					if ($mids) {
-						$db->update("DELETE FROM pw_msg WHERE mid IN ($mids)");
-						require_once(R_P.'require/msg.php');
-						delete_msgc($mids);
-					}
-				}
-
-				$log = array(
-					'type'      => 'deluser',
-					'username1' => $member['username'],
-					'username2' => $admin_name,
-					'field1'    => $fid,
-					'field2'    => $member['groupid'],
-					'field3'    => '',
-					'descrip'   => 'deluser_descrip',
-					'timestamp' => $timestamp,
-					'ip'        => $onlineip,
-				);
-				writelog($log);
 			}
 			if ($item & 1) {
-				$db->update("DELETE FROM pw_members WHERE uid IN ($delids)");
-				$db->update("DELETE FROM pw_memberdata WHERE uid IN ($delids)");
-				$db->update("DELETE FROM pw_memberinfo WHERE uid IN ($delids)");
-				$db->update("DELETE FROM pw_banuser WHERE uid IN ($delids)");
-
-				@extract($db->get_one("SELECT count(*) AS count FROM pw_members"));
-				@extract($db->get_one("SELECT username FROM pw_members ORDER BY uid DESC LIMIT 1"));
-				$db->update("UPDATE pw_bbsinfo SET newmember=".pwEscape($username).',totalmember='.pwEscape($count)."WHERE id='1'");
+				$ucuser = L::loadClass('Ucuser');
+				$ucuser->delete($delid);
 			}
-			adminmsg('operate_success',"$admin_file?adminjob=superdel&admintype=delmember&action=$action&groupid=$groupid&schname=".rawurlencode($schname)."&schemail=$schemail&postnum=$postnum&onlinetime=$onlinetime&regdate=$regdate&schlastvisit=$schlastvisit&orderway=$orderway&asc=$asc&lines=$lines&page=$page");
-
+			adminmsg('operate_success', "$admin_file?adminjob=superdel&admintype=delmember&action=$action&groupid=$groupid&schname=" . rawurlencode($schname)."&schemail=$schemail&postnum=$postnum&onlinetime=$onlinetime&regdate=$regdate&schlastvisit=$schlastvisit&orderway=$orderway&asc=$asc&lines=$lines&page=$page");
 		}
 	}
 } elseif ($admintype == 'message') {

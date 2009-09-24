@@ -46,6 +46,7 @@ class AdminAction {
 
 	function _modify() {
 		if (count ( $this->_rateconfig ) > 0) {
+			$rateService = $this->_getRateService();
 			foreach ( $this->_rateconfig as $id => $config ) {
 				if (intval ( $id ) < 1) {
 					continue;
@@ -59,14 +60,15 @@ class AdminAction {
 				$fieldData ['updater'] = $this->_adminName;
 				$fieldData ['update_at'] = time ();
 				(isset ( $config ['title'] )) && $fieldData ['title'] = $config ['title'];
-				$this->_getRateService ()->updateRateConfig ( $fieldData, $id );
+				$rateService->updateRateConfig ( $fieldData, $id );
 			}
 		}
 		Showmsg ( "恭喜你，评价配置操作成功!", $this->_getDefaultUrl () . "&typeid=" . $this->_typeid );
 	}
 
 	function _delete() {
-		(! $this->_getRateService ()->deleteRateConfig ( $this->_id )) && Showmsg ( "对不起，删除评价选项失败", $this->_getDefaultUrl () . "&typeid=" . $this->_typeid );
+		$rateService = $this->_getRateService();
+		(! $rateService->deleteRateConfig ( $this->_id )) && Showmsg ( "对不起，删除评价选项失败", $this->_getDefaultUrl () . "&typeid=" . $this->_typeid );
 	}
 
 	function _power(){
@@ -79,7 +81,8 @@ class AdminAction {
 			$tmp[$key] = intval($value);
 		}
 		$groupData = $tmp;
-		$this->_getRateService()->addConfigPower($powerData,$groupData);
+		$rateService = $this->_getRateService();
+		$rateService->addConfigPower($powerData,$groupData);
 		Showmsg ( "恭喜你，评价权限设置操作成功!", $this->_getDefaultUrl () . "&typeid=" . $this->_typeid );
 	}
 
@@ -104,7 +107,8 @@ class AdminAction {
 	}
 
 	function _buildPowerParams(){
-		$userGroups = $this->_getRateService()->getUserGroupLevel();
+		$rateService = $this->_getRateService();
+		$userGroups = $rateService->getUserGroupLevel();
 		$userGroupTitles = array("member"=>"用户组","system"=>"系统组","special"=>"特殊组","default"=>"默认用户组");
 		$imageUrl = $this->_bbsUrl.'/images/wind/level/';
 		$powerSets = unserialize($this->_db_ratepower);
@@ -117,11 +121,12 @@ class AdminAction {
 
 	function _buildRateConfigHTML($typeId) {
 		$tmp = array ();
-		$rateConfigs = $this->_getRateService ()->getsRateConfigByTypeId ( $typeId );
+		$rateService = $this->_getRateService();
+		$rateConfigs = $rateService->getsRateConfigByTypeId ( $typeId );
 		if (! $rateConfigs) {
 			return null;
 		}
-		$creditNames = $this->_getRateService ()->getCreditDefaultMap ();
+		$creditNames = $rateService->getCreditDefaultMap ();
 		foreach ( $rateConfigs as $key => $config ) {
 			$config ['typename'] = ($config ['typeid'] == 1) ? "贴子" : (($config ['typeid'] == 2) ? "日志" : "相片");
 			$config ['creditset'] = $this->_getCreditSelect ( $config ['id'], $config ['creditset'], $creditNames ); //需要知道当前的值

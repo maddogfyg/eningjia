@@ -20,7 +20,7 @@ class HotModuleUtility {
 					  		   	   'memberShareUser'=>"用户",
 					  		       'memberShareGroup'=>"群组",
 					  		       'memberSharePic'=>"照片",
-					  		       'memberShareLink'=>"连接",
+					  		       'memberShareLink'=>"网页",
 					  		       'memberShareVideo'=>"视频",
 					  		       'memberShareMusic'=>"音乐",
 					  		       'memberShareAll'=>"全部");

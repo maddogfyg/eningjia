@@ -303,7 +303,7 @@ print <<<EOT
 <td class="tac">$id</td>
 <td><a href="thread.php?fid=$report[fid]" target="_blank">$report[fname]</a></td>
 <td><a href="read.php?tid=$report[tid]#$report[pid]" target="_blank">进入帖子</a></td>
-<td>$report[username]</td>
+<td><a target="_blank" href="u.php?action=show&uid=$report[uid]">$report[username]</a></td>
 <td>&nbsp;$report[reason]</td>
 <!--
 EOT;
@@ -497,7 +497,7 @@ EOT;
 }print <<<EOT
 -->
 		</th>
-	<td><a href="u.php?action=show&uid=$thread[authorid]">$thread[author]</td>
+	<td><a target="_blank" href="u.php?action=show&uid=$thread[authorid]">$thread[author]</a></td>
 	<td>$thread[postdate]</td>
 </tr>
 <!--

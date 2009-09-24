@@ -61,9 +61,9 @@ EOT;
 foreach ($value as $k => $v) {print <<<EOT
 -->
 				<div class="lh24 mt10">
-					<div style="padding:10px;background:#f7f7f7;" class="lh24 mt10">
+					<div class="p10" class="lh24 mt10">
 						<p class="b"><a href="{$baseUrl}q=group&cyid=$k">$groupdb[$k]</a></p>
-						<div style="padding:10px;background:#f7f7f7;">
+						<div class="p10">
 							<ul>
 <!--
 EOT;
@@ -191,6 +191,7 @@ $extra = '，';
 EOT;
 }}print <<<EOT
 -->
+		&nbsp;&nbsp;<a href="{$basename}">返回</a>
 	</div>
 	<ul id="list-groups" class="cc list-box-a mt10">
 <!--
@@ -235,7 +236,7 @@ foreach ($group as $value) {print <<<EOT
 		<li>
 		<dl>
 		<dt><div><table style="height:100%;width:100%;"><tr><td class="tac"><a href="{$baseUrl}q=group&cyid=$value[id]"><img src="$value[cnimg]" onload="imgResize(this,100)" /></a></td></tr></table></div></dt>
-		<dd><a href="{$baseUrl}q=group&cyid=$value[id]" class="b f14">$value[cname]</a>
+		<dd class="fl" style="width:215px;overflow:hidden;"><a href="{$baseUrl}q=group&cyid=$value[id]" class="b f14">$value[cname]</a>
 			<div>加入该群的好友：
 <!--
 EOT;

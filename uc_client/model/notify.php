@@ -16,7 +16,8 @@ class notifymodel {
 		$this->operations = array(
 			'updatesyncredit' => array('Cache', 'updatesyncredit'),
 			'syncredit' => array('Credit', 'syncredit'),
-			'altername' => array('User', 'alterName')
+			'altername' => array('User', 'alterName'),
+			'deluser' => array('User', 'deluser')
 		);
 	}
 
@@ -71,7 +72,7 @@ class notifymodel {
 		$field = 'app' . $appid;
 
 		if ($appid == $this->base->appid && file_exists(R_P . 'api/class_base.php')) {
-			include(R_P . 'api/class_base.php');
+			include_once(R_P . 'api/class_base.php');
 			$api  = new api_client();
 			$resp = $api->dataFormat($api->callback($this->operations[$data['action']][0], $this->operations[$data['action']][1], $data['param'] ? unserialize($data['param']) : array()));
 			$success = isset($resp['result']);

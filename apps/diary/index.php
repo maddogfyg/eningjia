@@ -63,7 +63,7 @@ foreach ($o_uploadsize as $key => $value) {
 }
 
 if (empty($a) || $a == 'privacy') {
-	
+
 	if ($u != $winduid && !$space) {
 		if (!getOneFriend($u) && $groupid != 3) {
 			Showmsg('mode_o_not_friend');
@@ -73,13 +73,13 @@ if (empty($a) || $a == 'privacy') {
 	$did = (int)GetGP('did');
 	require_once(R_P.'require/bbscode.php');
 	$wordsfb = wordsfb::getInstance();
-	
+
 	$nums = $count = $dnum = $fnum = 0;
 	$sqladd = "WHERE d.uid=".pwEscape($u);
 
 	$diarydb = $diarytype = $dtids = $ftids = array();
 	$query = $db->query("SELECT d.* FROM pw_diarytype d $sqladd ORDER BY dtid");
-	
+
 	while ($rt = $db->fetch_array($query)) {
 		$nums += $rt['num'];
 		$diarytype[$rt['dtid']] = $rt;
@@ -129,7 +129,7 @@ if (empty($a) || $a == 'privacy') {
 
 	if (!$did) {
 		$dtid = (int)GetGP('dtid');
-		
+
 		$dtype = $dtid;
 		$dtid == '-1' && $dtype = 'null';
 		if ($u != $winduid) {
@@ -143,7 +143,7 @@ if (empty($a) || $a == 'privacy') {
 		} elseif (is_numeric($dtid) && $dtid > 0) {
 			$sqladd .= ' AND d.dtid='.pwEscape($dtid);
 		}
-		
+
 		$sum = $db->get_value("SELECT COUNT(*) as count FROM pw_diary d $sqladd");
 
 		if ($sum) {
@@ -179,7 +179,7 @@ if (empty($a) || $a == 'privacy') {
 						$aids = attachment($rt['content']);
 					}
 				}
-				
+
 				if ($attachs && is_array($attachs)) {
 					if ($winduid == $rt['authorid'] || $groupid == 3) {
 						$dfadmin = 1;
@@ -209,10 +209,6 @@ if (empty($a) || $a == 'privacy') {
 			}
 		}
 	} elseif (is_numeric($did)) {
-		
-		if ($u != $winduid && $groupid != 3 && !getOneFriend($u)) {
-			Showmsg('diary_friend_right');
-		}
 
 		if ($u != $winduid && $groupid != 3) {
 			$sqladd .= " AND d.privacy!=2 AND d.did=".pwEscape($did);
@@ -221,7 +217,11 @@ if (empty($a) || $a == 'privacy') {
 		}
 
 		$diary = $db->get_one("SELECT d.did,d.dtid,d.uid,d.aid,d.username,d.privacy,d.subject,d.content,d.ifconvert,d.ifwordsfb,d.r_num,d.c_num,d.postdate,d.ifcopy,d.copyurl,m.groupid FROM pw_diary d LEFT JOIN pw_members m ON d.uid=m.uid $sqladd");
-		!$diary && Showmsg('undefined_action');
+		!$diary && Showmsg('mode_o_no_diary');
+
+		if ($u != $winduid && $groupid != 3 && !getOneFriend($u) && $diary['privacy'] == 1) {
+			Showmsg('diary_friend_right');
+		}
 		$diary['r_num'] += 1;
 		if ($diary['groupid'] == 6 && $db_shield && $groupid != 3) {
 			$diary['subject'] = '';
@@ -234,9 +234,9 @@ if (empty($a) || $a == 'privacy') {
 				$aids = attachment($diary['content']);
 			}
 		}
-		
+
 		$diary['content'] = str_replace("\n","<br />",$diary['content']);
-		
+
 		if ($attachs && is_array($attachs)) {
 			if ($winduid == $diary['authorid'] || $groupid == 3) {
 				$dfadmin = 1;
@@ -248,7 +248,7 @@ if (empty($a) || $a == 'privacy') {
 				$rat = array();
 				if ($at['type'] == 'img') {
 					$a_url = geturl('diary/'.$at['attachurl'],'show');
-					
+
 					if (is_array($a_url)) {
 						$atype = 'pic';
 						$dfurl = '<br>'.cvpic($a_url[0], 1, 450, 338, $at['ifthumb']);
@@ -266,7 +266,7 @@ if (empty($a) || $a == 'privacy') {
 
 		$diary['link'] = "$db_bbsurl/{$basename}q=diary&u=$diary[uid]&did=$diary[did]";
 		$diary['title'] = "($diary[link])";
-		
+
 		if (!$wordsfb->equal($diary['ifwordsfb'])) {
 			$diary['content'] = $wordsfb->convert($diary['content'], new wdstruct($diary['did'], 'diary', $diary['ifwordsfb']));
 		}
@@ -278,9 +278,9 @@ if (empty($a) || $a == 'privacy') {
 		list($diary['copyuid'],$diary['copyer'],$diary['url']) = explode("|",$diary['copyurl']);
 
 		$diary['postdate'] = get_date($diary['postdate'],'Y-m-d H:i');
-		
+
 		$db->update("UPDATE pw_diary SET r_num=r_num+1 WHERE uid=".pwEscape($u)." AND did=".pwEscape($did));
-		
+
 		$url = 'mode.php?m=o&q=diary&u='.$u.'&did='.$did.'&';
 		list($commentdb,$subcommentdb,$pages) = getCommentDbByTypeid('diary',$did,$page,$url);
 		$comment_type = 'diary';
@@ -308,10 +308,10 @@ if (empty($a) || $a == 'privacy') {
 		$sum = $db->get_value("SELECT COUNT(*) as count FROM pw_diary d $sqladd");
 
 		if ($sum) {
-			
+
 			$wordsfb = wordsfb::getInstance();
 			list($pages,$limit) = pwLimitPages($sum,$page,$basename."q=diary&a=$a&");
-			
+
 			$query = $db->query("SELECT d.did,d.dtid,d.uid,d.aid,d.username,d.privacy,d.subject,d.ifconvert,d.ifwordsfb,d.content,d.r_num,d.c_num,d.postdate,m.groupid,m.icon FROM pw_diary d LEFT JOIN pw_members m ON d.uid=m.uid $sqladd ORDER BY d.postdate DESC $limit");
 
 			while ($rt = $db->fetch_array($query)) {
@@ -340,7 +340,7 @@ if (empty($a) || $a == 'privacy') {
 						$aids = attachment($rt['content']);
 					}
 				}
-				
+
 				if ($attachs && is_array($attachs)) {
 					if ($winduid == $rt['authorid'] || $groupid == 3) {
 						$dfadmin = 1;
@@ -362,7 +362,7 @@ if (empty($a) || $a == 'privacy') {
 						if (in_array($at['aid'], $aids)) {
 							$rt['content'] = attcontent($rt['content'], $atype, $rat);
 						} else {
-							
+
 							$rt[$atype][$at['aid']] = $rat;
 						}
 					}
@@ -374,7 +374,7 @@ if (empty($a) || $a == 'privacy') {
 				if ($rt['uid']!=$winduid) {
 					list($rt['icon']) = showfacedesign($rt['icon'],1);
 				}
-				
+
 				$diarydb[] = $rt;
 			}
 			$wordsfb->updateWordsfb();
@@ -407,7 +407,7 @@ if (empty($a) || $a == 'privacy') {
 	$endtime = $tdtime + 24*3600;
 	$postdate = $db->get_value("SELECT postdate FROM pw_diary WHERE uid=".pwEscape($winduid)." ORDER BY postdate DESC LIMIT 1");
 	$todaycount = $db->get_value("SELECT COUNT(*) as count FROM pw_diary WHERE uid=".pwEscape($winduid)." AND postdate>=".pwEscape($tdtime)." AND postdate<".pwEscape($endtime));
-	
+
 	$tdtime  >= $postdate && $todaycount = 0;
 
 	if ($groupid != 3 && $o_diarylimit && $todaycount >= $o_diarylimit) {
@@ -436,7 +436,7 @@ if (empty($a) || $a == 'privacy') {
 		PostCheck(1,$o_diary_gdcheck,$o_diary_qcheck);
 		InitGP(array('dtid','privacy','ifcopy'),'P');
 		require_once(R_P.'require/bbscode.php');
-		
+
 		$wordsfb = wordsfb::getInstance();
 		if (($banword = $wordsfb->comprise($_POST['atc_title'])) !== false) {
 			Showmsg('title_wordsfb');
@@ -447,7 +447,7 @@ if (empty($a) || $a == 'privacy') {
 
 		list($atc_title,$atc_content,$ifconvert,$ifwordsfb) = check_data('new');
 		//$db_tcheck && $winddb['postcheck'] == tcheck($atc_content) && Showmsg('diary_content_same'); //内容验证
-		
+
 		$dtid = (int)$dtid;
 		$privacy = (int)$privacy;
 		$ifcopy = (int)$ifcopy;
@@ -459,7 +459,7 @@ if (empty($a) || $a == 'privacy') {
 		$pwSQL = pwSqlSingle(array(
 			'uid'		=> $winduid,
 			'dtid'		=> $dtid,
-			'aid'		=> $attachs,
+			'aid'		=> (!empty($attachs) ? addslashes(serialize($attachs)) : ''),
 			'username'	=> $windid,
 			'privacy'	=> $privacy,
 			'subject'	=> $atc_title,
@@ -488,7 +488,22 @@ if (empty($a) || $a == 'privacy') {
 				);
 		}
 		countPosts('+1');
-		
+		if (!$privacy) {
+			//会员资讯缓存
+			$usercachedata = array();
+			$usercache = L::loadDB('Usercache');
+			$usercachedata['content'] = substrs(stripWindCode($atc_content),100,N);
+			$usercachedata['subject'] = $atc_title;
+			$usercachedata['postdate'] = $timestamp;
+			if ($attachs) {
+				foreach ($attachs as $value) {
+					if ($value['type'] == 'img') {
+						$usercachedata['attimages'][]= array('attachurl' => $value['attachurl'], 'ifthumb' => $value['ifthumb']);
+					}
+				}
+			}
+			$usercache->update($winduid,'diary',$did,$usercachedata);
+		}
 		//积分变动
 		require_once(R_P.'require/credit.php');
 		$o_diary_creditset = unserialize($o_diary_creditset);
@@ -498,12 +513,12 @@ if (empty($a) || $a == 'privacy') {
 			$credit->sets($winduid,$creditset,true);
 			updateMemberid($winduid);
 		}
-		
+
 		if ($creditlog = unserialize($o_diary_creditlog)) {
 			addLog($creditlog['Post'],$windid,$winduid,'diary_Post');
 		}
 		updateUserAppNum($winduid,'diary');
-		refreshto("{$basename}q=diary",'operate_success');
+		refreshto("{$basename}q=diary",'operate_success',2,true);
 	}
 } elseif ($a == 'edit') {
 
@@ -513,7 +528,7 @@ if (empty($a) || $a == 'privacy') {
 		$editor = getstatus($winddb['userstatus'],11) ? 'wysiwyg' : 'textmode';
 		$dtsel = '';
 		$diary = $db->get_one("SELECT did,dtid,aid,privacy,subject,content,ifcopy FROM pw_diary WHERE uid=".pwEscape($winduid)." AND did=".pwEscape($did));
-		
+
 		!$diary && Showmsg('illegal_request');
 		$attach = '';
 		if ($diary['aid']) {
@@ -545,7 +560,7 @@ if (empty($a) || $a == 'privacy') {
 		require_once(R_P.'require/bbscode.php');
 		require_once(R_P.'require/postfunc.php');
 		PostCheck(1,$o_diary_gdcheck,$o_diary_qcheck);
-		
+
 		$wordsfb = wordsfb::getInstance();
 		if (($banword = $wordsfb->comprise($_POST['atc_title'])) !== false) {
 			Showmsg('title_wordsfb');
@@ -553,10 +568,10 @@ if (empty($a) || $a == 'privacy') {
 		if (($banword = $wordsfb->comprise($_POST['atc_content'], false)) !== false) {
 			Showmsg('content_wordsfb');
 		}
-		
+
 		list($atc_title,$atc_content,$ifconvert,$ifwordsfb) = check_data('modify');
 		//$db_tcheck && $winddb['postcheck'] == tcheck($atc_content) && Showmsg('diary_content_same'); //内容验证
-		
+
 		$dtid = (int)$dtid;
 		$dtided = (int)$dtided;
 		$privacy = (int)$privacy;
@@ -568,7 +583,7 @@ if (empty($a) || $a == 'privacy') {
 		$oldattach = $replacedb = $unsetattach = array();
 
 		$aid = $db->get_value("SELECT aid FROM pw_diary WHERE uid=".pwEscape($winduid)." AND did=".pwEscape($did));
-		
+
 		if ($aid) {
 			InitGP(array('keep','oldatt_special','oldatt_needrvrc'), 'P', 2);
 			InitGP(array('oldatt_ctype','oldatt_desc'), 'P');
@@ -582,10 +597,10 @@ if (empty($a) || $a == 'privacy') {
 						'special'	=> $oldatt_special[$key],		'ctype'		=> $oldatt_ctype[$key],
 						'needrvrc'	=> $oldatt_needrvrc[$key],		'desc'		=> $oldatt_desc[$key]
 					);
-					
+
 					$v['needrvrc'] = $v['special'] = 0;
 					$v['ctype'] = '';
-					
+
 					$oldattach[$key] = array_merge($oldattach[$key], $v);
 
 					if (array_key_exists('replace_'.$key, $_FILES)) {
@@ -606,7 +621,6 @@ if (empty($a) || $a == 'privacy') {
 		require_once(R_P.'require/app_upload.php');
 
 		if ($attachs) {
-			$attachs = unserialize(stripslashes($attachs));
 			foreach ($attachs as $key => $value) {
 				$oldattach[$key] = $value;
 			}
@@ -642,7 +656,7 @@ if (empty($a) || $a == 'privacy') {
 		if ($aids) {
 			$db->update("UPDATE pw_attachs SET did=".pwEscape($did)." WHERE aid IN($aids)");
 		}
-		
+
 		if ($dtided != $dtid) {
 			$db->update("UPDATE pw_diarytype SET num=num-1 WHERE uid=".pwEscape($winduid)." AND dtid=".pwEscape($dtided));
 			$db->update("UPDATE pw_diarytype SET num=num+1 WHERE uid=".pwEscape($winduid)." AND dtid=".pwEscape($dtid));
@@ -679,7 +693,7 @@ if (empty($a) || $a == 'privacy') {
 		$dtsel .= "<option value=\"$rt[dtid]\">$rt[name]</option>";
 	}
 	require_once PrintEot('m_ajax');ajax_footer();
-	
+
 } elseif ($a == 'next') {
 
 	define('AJAX',1);
@@ -721,7 +735,7 @@ if ($space == 1 && defined('F_M')) {
 	require_once PrintEot('user_diary');
 	footer();
 } else {
-	
+
 	/*** userapp **/
 	$app_array = array();
 	if (true) {

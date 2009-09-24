@@ -412,7 +412,7 @@ if (empty($action)) {
 
 	if ($step == 'list') {
 
-		InitGP(array('page','cid','author','ckauthor','keyword','ktype','ttype','ckkeyword','postdate1','postdate2','orderby','sc','perpage','cname'));
+		InitGP(array('page','cid','author','ckauthor','keyword','ktype','ttype','ckkeyword','postdate_s','postdate_e','orderby','sc','perpage','cname'));
 		
 		$addpage = $sqltab = $sql = '';
 
@@ -469,15 +469,15 @@ if (empty($action)) {
 				$sql .= " AND {$tpre}.content" . $k_sql;
 			}
 		}
-		if ($postdate1) {
-			!is_numeric($postdate1) && $postdate1 = PwStrtoTime($postdate1);
-			$sql .= " AND t.postdate>".pwEscape($postdate1);
-			$addpage .= "postdate1=$postdate1&";
+		if ($postdate_s) {
+			!is_numeric($postdate_s) && $postdate_s = PwStrtoTime($postdate_s);
+			$sql .= " AND t.postdate>".pwEscape($postdate_s);
+			$addpage .= "postdate_s=$postdate_s&";
 		}
-		if ($postdate2) {
-			!is_numeric($postdate2) && $postdate2 = PwStrtoTime($postdate2);
-			$sql .= " AND t.postdate<".pwEscape($postdate2);
-			$addpage .= "postdate2=$postdate2&";
+		if ($postdate_e) {
+			!is_numeric($postdate_e) && $postdate_e = PwStrtoTime($postdate_e);
+			$sql .= " AND t.postdate<".pwEscape($postdate_e);
+			$addpage .= "postdate_e=$postdate_e&";
 		}
 		$sql_orderby = ($orderby == 'postdate') ? 'ORDER BY t.postdate' : 'ORDER BY t.authorid';
 		$sc != 'ASC' && $sc = 'DESC';
@@ -696,9 +696,9 @@ if (empty($action)) {
 	if ($job == 'list') {
 
 		InitGP(array('aname','owner','cid','crtime_s','crtime_e','lasttime_s','lasttime_e','private','lines','orderway','ordertype','page','cname'));
-		if (empty($aname) && empty($owner) && empty($cid) && empty($crtime_s) && empty($crtime_e) && empty($lasttime_s) && empty($lasttime_e) && $private == '-1' && empty($cname)) {
-			adminmsg('noenough_condition',"$basename&action=album");
-		}
+//		if (empty($aname) && empty($owner) && empty($cid) && empty($crtime_s) && empty($crtime_e) && empty($lasttime_s) && empty($lasttime_e) && $private == '-1' && empty($cname)) {
+//			adminmsg('noenough_condition',"$basename&action=album");
+//		}
 		$encode_aname = rawurlencode($aname);
 		$encode_owner = rawurlencode($owner);
 		$crtime_s && !is_numeric($crtime_s) && $crtime_s = PwStrtoTime($crtime_s);
@@ -741,6 +741,10 @@ if (empty($action)) {
 		if ($lasttime_e) {
 			$sql .= ' AND c.lasttime<='.pwEscape($lasttime_e);
 			$urladd .= "&lasttime_e=$lasttime_e";
+		} 
+		if ($private > -1) {
+			$sql .= ' AND c.private='.pwEscape($private);
+			$urladd .= "&private=$private";
 		}
 		$sql_orderway = $orderway == 'crtime' ? 'c.crtime' : 'c.lasttime';
 		$ordertype = $ordertype == 'asc' ? 'asc' : 'desc';
@@ -829,9 +833,9 @@ if (empty($action)) {
 
 		require_once("mode/o/require/core.php");
 		InitGP(array('cid','cname','aid','aname','uploader','pintro','uptime_s','uptime_e','orderway','ordertype','lines','page'));
-		if (empty($cid) && empty($cname) && empty($aid) && empty($aname) && empty($uploader) && empty($pintro) && empty($uptime_s) && empty($uptime_e)) {
-			adminmsg('noenough_condition',"$basename&action=photos");
-		}
+//		if (empty($cid) && empty($cname) && empty($aid) && empty($aname) && empty($uploader) && empty($pintro) && empty($uptime_s) && empty($uptime_e)) {
+//			adminmsg('noenough_condition',"$basename&action=photos");
+//		}
 		$uptime_s && $uptime_s = PwStrtoTime($uptime_s);
 		$uptime_e && $uptime_e = PwStrtoTime($uptime_e);
 
@@ -873,7 +877,8 @@ if (empty($action)) {
 			$urladd .= "&uptime_s=$uptime_s";
 		}
 		if ($uptime_e) {
-			$sql .= ' AND cp.uptime<='.pwEscape($uptime_e);
+			$uptime_e_sql = $uptime_e + 24*3600;
+			$sql .= ' AND cp.uptime<='.pwEscape($uptime_e_sql);
 			$urladd .= "&uptime_e=$uptime_e";
 		}
 		switch ($orderway) {

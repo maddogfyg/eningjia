@@ -4,7 +4,7 @@ class PW_InvokeDB extends BaseDB {
 	var $_tableName = "pw_invoke";
 
 	function getDataByName($name,$cateid=0) {
-		$temp	= $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE name=".pwEscape($name));
+		$temp	= $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE name=".pwEscape($name));
 		if ($temp['loops']) {
 			$temp['loops'] = unserialize($temp['loops']);
 			$temp['loops'] = $this->stripFidByCateid($temp['loops'],$cateid);
@@ -18,8 +18,8 @@ class PW_InvokeDB extends BaseDB {
 			$sql_add .= 'AND t.type='.pwEscape($type);
 		}
 		$temp	= array();
-		$query	= $this->_getConnection()->query("SELECT i.*,t.image,t.type FROM ".$this->_tableName." i LEFT JOIN pw_tpl t USING(tplid) WHERE i.name IN(".pwImplode($names).") $sql_add ORDER BY i.id");
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query	= $this->_db->query("SELECT i.*,t.image,t.type FROM ".$this->_tableName." i LEFT JOIN pw_tpl t USING(tplid) WHERE i.name IN(".pwImplode($names).") $sql_add ORDER BY i.id");
+		while ($rt = $this->_db->fetch_array($query)) {
 			if ($rt['loops']) {
 				$rt['loops'] = unserialize($rt['loops']);
 				$rt['loops'] = $this->stripFidByCateid($rt['loops'],$cateid);
@@ -47,13 +47,13 @@ class PW_InvokeDB extends BaseDB {
 		return $fids;
 	}
 	function getDataById($id) {
-		$temp	= $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
+		$temp	= $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}
 	function getByTplId($tplid) {
-		$query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE tplid=".$this->_addSlashes($tplid));
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE tplid=".$this->_addSlashes($tplid));
+		while ($rt = $this->_db->fetch_array($query)) {
 			$rt	= $this->_unserializeData($rt);
 			$temp[] = $rt;
 		}
@@ -67,8 +67,8 @@ class PW_InvokeDB extends BaseDB {
 			$sqladd = '';
 		}
 		$temp = array();
-		$query = $this->_getConnection()->query("SELECT i.*,t.image FROM ".$this->_tableName." i LEFT JOIN pw_tpl t USING(tplid) $sqladd $limit");
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query("SELECT i.*,t.image FROM ".$this->_tableName." i LEFT JOIN pw_tpl t USING(tplid) $sqladd $limit");
+		while ($rt = $this->_db->fetch_array($query)) {
 			if ($rt['ifloop']) {
 				$rt['pwcode'] = Char_cv('<loop id="'.$rt['name'].'"><pw id="'.$rt['name'].'" /></loop>');
 			} else {
@@ -84,7 +84,7 @@ class PW_InvokeDB extends BaseDB {
 		if (!$array) {
 			return null;
 		}
-		$this->_getConnection()->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE name=".pwEscape($name));
+		$this->_db->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE name=".pwEscape($name));
 	}
 
 	function count($type='') {
@@ -94,7 +94,7 @@ class PW_InvokeDB extends BaseDB {
 		} else {
 			$sqladd = '';
 		}
-		return $this->_getConnection()->get_value("SELECT COUNT(*) AS count FROM ".$this->_tableName." $sqladd");
+		return $this->_db->get_value("SELECT COUNT(*) AS count FROM ".$this->_tableName." $sqladd");
 	}
 
 	function insertData($array) {
@@ -102,11 +102,11 @@ class PW_InvokeDB extends BaseDB {
 		if (!$array || !$array['name'] || !$array['tplid']) {
 			return null;
 		}
-		$this->_getConnection()->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
+		return $this->_db->insert_id();
 	}
 	function deleteByName($name){
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE name=".pwEscape($name));
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE name=".pwEscape($name));
 	}
 
 

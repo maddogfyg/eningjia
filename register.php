@@ -334,8 +334,8 @@ if (!$step && $step != 2) {
 
 			$pwServer['HTTP_USER_AGENT'] = 'Shockwave Flash';
 			$swfhash = GetVerify($winduid);
-			$upload_param = rawurlencode($db_bbsurl.'/profile.php?action=uploadicon&verify='.$swfhash.'&uid='.$winduid.'&');
-			$save_param = rawurlencode($db_bbsurl.'/profile.php?action=uploadicon&step=2&');
+			$upload_param = rawurlencode($db_bbsurl.'/job.php?action=uploadicon&verify='.$swfhash.'&uid='.$winduid.'&');
+			$save_param = rawurlencode($db_bbsurl.'/job.php?action=uploadicon&step=2&from=reg&');
 			$default_pic = rawurlencode("$db_picpath/facebg.jpg");
 			session_start();
 			$sid = session_id();
@@ -363,6 +363,10 @@ if (!$step && $step != 2) {
 			$proicon = $httpurl[0];
 			$httpurl[1] = (int)$httpurl[1];
 			$httpurl[2] = (int)$httpurl[2];
+			$httpurl[3] = (int)$httpurl[3];
+			$httpurl[4] = (int)$httpurl[4];
+			list($user_a[2], $user_a[3]) = flexlen($httpurl[1], $httpurl[2], $httpurl[3], $httpurl[4]);
+			/*
 			if (empty($httpurl[1]) && empty($httpurl[2])) {
 				list($iconwidth,$iconheight) = getimagesize($proicon);
 			} else {
@@ -370,6 +374,7 @@ if (!$step && $step != 2) {
 			}
 			$user_a[2] = $iconwidth;
 			$user_a[3] = $iconheight;
+			*/
 			$usericon = setIcon($proicon, $facetype, $user_a);
 			unset($httpurl);
 		}

@@ -38,7 +38,7 @@ $action || $action = '';
 
 if(!$action){
 	$rs	 = $db->query("SELECT * FROM pw_nav WHERE type=".pwEscape($type)."ORDER BY view");
-	$nav = array();
+	$nav = $sublinkdb = $linkdb = $navdb = array();
 	while($navdb = $db->fetch_array($rs)){
 		$style_array = explode("|",$navdb['style']);
 		$style_color = $style_array[0];

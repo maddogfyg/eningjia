@@ -284,10 +284,13 @@ class postCate {
 				$fieldone[$rt['fieldname']] = nl2br($fieldone[$rt['fieldname']]);
 			}
 			$rt['fieldvalue'] = $fieldone[$rt['fieldname']];
-			if ($rt['fieldvalue'] && $rt['type'] != 'img' && $rt['type'] != 'upload'){
+			if (($rt['fieldvalue'] || $rt['fieldname'] == 'limitnum') && $rt['type'] != 'img' && $rt['type'] != 'upload'){
 				$classname =  $i%2 == 0 ? 'two' : '';
 				$rt['rules'] && $rt['rules'] = unserialize($rt['rules']);
 				list($rt['name1'],$rt['name2']) = explode('{#}',$rt['name']);
+				if ($rt['fieldname'] == 'limitnum') {
+					!$rt['fieldvalue'] && $rt['fieldvalue'] = getLangInfo('other','pc_limitnum');
+				}
 				if ($rt['vieworder'] != $vieworder_mark && $vieworder_mark != 0) $postcatevalue .= "</cite></li>";
 				if ($rt['vieworder'] == 0) {
 					$postcatevalue .= "<li class=\"$classname\"><em>$rt[name1]：</em><cite>";
@@ -476,19 +479,21 @@ class postCate {
 				$searchhtml .= "<input type=\"text\" size=\"$textsize\" name=\"searchname[".$fieldid."]\" value=\"\" class=\"input\">";
 			}
 			if ($rt['vieworder'] == 0) {
-				$searchhtml .= " ".$name2."</span>";
+				$searchhtml .= $name2."</span>";
 			} elseif ($rt['vieworder'] != 0) {
-				$searchhtml .= " ".$name2;
+				$searchhtml .= $name2;
 				$vieworder_mark = $rt['vieworder'];
 			}
 		}
-		$searchhtml .= "&nbsp;&nbsp;<input type=\"submit\" name=\"submit\" value=\"".getLangInfo('other','pc_search')."\" class=\"btn\">";
-		$ifsearch == 0 && $searchhtml = '</span></form>';
+		$searchhtml .= "<input type=\"submit\" name=\"submit\" value=\"".getLangInfo('other','pc_search')."\" class=\"btn\">";
+		$ifsearch == 0 && $searchhtml = '';
 
 		$ifasearch == '1' && $searchhtml .= "<a id=\"aserach\" href=\"javascript:;\" onclick=\"sendmsg('pw_ajax.php?action=asearch&fid=$fid&pcid=$pcid','',this.id);\">".getLangInfo('other','pc_asearch')."</a></span></form>";
 
-		if (strpos($searchhtml,'</span>&nbsp;&nbsp;<input') !== false) {
-			$searchhtml = str_replace('</span>&nbsp;&nbsp;<input','&nbsp;&nbsp;<input',$searchhtml);
+		if (strpos($searchhtml,'</span><input type="submit"') !== false) {
+			$searchhtml = str_replace('</span><input type="submit"','</span><span><input type="submit"',$searchhtml);
+		} elseif (strpos($searchhtml,'class="input"><input type="submit"') !== false) {
+			$searchhtml = str_replace('class="input"><input type="submit"','class="input"></span><span><input type="submit"',$searchhtml);
 		}
 		return $searchhtml;
 	}

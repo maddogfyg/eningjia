@@ -188,7 +188,7 @@ function dodebate(id,tid,pid) {
 				getObj('reimgre').height = str[5]+'%';
 <!--
 EOT;
-if($fastpost){print <<<EOT
+if($fastpost && $groupid != 'guest'){print <<<EOT
 -->
 				var i = str[6] == 1 ? 2 : 1;
 				document.FORM.standpoint.options[i].disabled = true;

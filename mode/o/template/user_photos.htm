@@ -133,7 +133,7 @@ EOT;
 if ($cnpho) {
 foreach ($cnpho as $key => $value) {print <<<EOT
 -->                
-				<li><table><tr><td class="tac"><a href="{$basename}a=view&pid=$value[pid]" class="photo-img"><img src="$value[path]" /></a></td></tr></table>
+				<li><table><tr><td class="tac"><a href="{$basename}a=view&pid=$value[pid]" class="photo-img"><img src="$value[path]" onload="if(this.width>100){this.width = 100;}"/></a></td></tr></table>
 <p>          
 								<!--<div class="lh18-b" id="ff" title="$value[pintro]">$value[sub_pintro]</div>-->
 								共$value[c_num]条评论<br />
@@ -388,7 +388,7 @@ EOT;
 <script language="JavaScript">
 function ajaxdel(pid) {
 	var u = '$u';
-	ajax.send('{$temp_baseUrl}a=delphoto&pid='+pid,'',function() {
+	ajax.send('{$temp_basename}a=delphoto&pid='+pid,'',function() {
 		var rText = ajax.request.responseText.split('\t');
 		if (rText[0] == 'ok') {
 			window.location = '{$basename}a=album&aid='+rText[1];

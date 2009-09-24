@@ -1893,7 +1893,7 @@ $search = array(
 		'global_indexset' => '未登录状态圈子首页模块开启：',
 	),
 
-	'o_diary'		=> array(
+	'app_diary'		=> array(
 		'diary_set_title'	=> '日志基本设置',
 		'diary_dopen' => '是否开启日志功能：',
 		'diary_gdcheck' => '是否开启发表日志认证码：',
@@ -1932,7 +1932,7 @@ $search = array(
 			'diary_orderby' => '排序：',
 		),
 	),
-	'o_groups'		=> array(
+	'app_groups'		=> array(
 		'groups_setting' => '基本设置',
 		'groups_cache' => '更新缓存',
 		'groups_open' => '是否开启群组：',
@@ -1990,7 +1990,7 @@ $search = array(
 			'groups_delcolony' => '清除没有分类的朋友圈( 此将删除关联没有分类的朋友圈所有东西，删除后不能再恢复，请确定若只是修改朋友圈分类，请到朋友圈管理处修改分类 )',
 		),
 	),
-	'o_photos'	=> array(
+	'app_photos'	=> array(
 		'photos_setting' => '相册设置',
 		'photos_photos' => '相片管理',
 		'photos_set_title' => '相册基本设置',
@@ -2028,7 +2028,7 @@ $search = array(
 			'photos_default' => '排序',
 		),
 	),
-	'o_write'		=> array(
+	'app_write'		=> array(
 		'diary_jifenset'	=> '记录积分奖惩设置',
 		'diary_jifensetwarning' => '注：威望积分设置支持1位小数点，其他积分只允许整数！',
 		'diary_jifenliutong' => '记录积分流通记录',
@@ -2047,7 +2047,7 @@ $search = array(
 			'write_confirm' => '确定要删除所选记录吗？',
 		),
 	),
-	'o_share'		=> array(
+	'app_share'		=> array(
 		'share_setting' => '分享设置',
 		'share_share' => '分享管理',
 		'share_set_title' => '分享基本设置',
@@ -2083,6 +2083,14 @@ $search = array(
 			'share_confirm' => '确定要删除所选分享吗？',
 		),
 	),
+	'app_hot'		=> array(
+		'hot_base_set' => '基本设置',
+		'hot_sort_type' => '排行类型设置',
+		'hot_if_open' => '是否开启热榜：',
+		'hot_view_purview' => '浏览权限：',
+		'hot_purview_descrip' => '（勾选允许浏览的用户组，全不选表示全开放）',
+	),
+
 	'o_comments'		=> array(
 		'comments_title' => '评论搜索',
 		'comments_type' => '评论类型',
@@ -2106,7 +2114,7 @@ $search = array(
 			'name'	=> '应用列表',
 			'app_name'	=> '应用名称',
 			'app_base'	=> '基础应用',
-			'app_disanfang'	=> '第三方APP应用',
+			'app_disanfang'	=> '第三方在线应用',
 			'app_descript'	=> 'app应用简介 app应用是由 PHPWind 提供的程序扩展服务。站长可自主选择是否开启，并且可针对每个应用设置是否启用。',
 			'app_explain'	=> '1、当站点应用使用异常时，你可以使用数据更新操作将站点信息更新到app应用平台。<br />
 	2、关闭应用之后，所有用户应用都将无法使用。',
@@ -2118,6 +2126,33 @@ $search = array(
 	2.点击获取最新分类：当PHPWind.com平台，有分类更新时，点击即可获取最新分类信息。<br />
 	3.使用用户组：控制用户组使用帖子推送的权限。'
 		),
+	),
+	'msphinx'			=> array(
+		'msphinx_config'	=> 'Sphinx全文索引配置',
+		'msphinx_descrip'	=> '介绍说明',
+		'msphinx_descrip_info'	=> 'Sphinx是一个基于SQL的全文检索引擎，可以结合MySQL,PostgreSQL做全文搜索，它可以提供比数据库本身更专业的搜索功能，使得应用程序更容易实现专业化的全文检索。Sphinx特别为一些脚本语言设计搜索API接口，如PHP,Python,Perl,Ruby等，同时为MySQL也设计了一个存储引擎插件。',
+		'msphinx_admin'	=> '全文索引管理',
+		'msphinx_ifopen'	=> '是否开启全文索引',
+	),
+	'mmemcache'			=> array(
+		'mmemcache_config'	=> 'Memcache 缓存配置',
+		'mmemcache_descrip_info'	=> 'memcached是以LiveJournal旗下Danga Interactive公司的Brad Fitzpatric为首开发的一款开源软件。现在已成为从多服务中提高Web应用扩展性的重要因素。许多Web应用都将数据保存到RDBMS中,应用服务器从中读取数据并在浏览器中显示。但随着数据量的增大、访问的集中，就会出现RDBMS的负担加重、数据库响应恶化、网站显示延迟等重大影响。memcached是高性能的分布式内存缓存服务器。一般的使用目的是，通过缓存数据库查询结果，减少数据库访问次数，以提高动态Web应用的速度、提高可扩展性。Memcache官方网站：',
+		'mmemcache_ifopen'	=> '是否开启Memcache',
+	),
+	'ucset'				=> array(
+		'ucset_info'	=> '此处用于设置多个系统间的用户信息共享，并实现各系统间用户资料、操作等的同步。独立系统—表示系统没有跟其他系统共享用户信息；<br />用户中心服务端—表示系统为用户中心主站，设置过程中其本身的数据将不受影响；设置完成后，需要到《应用管理》中添加附站信息；用户中心客户端—表示系统为用户中心附站，设置完成后，其用户信息将被主站覆盖（设置需谨慎）',
+		'ucset_set_for'	=> '将本系统作为：',
+		'ucset_set_for_single'	=> '独立系统',
+		'ucset_set_for_server'	=> '用户中心服务端',
+		'ucset_set_for_client'	=> '用户中心客户端（用户中心的一个子应用）',
+		'ucset_id'	=> '本应用id',
+		'ucset_key'	=> '本应用密钥',
+		'ucset_server_ip'	=> '服务端数据库主机名 或 IP 地址',
+		'ucset_server_sql_username'	=> '服务端数据库用户名',
+		'ucset_server_sql_keyword'	=> '服务端数据库密码',
+		'ucset_sercer_sql_name'	=> '服务端数据库名',
+		'ucset_sercer_sql_prefix'	=> '服务端数据库表前缀',
+		'ucset_sercer_sql_language'	=> '服务端数据库表字符编码',
 	),
 );
 ?>

@@ -3,7 +3,6 @@
 $basename = "$admin_file?adminjob=creathtm&type=$type";
 
 $sqladd = "WHERE type<>'category' AND allowvisit='' AND f_type!='hidden' AND cms='0'";
-
 if (!$action) {
 
 	@include_once(D_P.'data/bbscache/forumcache.php');
@@ -59,7 +58,7 @@ if (!$action) {
 
 	!$tfid && $tfid = 0;
 	$thisfid = (int)$creatfid[$tfid];
-	
+
 	$imgpath	= $db_http	!= 'N' ? $db_http : $db_picpath;
 	$attachpath	= $db_attachurl	!= 'N' ? $db_attachurl : $db_attachname;
 	$staticPage = L::loadClass('StaticPage');
@@ -75,7 +74,7 @@ if (!$action) {
 	$step++;
 	$j_url = "$basename&action=$action&percount=$percount&creatfid=$fids&forumnum=$forumnum";
 	$goon  = 0;
-	
+
 	$query = $db->query("SELECT tid FROM pw_threads WHERE fid='$thisfid' AND ifcheck=1 AND special='0' ORDER BY topped DESC,lastpost DESC" . pwLimit($start, $percount));
 	while ($topic = $db->fetch_array($query)) {
 		$goon = 1;
@@ -123,33 +122,39 @@ if (!$action) {
 	}
 	adminmsg('operate_success');
 }
-function pwAdvert($ckey,$fid=0,$lou=0,$scr=0) {
-	global $timestamp,$db_advertdb,$db_mode;
-	if (empty($db_advertdb[$ckey])) return false;
 
+function pwAdvert($ckey,$fid=0,$lou=-1,$scr=0) {
+	global $timestamp,$db_advertdb,$_time;
+	if (empty($db_advertdb[$ckey])) return false;
+	$hours = $_time['hours'] + 1;
 	$fid || $fid = $GLOBALS['fid'];
-	$scr || $scr = SCR;
+	$scr || $scr = 'read';
+	$lou = (int)$lou;
 	$tmpAdvert = $db_advertdb[$ckey];
 	if ($db_advertdb['config'][$ckey] == 'rand') {
 		shuffle($tmpAdvert);
 	}
-	$advert = array();
+	$arrAdvert = array();$advert = '';
 	foreach ($tmpAdvert as $key=>$value) {
-		if ($value['stime'] <= $timestamp && $value['etime'] >= $timestamp) {
-			if (($value['mode'] && strpos($value['mode'],($db_mode?$db_mode:'bbs'))===false)
-				|| ($value['page'] && strpos($value['page'],$scr)===false)
-				|| ($value['fid'] && strpos(",{$value['fid']},",",$fid,")===false)
-				|| ($value['lou'] && strpos(",{$value['lou']},",",$lou,")===false)) {
-				continue;
-			}
-			if ($db_advertdb['config'][$ckey] != 'all') {
-				$advert = $value['code'];break;
-			} else {
-				$advert[] = $value['code'];
-			}
-		}
+            if ($value['stime'] > $timestamp ||
+                $value['etime'] < $timestamp ||
+                ($value['dtime'] && strpos(",{$value['dtime']},",",{$hours},")===false) ||
+		($value['mode'] && strpos($value['mode'],'bbs')===false) ||
+		($value['page'] && strpos($value['page'],$scr)===false) ||
+		($value['fid'] && strpos(",{$value['fid']},",",$fid,")===false) ||
+		($value['lou'] && strpos(",{$value['lou']},",",$lou,")===false)
+            ) {
+		continue;
+            }
+            if ((!$value['ddate'] && !$value['dweek']) ||
+                ($value['ddate'] && strpos(",{$value['ddate']},",",{$_time['day']},")!==false) ||
+                ($value['dweek'] && strpos(",{$value['dweek']},",",{$_time['week']},")!==false)) {
+                $arrAdvert[] = $value['code'];
+                $advert .= is_array($value['code']) ? $value['code']['code'] : $value['code'];
+                if ($db_advertdb['config'][$ckey] != 'all') break;
+            }
 	}
-	return $advert;
+	return array($advert,$arrAdvert);
 }
 
 function pwNavBar() {

@@ -30,19 +30,19 @@ if ($do == 'post') {
 
 
 	$text = GetGP('text','P');
-	
+
 	if (!CkInArray(strtolower($encode),array('gbk','utf8','big5'))) {
 		$encode = $charset;
 	} elseif ($charset != $encode) {
 		$text = pwConvert($text,$charset,$encode,true);
 	}
-	
+
 	$textlen = strlen(trim($text));
-	
+
 	$textlen < $minLenText && Showmsg('mode_o_write_textminlen');
 	$textlen > $maxLenText && Showmsg('mode_o_write_textmaxlen');
 	$text = trim($text);
-	
+
 	require_once(R_P.'require/bbscode.php');
 	$wordsfb = wordsfb::getInstance();
 	if (($banword = $wordsfb->comprise($text)) !== false) {
@@ -95,9 +95,9 @@ if ($do == 'post') {
 			'content'	=> $text
 		)));
 	$f_id = $db->insert_id();
-	
+
 	updateUserAppNum($winduid,'owrite','add');
-	
+
 	if (getstatus($winddb['userstatus'],20,3) != 2) {
 		pwAddFeed($winduid, 'write',$f_id, array('lang' => 'o_write', 'text' => $text));
 	}
@@ -105,7 +105,14 @@ if ($do == 'post') {
 		$db->update("UPDATE pw_members SET honor=".pwEscape($text)." WHERE uid=".pwEscape($winduid));
 	}
 	countPosts('+1');
-	
+
+	//会员资讯缓存
+	$usercachedata = array();
+	$usercache = L::loadDB('Usercache');
+	$usercachedata['content'] = substrs(stripWindCode($text),100,N);
+	$usercachedata['postdate'] = $timestamp;
+	$usercache->update($winduid,'write',$f_id,$usercachedata);
+
 	//积分变动
 	require_once(R_P.'require/credit.php');
 	$o_write_creditset = unserialize($o_write_creditset);
@@ -115,7 +122,7 @@ if ($do == 'post') {
 		$credit->sets($winduid,$creditset,true);
 		updateMemberid($winduid);
 	}
-	
+
 	if ($creditlog = unserialize($o_write_creditlog)) {
 		addLog($creditlog['Post'],$windid,$winduid,'write_Post');
 	}
@@ -138,13 +145,17 @@ if ($do == 'post') {
 		$authorid = $owritedata['uid'];
 		$author = $owritedata['username'];
 	}
-	
+
 	$db->update("DELETE FROM pw_owritedata WHERE id=".pwEscape($id).$sql);
 	if ($db->affected_rows() == 0) {
 		Showmsg('mode_o_write_del_error');
 	} else {
 		$affected_rows = delAppAction('write',$id)+1;
 		countPosts("-$affected_rows");
+
+		$usercache = L::loadDB('Usercache');
+		$usercache->delete($winduid,'write',$id);
+
 		//积分变动
 		require_once(R_P.'require/credit.php');
 		$o_write_creditset = unserialize($o_write_creditset);
@@ -155,7 +166,7 @@ if ($do == 'post') {
 			$credit->sets($authorid,$creditset,true);
 			updateMemberid($authorid,false);
 		}
-		
+
 		if ($creditlog = unserialize($o_write_creditlog)) {
 			addLog($creditlog['Delete'],$author,$authorid,'write_Delete');
 		}
@@ -193,7 +204,7 @@ if ($do == 'post') {
 	if ($u && $u != $winduid) {
 		$uinfo = $db->get_one("SELECT m.uid,m.username,m.icon,m.groupid,ud.index_privacy,ud.owrite_privacy FROM pw_members m LEFT JOIN pw_ouserdata ud ON m.uid=ud.uid WHERE m.uid=".pwEscape($u,false));
 		$username = $uinfo['username'];
-		$pageurl = "{$basename}do=view";
+		$pageurl = "{$basename}do=view&";
 	} else {
 		$u = (int)$winduid;
 		$uinfo = $winddb;

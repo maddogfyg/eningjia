@@ -4,7 +4,7 @@ class PW_cacheDataDB extends BaseDB {
 	var $_tableName = "pw_cachedata";
 
 	function getDataByInvokepieceId($invokepieceid,$fid=0,$loopid=0){
-		$temp = $this->_getConnection()->get_one("SELECT invokepieceid,fid,loopid,data,cachetime FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)."AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid));
+		$temp = $this->_db->get_one("SELECT invokepieceid,fid,loopid,data,cachetime FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)."AND fid=".pwEscape($fid)." AND loopid=".pwEscape($loopid));
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}
@@ -13,8 +13,8 @@ class PW_cacheDataDB extends BaseDB {
 		if (!$array || !$array['invokepieceid'] || !$array['fid'] || !$array['loopid']) {
 			return null;
 		}
-		$this->_getConnection()->update("REPLACE INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("REPLACE INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
+		return $this->_db->insert_id();
 	}
 	function deleteData($invokepieceid,$fid=0,$loopid=0){
 		$sqladd = '';
@@ -24,16 +24,16 @@ class PW_cacheDataDB extends BaseDB {
 		if ($loopid) {
 			$sqladd .= " AND loopid=".pwEscape($loopid);
 		}
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." $sqladd");
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE invokepieceid=".pwEscape($invokepieceid)." $sqladd");
 	}
 	function truncate(){
-		$this->_getConnection()->query("TRUNCATE ".$this->_tableName."");
+		$this->_db->query("TRUNCATE ".$this->_tableName."");
 	}
 	function updates($array){
 		foreach ($array as $key=>$value) {
 			$array[$key] = $this->_serializeData($value);
 		}
-		$this->_getConnection()->update("REPLACE INTO ".$this->_tableName." (invokepieceid,fid,loopid,data,cachetime) VALUES " . pwSqlMulti($array,false));
+		$this->_db->update("REPLACE INTO ".$this->_tableName." (invokepieceid,fid,loopid,data,cachetime) VALUES " . pwSqlMulti($array,false));
 	}
 	function getDatasByInvokepieceids($invokepieceids){
 		$temp_0 = $temp_1 = $invokepieceids_0 = $invokepieceids_1 = array();
@@ -54,8 +54,8 @@ class PW_cacheDataDB extends BaseDB {
 	function commonGetDatas($invokepieceids){
 		if (!is_array($invokepieceids) || !$invokepieceids) return array();
 		$temp	= array();
-		$query	= $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid IN(".pwImplode($invokepieceids).")");
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query	= $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid IN(".pwImplode($invokepieceids).")");
+		while ($rt = $this->_db->fetch_array($query)) {
 			$rt	= $this->_unserializeData($rt);
 			$key = $rt['loopid'] ? $rt['invokepieceid']."_".$rt['loopid'] : $rt['invokepieceid'];
 			$temp[$key] = $rt;
@@ -70,8 +70,8 @@ class PW_cacheDataDB extends BaseDB {
 		$temp_fid = $fid ? $fid : '';
 		if (!is_array($invokepieceids) || !$invokepieceids) return array();
 		$temp	= array();
-		$query	= $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid IN(".pwImplode($invokepieceids).") AND fid=".pwEscape($temp_fid));
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query	= $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE invokepieceid IN(".pwImplode($invokepieceids).") AND fid=".pwEscape($temp_fid));
+		while ($rt = $this->_db->fetch_array($query)) {
 			$rt	= $this->_unserializeData($rt);
 			$key = $rt['loopid'] ? $rt['invokepieceid']."_".$rt['loopid'] : $rt['invokepieceid'];
 			$temp[$key] = $rt;

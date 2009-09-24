@@ -3,7 +3,7 @@ define('SCR','userpay');
 require_once('global.php');
 require_once(R_P.'require/tool.php');
 !$windid && Showmsg('not_login');
-
+$db_menuinit .= ",'td_userinfomore' : 'menu_userinfomore'";
 require_once(R_P.'require/credit.php');
 $creditdb = array(
 	'money'		=> $winddb['money'],

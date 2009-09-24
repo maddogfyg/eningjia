@@ -75,9 +75,10 @@ function()
 				var fixtop=50;
                 b.top = c[1] - b.body.offsetTop-28;
 				
-                b.render();
+                b.render();	
 				if(b.element.offsetTop>_this.ROOT.offsetHeight-b.element.offsetHeight-fixtop)
 				{
+					
 					b.element.style.top=_this.ROOT.offsetHeight-b.element.offsetHeight-fixtop+"px";
 				}
 				showedMenu=b.id;
@@ -126,7 +127,7 @@ function()
 			if(this.top+this.menu.offsetHeight>this.ROOT.offsetHeight-37)
 			{
 				var tt=this.top-(this.ROOT.offsetHeight-this.menu.offsetHeight-fixtop)+47;
-				this.arrow.style.top=tt+"px";
+				this.arrow?this.arrow.style.top=tt+"px":0;
 			}
             sty.top = (this.top+this.menu.offsetHeight>this.ROOT.offsetHeight-37?this.ROOT.offsetHeight-this.menu.offsetHeight-fixtop:this.top) + "px";
             sty.position = "absolute";

@@ -12,6 +12,7 @@ $_G['maxmsg'] == 0 && Showmsg('msg_group_right');
 $msginfo['mdate'] = '';
 InitGP(array('action','page'));
 if (!$action) $action = 'receivebox';
+$db_menuinit .= ",'td_userinfomore' : 'menu_userinfomore'";
 
 $pubmsg = $readmsg = $delmsg = $pages = '';
 if (in_array($action,array('receivebox','readpub','del','clear','readn','read','unread'))) {

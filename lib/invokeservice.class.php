@@ -14,30 +14,47 @@ dbs:
 	pw_mpageconfig
 */
 class PW_InvokeService {
+	var $_tplDB;
+	var $_invokeDB;
+	var $_invokePieceDB;
+
+	var $_pushDataDB;
+	var $_cacheDataDB;
+	var $_stampDB;
+
+	var $_mpageConfigDB;
+
 
 /**	pw_tpl **/
 	function getTpl($tplid) {
-		return $this->_getTplDB()->getData($tplid);
+		$tplDb = $this->_getTplDB();
+		return $tplDb->getData($tplid);
 	}
 	function insertTpl($data) {
-		$this->_getTplDB()->insertData($data);
+		$tplDb = $this->_getTplDB();
+		$tplDb->insertData($data);
 	}
 	function updateTpl($id,$data) {
-		$this->_getTplDB()->updataById($id,$data);
+		$tplDb = $this->_getTplDB();
+		$tplDb->updataById($id,$data);
 		$this->_updateInvokeByTplId($id);
 	}
 /**	pw_invoke **/
 	function getInvokeByName($invokename,$cateid=0) {
-		return $this->_getInvokeDB()->getDataByName($invokename,$cateid);
+		$invokeDB = $this->_getInvokeDB();
+		return $invokeDB->getDataByName($invokename,$cateid);
 	}
 	function getInvokesByNames($names,$cateid=0,$type='') {
-		return $this->_getInvokeDB()->getDatasByNames($names,$cateid,$type);
+		$invokeDB = $this->_getInvokeDB();
+		return $invokeDB->getDatasByNames($names,$cateid,$type);
 	}
 	function updateInvokeByName($name,$data) {
-		$this->_getInvokeDB()->updateByName($name,$data);
+		$invokeDB = $this->_getInvokeDB();
+		$invokeDB->updateByName($name,$data);
 	}
 	function getInvokeByTplId($tplid) {
-		return $this->_getInvokeDB()->getByTplId($tplid);
+		$invokeDB = $this->_getInvokeDB();
+		return $invokeDB->getByTplId($tplid);
 	}
 
 	function _updateInvokeByTplId($tplid) {
@@ -55,34 +72,42 @@ class PW_InvokeService {
 	}
 /**	pw_invokepiece **/
 	function getInvokePieceByInvokeId($id) {
-		return $this->_getInvokePieceDB()->getDataById($id);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		return $invokePieceDB->getDataById($id);
 	}
 
 	function getInvokePieceByInvokeName($invokename) {
-		return $this->_getInvokePieceDB()->getDatasByInvokeName($invokename);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		return $invokePieceDB->getDatasByInvokeName($invokename);
 	}
 
 	function getInvokePiecesByInvokeNames($names) {
-		return $this->_getInvokePieceDB()->getDatasByInvokeNames($names);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		return $invokePieceDB->getDatasByInvokeNames($names);
 	}
 
 	function getInvokePieceByNameAndTitle($invokename,$title) {
-		return $this->_getInvokePieceDB()->getDataByInvokeNameAndTitle($invokename,$title);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		return $invokePieceDB->getDataByInvokeNameAndTitle($invokename,$title);
 	}
 
 	function updateInvokePieceById($id,$array) {
-		$this->_getInvokePieceDB()->updateById($id,$array);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		$invokePieceDB->updateById($id,$array);
 	}
 
 	function insertInvokePiece($array) {
-		return $this->_getInvokePieceDB()->insertData($array);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		return $invokePieceDB->insertData($array);
 	}
 
 	function insertInvokePieces($array) {
-		$this->_getInvokePieceDB()->insertDatas($array);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		$invokePieceDB->insertDatas($array);
 	}
 	function deleteInovkePieceByInvokeName($name) {
-		$this->_getInvokePieceDB()->deleteByInvokeName($name);
+		$invokePieceDB = $this->_getInvokePieceDB();
+		$invokePieceDB->deleteByInvokeName($name);
 	}
 	function updateInvokePieces($array) {
 		if (!is_array($array) || !$array) return false;
@@ -104,39 +129,49 @@ class PW_InvokeService {
 /**	pw_pushdata **/
 
 	function getPushDataById($id) {
-		return $this->_getPushDataDB()->getDataById($id);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->getDataById($id);
 	}
 
 	function getPushDataEffect($invokepieceid,$fid=0,$loopid=0,$num = 10) {
-		return $this->_getPushDataDB()->getEffectData($invokepieceid,$fid,$loopid,$num);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->getEffectData($invokepieceid,$fid,$loopid,$num);
 	}
 	function getPushDataOverdue($invokepieceid,$fid=0,$loopid=0,$num = 10) {
-		return $this->_getPushDataDB()->getOverdueData($invokepieceid,$fid,$loopid,$num);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->getOverdueData($invokepieceid,$fid,$loopid,$num);
 	}
 	function countEffectPushData($invokepieceid,$fid,$loopid) {
-		return $this->_getPushDataDB()->countEffect($invokepieceid,$fid,$loopid);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->countEffect($invokepieceid,$fid,$loopid);
 	}
 	function countOverduePushData($invokepieceid,$fid,$loopid) {
-		return $this->_getPushDataDB()->countOverdue($invokepieceid,$fid,$loopid);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->countOverdue($invokepieceid,$fid,$loopid);
 	}
 	function insertPushData($array) {
-		return $this->_getPushDataDB()->insertData($array);
+		$pushDataDB = $this->_getPushDataDB();
+		return $pushDataDB->insertData($array);
 	}
 	function updatePushData($id,$array) {
-		$this->_getPushDataDB()->update($id,$array);
+		$pushDataDB = $this->_getPushDataDB();
+		$pushDataDB->update($id,$array);
 	}
 	function deletePushData($id) {
-		$this->_getPushDataDB()->delete($id);
+		$pushDataDB = $this->_getPushDataDB();
+		$pushDataDB->delete($id);
 	}
 
 	function deleteOverduePushData($invokepieceid,$fid,$loopid) {
-		$this->_getPushDataDB()->deleteOverdues($invokepieceid,$fid,$loopid);
+		$pushDataDB = $this->_getPushDataDB();
+		$pushDataDB->deleteOverdues($invokepieceid,$fid,$loopid);
 	}
 
 /**	pw_stamp **/
 
 	function getStampBlocks($stamp) {
-		return $this->_getStampDB()->getBlocksByStamp($stamp);
+		$stampDB = $this->_getStampDB();
+		return $stampDB->getBlocksByStamp($stamp);
 	}
 /**	pw_cachedata **/
 	function updateCacheDataPiece($invokepieceid,$fid=0,$loopid=0) {
@@ -144,20 +179,24 @@ class PW_InvokeService {
 		updateAreaStaticRefreshTime();
 	}
 	function deleteCacheData($invokepieceid,$fid=0,$loopid=0) {
-		$this->_getCacheDataDB()->deleteData($invokepieceid,$fid,$loopid);
+		$cacheDataDB = $this->_getCacheDataDB();
+		$cacheDataDB->deleteData($invokepieceid,$fid,$loopid);
 	}
 
 /**	pw_mpageconfig **/
 
 	function getMPageConfig($mode,$SCR,$fid=0) {
 		$temp_fid	= $this->getMPageConfigFid($fid);
-		return $this->_getMPageConfigDB()->getConfig($mode,$SCR,$temp_fid);
+		$mpageConfigDB = $this->_getMPageConfigDB();
+		return $mpageConfigDB->getConfig($mode,$SCR,$temp_fid);
 	}
 	function getMPageConfigFid($fid) {
-		return $this->_getMPageConfigDB()->getAreaFid($fid);
+		$mpageConfigDB = $this->_getMPageConfigDB();
+		return $mpageConfigDB->getAreaFid($fid);
 	}
 	function getMPageConfigInvoke($db_mode,$SCR,$fid=0) {
-		return $this->_getMPageConfigDB()->getInvokes($db_mode,$SCR,$fid);
+		$mpageConfigDB = $this->_getMPageConfigDB();
+		return $mpageConfigDB->getInvokes($db_mode,$SCR,$fid);
 	}
 
 

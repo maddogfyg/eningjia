@@ -47,6 +47,14 @@ if (empty($action)){
 				$asearchhtml .= getSearchHtml($rt);
 			}
 		}
+		$searchhtml .= '</span>';
+		$asearchhtml .= '</span>';
+		if (strpos($searchhtml,'</span></span>') !== false) {
+			$searchhtml = str_replace('</span></span>','</span>',$searchhtml);
+		}
+		if (strpos($asearchhtml,'</span></span>') !== false) {
+			$asearchhtml = str_replace('</span></span>','</span>',$asearchhtml);
+		}
 		$pcvaluetable = 'pw_pcvalue'.$pcid;
 	}
 	
@@ -626,9 +634,9 @@ function getSearchHtml($data) {
 	}
 
 	if ($data['vieworder'] == 0) {
-		$searchhtml .= " ".$name2."</span>";
+		$searchhtml .= $name2."</span>";
 	} elseif ($data['vieworder'] != 0) {
-		$searchhtml .= " ".$name2;
+		$searchhtml .= $name2;
 		$vieworder_mark = $data['vieworder'];
 	}
 	return $searchhtml;

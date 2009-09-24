@@ -329,6 +329,7 @@ if (empty($action)) {
 		}
 		$newgroups != $oldinfo['groups'] && $upmembers['groups'] = $newgroups;
 
+		/*
 		list($iconurl,$icontype,$iconwidth,$iconheight,$iconfile,$iconpig,$ifhavasmallicon) = showfacedesign(addslashes($oldinfo['icon']),true);
 		if ($facetype == 2) {
 			if (substr($_POST['i_http'],0,4) != 'http' || strrpos($_POST['i_http'],'|') !== false) {
@@ -373,6 +374,31 @@ if (empty($action)) {
 		}
 		strlen($icon)>100 && adminmsg('illegal_customimg');
 		pwFtpClose($ftp);
+		*/
+		$user_a = explode('|',$oldinfo['icon']);
+		$usericon = '';
+		if ($facetype == 3 && $delupload) {
+			$facetype = 1;
+			$proicon = 'none.gif';
+		}
+		if ($facetype == 1) {
+			$usericon = setIcon($proicon, $facetype, $user_a);
+		} elseif ($facetype == 2) {
+			$httpurl = $_POST['httpurl'];
+			if (strncmp($httpurl[0],'http',4) != 0 || strrpos($httpurl[0],'|') !== false) {
+				Showmsg('illegal_customimg');
+			}
+			$proicon = $httpurl[0];
+			$httpurl[1] = (int)$httpurl[1];
+			$httpurl[2] = (int)$httpurl[2];
+			$httpurl[3] = (int)$httpurl[3];
+			$httpurl[4] = (int)$httpurl[4];
+			list($user_a[2], $user_a[3]) = flexlen($httpurl[1], $httpurl[2], $httpurl[3], $httpurl[4]);
+			$usericon = setIcon($proicon, $facetype, $user_a);
+			unset($httpurl);
+		}
+		pwFtpClose($ftp);
+		$usericon && $upmembers['icon'] = $usericon;
 
 		$bday = $year."-".$month."-".$day;
 		$rvrc*=10;
@@ -387,7 +413,7 @@ if (empty($action)) {
 		}
 		if ($uc_edit) {
 			$ucuser = L::loadClass('Ucuser');
-			list($ucstatus, $errmsg) = $ucuser->ucedit($uid, $oldinfo['username'], $uc_edit);
+			list($ucstatus, $errmsg) = $ucuser->edit($uid, $oldinfo['username'], $uc_edit);
 			if ($ucstatus < 0) {
 				Showmsg($errmsg);
 			}
@@ -422,7 +448,6 @@ if (empty($action)) {
 				'email'			=> $email,
 				'regdate'		=> $regdate,
 				'groupid'		=> $groupid,
-				'icon'			=> $icon,
 				'site'			=> $site,
 				'oicq'			=> $oicq,
 				'icq'			=> $icq,

@@ -20,8 +20,9 @@ function()
         var ale = document[frm].elements;
         var submit = document[frm].onsubmit;
         function _e()
-        {
+        {	
             submit ? submit() : 0;
+			
             var error = 0;
             for (var i = 0,len = ale.length; i < len; i++)
             {
@@ -153,7 +154,6 @@ function()
                         var range = getc.split("-");
 						if (newerror == 'rang_error2' && (this.value == '' || this.value == 0)) {
 							isTrue = true;
-							return;
 						} else {
 							var isTrue=	range[0] <= Math.floor(this.value) && range[1] >= Math.floor(this.value);
 						}
@@ -166,13 +166,10 @@ function()
 						}
 						if (newerror == 'email_error2' && (this.value == '' || this.value == 0)) {
 							isTrue = true;
-							return;
 						} else if (newerror == 'number_error2' && (this.value == '' || this.value == 0)) {
 							isTrue = true;
-							return;
 						} else if (newerror == 'numberic_error2' && (this.value == '' || this.value == 0)) {
 							isTrue = true;
-							return;
 						} else {
 							var isTrue = r.test(this.value);
 						}

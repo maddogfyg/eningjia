@@ -16,7 +16,9 @@ class PW_tplGetData{
 	function getData($invokename,$title,$loopid=0){
 		$temp = $this->_getDataFromCache($invokename,$title,$loopid);
 		if ($temp === false) {
-			$this->index++;
+			if (L::config('area_static_ifon','area_config')!=1) {
+				$this->index++;
+			}
 			$temp = $this->_getDataFromBBS($invokename,$title,$loopid);
 		}
 		return $temp;

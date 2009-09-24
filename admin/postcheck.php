@@ -87,14 +87,32 @@ if (!$_POST['step']) {
 		}
 		$db->update("UPDATE $pw_posts SET ifcheck='1' WHERE $sql AND pid IN($selid)");
 	} else {
+		require_once(R_P.'require/credit.php');
+		$creditOpKey = "Deleterp";
+		$forumInfos = array();
 		$_tids = $_pids = array();
-		$query = $db->query("SELECT tid,pid,aid FROM $pw_posts WHERE $sql AND pid IN($selid)");
+		$query = $db->query("SELECT fid,tid,pid,aid,author,authorid FROM $pw_posts WHERE $sql AND pid IN($selid)");
 		while ($rt = $db->fetch_array($query)) {
+			//积分操作
+			if (!isset($forumInfos[$rt['fid']])) $forumInfos[$rt['fid']] = L::forum($rt['fid']);
+			$foruminfo = $forumInfos[$rt['fid']];
+			$creditset = $credit->creditset($foruminfo['creditset'],$db_creditset);
+			$credit->addLog("topic_$creditOpKey", $creditset[$creditOpKey], array(
+				'uid' => $rt['authorid'],
+				'username' => $rt['author'],
+				'ip' => $onlineip,
+				'fname' => strip_tags($foruminfo['name']),
+				'operator' => $windid,
+			));
+			$credit->sets($rt['authorid'],$creditset[$creditOpKey],false);
+			
 			if ($rt['aid']) {
 				$_tids[$rt['tid']] = $rt['tid'];
 				$_tids[$rt['pid']] = $rt['pid'];
 			}
 		}
+		$credit->runsql();
+
 		if ($_tids && $_pids) {
 			$pw_attachs = L::loadDB('attachs');
 			$attachdb = $pw_attachs->getByTid($_tids,$_pids);

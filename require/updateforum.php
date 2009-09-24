@@ -25,9 +25,9 @@ function updateforum($fid,$lastinfo='') {//TODO 慢查询
 		if (!$lastinfo) {
 			$lt = $db->get_one("SELECT tid,author,postdate,lastpost,lastposter,subject FROM pw_threads WHERE fid=".pwEscape($fid)." AND topped=0 AND ifcheck=1 AND lastpost>0 ORDER BY lastpost DESC LIMIT 1");
 			if ($lt['postdate'] == $lt['lastpost']) {
-				$subject = addslashes(substrs($lt['subject'],40));
+				$subject = addslashes(substrs($lt['subject'],26));
 			} else {
-				$subject = 'Re:'.addslashes(substrs($lt['subject'],40));
+				$subject = 'Re:'.addslashes(substrs($lt['subject'],26));
 			}
 			$author  = addslashes($lt['lastposter']);
 			$lastinfo = $lt['tid'] ? $subject."\t".$author."\t".$lt['lastpost']."\t"."read.php?tid=$lt[tid]&page=e#a" : '' ;
@@ -44,11 +44,54 @@ function updateforum($fid,$lastinfo='') {//TODO 慢查询
 			$lastinfo = '';
 		}
 		delfcache($fid,$db_fcachenum);
-		if ($fm['type'] == 'sub') {
+		if ($fm['type'] == 'sub' || $fm['type'] == 'sub2') {
 			updateforum($fm['fup'],$lastinfo);
 		}
 	}
 }
+
+function updateForumCount($fid, $topic, $replies) {
+	global $db,$db_fcachenum;
+	$fm = $db->get_one("SELECT fup,type,password,allowvisit,f_type FROM pw_forums WHERE fid=" . pwEscape($fid));
+	if ($fm['type'] == 'category') {
+		return false;
+	}
+	delfcache($fid,$db_fcachenum);
+	$topic = intval($topic);
+	$article = $topic + intval($replies);
+	
+	$lastpost = '';
+	$lt = $db->get_one("SELECT tid,author,postdate,lastpost,lastposter,subject FROM pw_threads WHERE fid=" . pwEscape($fid) . " AND topped='0' AND ifcheck='1' AND lastpost>0 ORDER BY lastpost DESC LIMIT 1");
+	if ($lt) {
+		if ($lt['postdate'] == $lt['lastpost']) {
+			$subject = substrs($lt['subject'], 26);
+		} else {
+			$subject = 'Re:'.substrs($lt['subject'],26);
+		}
+		$lastpost = ",lastpost=" . pwEscape($subject."\t".$lt['lastposter']."\t".$lt['lastpost']."\t"."read.php?tid=$lt[tid]&page=e#a");
+	}
+	$db->update("UPDATE pw_forumdata SET article=article+'$article',topic=topic+'$topic'{$lastpost} WHERE fid=" . pwEscape($fid));
+
+	if (($fm['type'] == 'sub' || $fm['type'] == 'sub2') && $fids = getUpFids($fid)) {
+		if ($fm['password'] != '' || $fm['allowvisit'] != '' || $fm['f_type'] == 'hidden') {
+			$lastpost = '';
+		}
+		$db->update("UPDATE pw_forumdata SET article=article+'$article',subtopic=subtopic+'$topic'{$lastpost} WHERE fid IN(" . pwImplode($fids) . ')');
+	}
+}
+
+function getUpFids($fid) {
+	global $forum;
+	isset($forum) || include_once(D_P . 'data/bbscache/forum_cache.php');
+	$upfids = array();
+	$fid = $forum[$fid]['fup'];
+	while (in_array($forum[$fid]['type'], array('sub2','sub','forum'))) {
+		$upfids[] = $fid;
+		$fid = $forum[$fid]['fup'];
+	}
+	return $upfids;
+}
+
 function updateshortcut() {
 	global $db,$db_shortcutforum;
 	PwNewDB();

@@ -93,6 +93,57 @@ EOT;
 		}
 	}
 }
+if ($thread_read['aid'] && $thread_read['ifhide']>0) {
+print <<<EOT
+-->
+					<blockquote class="blockquote fl">附件设置隐藏，需要回复后才能看到</blockquote>
+					<div class="c"></div>
+<!--
+EOT;
+}
+if($thread_read['downattach']){
+	foreach($thread_read['downattach'] as $attach){
+		if($attach){
+print <<<EOT
+-->
+					<div style="margin:5px 0;" id="att_$attach[aid]">
+<!--
+EOT;
+			if($attach['desc']){
+print <<<EOT
+-->
+						描述：$attach[desc]<br />
+<!--
+EOT;
+			}
+			$att_id = $db_attfg ? "id=\"fg_$attach[aid]\"" : '';
+print <<<EOT
+-->
+						附件： <img src="$imgpath/$stylepath/file/$attach[type].gif" align="absmiddle" /> <a $att_id href="job.php?action=download&aid=$attach[aid]" target="_blank"> <font color="red">$attach[name]</font></a> ($attach[size] K) 下载次数:$attach[hits]
+<!--
+EOT;
+			if ($attach['needrvrc']) {
+				$at_lang = $attach['special'] == 2 ? '售价' : '需要';
+print <<<EOT
+-->
+						{$at_lang}:{$attach[needrvrc]}{$attach[cname]}
+<!--
+EOT;
+			}elseif(in_array($attach['ext'],array('mp3','wma','wmv','rm','swf'))){
+print <<<EOT
+-->
+						[<a style="cursor:pointer" onclick="playatt('$attach[aid]');">试播</a>]
+<!--
+EOT;
+			}
+print <<<EOT
+-->
+					</div>
+<!--
+EOT;
+		}
+	}
+}
 print <<<EOT
 -->
 					</div>
@@ -239,8 +290,60 @@ EOT;
 		}
 	}
 }
+if ($read['aid'] && $read['ifhide']>0) {
 print <<<EOT
 -->
+					<blockquote class="blockquote fl">附件设置隐藏，需要回复后才能看到</blockquote>
+					<div class="c"></div>
+<!--
+EOT;
+}
+if($read['downattach']){
+	foreach($read['downattach'] as $attach){
+		if($attach){
+print <<<EOT
+-->
+					<div style="margin:0 15px 10px;" id="att_$attach[aid]">
+<!--
+EOT;
+			if($attach['desc']){
+print <<<EOT
+-->
+						描述：$attach[desc]<br />
+<!--
+EOT;
+			}
+			$att_id = $db_attfg ? "id=\"fg_$attach[aid]\"" : '';
+print <<<EOT
+-->
+						附件： <img src="$imgpath/$stylepath/file/$attach[type].gif" align="absmiddle" /> <a $att_id href="job.php?action=download&aid=$attach[aid]" target="_blank"> <font color="red">$attach[name]</font></a> ($attach[size] K) 下载次数:$attach[hits]
+<!--
+EOT;
+			if ($attach['needrvrc']) {
+				$at_lang = $attach['special'] == 2 ? '售价' : '需要';
+print <<<EOT
+-->
+						{$at_lang}:{$attach[needrvrc]}{$attach[cname]}
+<!--
+EOT;
+			}elseif(in_array($attach['ext'],array('mp3','wma','wmv','rm','swf'))){
+print <<<EOT
+-->
+						[<a style="cursor:pointer" onclick="playatt('$attach[aid]');">试播</a>]
+<!--
+EOT;
+			}
+print <<<EOT
+-->
+					</div>
+<!--
+EOT;
+		}
+	}
+}
+print <<<EOT
+-->
+
 				</dd>
 			</dl>
 <!--
@@ -410,6 +513,8 @@ EOT;
 -->
 		</div>
 	</div>
+	<script type="text/javascript" language="JavaScript" src="js/pw_lwd.js"></script>
+	
 <!--
 EOT;
 ?>

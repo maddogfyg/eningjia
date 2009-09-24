@@ -4,15 +4,15 @@ class PW_InvokePieceDB extends BaseDB {
 	var $_tableName = "pw_invokepiece";
 
 	function getDataById($id) {
-		$temp = $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
+		$temp = $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE id=".pwEscape($id));
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}
 	function getDatasByIds($ids) {
 		$temp	= array();
 		if (is_array($ids) && $ids) {
-			$query	= $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE id IN(".pwImplode($ids).")");
-			while ($rt = $this->_getConnection()->fetch_array($query)) {
+			$query	= $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE id IN(".pwImplode($ids).")");
+			while ($rt = $this->_db->fetch_array($query)) {
 				$temp[$rt['id']]	= $this->_unserializeData($rt);
 			}
 		}
@@ -22,8 +22,8 @@ class PW_InvokePieceDB extends BaseDB {
 
 	function getDatasByInvokeName($invokename) {
 		$temp = array();
-		$query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE invokename=".pwEscape($invokename));
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE invokename=".pwEscape($invokename));
+		while ($rt = $this->_db->fetch_array($query)) {
 			$temp[$rt['id']]	= $this->_unserializeData($rt);
 		}
 		return $temp;
@@ -32,15 +32,15 @@ class PW_InvokePieceDB extends BaseDB {
 	function getDatasByInvokeNames($names) {
 		if (!is_array($names) || !$names) Showmsg('data_is_not_array');
 		$temp = array();
-		$query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName." WHERE invokename IN(".pwImplode($names).")");
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query = $this->_db->query("SELECT * FROM ".$this->_tableName." WHERE invokename IN(".pwImplode($names).")");
+		while ($rt = $this->_db->fetch_array($query)) {
 			$temp[]	= $this->_unserializeData($rt);
 		}
 		return $temp;
 	}
 
 	function getDataByInvokeNameAndTitle($invokename,$title) {
-		$temp = $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE invokename=".pwEscape($invokename)."AND title=".pwEscape($title));
+		$temp = $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE invokename=".pwEscape($invokename)."AND title=".pwEscape($title));
 		if (!$temp) return array();
 		return $this->_unserializeData($temp);
 	}
@@ -48,7 +48,7 @@ class PW_InvokePieceDB extends BaseDB {
 	function updateById($id,$array) {
 		$array	= $this->_checkData($array);
 		if (!$array) return null;
-		$this->_getConnection()->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE id=".pwEscape($id));
+		$this->_db->update("UPDATE ".$this->_tableName." SET ".pwSqlSingle($array,false)." WHERE id=".pwEscape($id));
 	}
 
 	function insertData($array) {
@@ -63,11 +63,11 @@ class PW_InvokePieceDB extends BaseDB {
 			$array['cachetime'] = $block['cachetime'];
 			$array['rang']	= $block['rang'];
 		}
-		$this->_getConnection()->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("INSERT INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
+		return $this->_db->insert_id();
 	}
 	function deleteByInvokeName($name) {
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE invokename=".pwEscape($name));
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE invokename=".pwEscape($name));
 	}
 
 	function insertDatas($array) {

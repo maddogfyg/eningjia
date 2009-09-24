@@ -22,7 +22,7 @@ if ($article == '0') {
 }
 $tpcarray = $db->get_one("SELECT t.tid,t.fid,t.locked,t.ifcheck,t.author,t.authorid,t.postdate,t.lastpost,t.ifmail,t.special,t.subject,t.type,t.ifshield,t.anonymous,t.ptable,t.replies,t.tpcstatus $S_sql FROM pw_threads t $J_sql WHERE t.tid=" . pwEscape($tid));
 $pw_posts = GetPtable($tpcarray['ptable']);
-$tpcarray['openIndex'] = getstatus($read['tpcstatus'], 2);
+$tpcarray['openIndex'] = getstatus($tpcarray['tpcstatus'], 2);
 //$t_date = $tpcarray['postdate'];//主题发表时间 bbspostguide 中用到
 if ($tpcarray['fid'] != $fid) {
 	Showmsg('illegal_tid');
@@ -170,7 +170,7 @@ if (empty($_POST['step'])) {
 
 	if ($winduid && $tpcarray['special'] == 5) {
 		require_once(R_P . 'lib/special/post_5.class.php');
-		$postdebate = new postSpecial();
+		$postdebate = new postSpecial($pwpost);
 		$postdebate->reply($tid, $pid);
 	}
 	if ($postdata->getIfcheck()) {

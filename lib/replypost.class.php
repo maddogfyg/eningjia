@@ -73,9 +73,9 @@ class replyPost {
 			'anonymous'	=> $this->data['anonymous'],		'ifhide'	=> $this->data['hideatt']
 		));
 		$pw_posts = GetPtable($this->tpcArr['ptable']);
-		$this->tpcArr['openIndex'] && $this->setPostFloor($pid);
 		$this->db->update("INSERT INTO $pw_posts SET $pwSQL");
 		!$pid && $pid = $this->db->insert_id();
+		$this->tpcArr['openIndex'] && $this->setPostFloor($pid); 
 		$this->pid = $pid;
 		if (is_object($this->att) && ($aids = $this->att->getAids())) {
 			$this->db->update("UPDATE pw_attachs SET " . pwSqlSingle(array('tid' => $this->tid, 'pid' => $this->pid)) . ' WHERE aid IN(' . pwImplode($aids) . ')');
@@ -104,7 +104,7 @@ class replyPost {
 	function sendMail() {
 		global $db_replysendmail,$db_replysitemail;
 		$ret = 0;
-		if ($this->data['authorid'] != $this->tpcArr['authorid']) {
+		if ($this->data['authorid'] == $this->tpcArr['authorid']) {
 			return $ret;
 		}
 		if ($db_replysendmail == 1 && ($this->tpcArr['ifmail'] == 1 || $this->tpcArr['ifmail'] == 3)) {
@@ -121,7 +121,8 @@ class replyPost {
 		if ($db_replysitemail && ($this->tpcArr['ifmail'] == 2 || $this->tpcArr['ifmail'] == 3)) {
 			$rt = $this->db->get_one("SELECT mb.replyinfo,m.userstatus FROM pw_memberinfo mb LEFT JOIN pw_members m USING(uid) WHERE mb.uid=" . pwEscape($this->tpcArr['authorid']));
 			if (empty($rt)) {
-				$this->db->update("INSERT INTO pw_memberinfo SET " . pwSqlSingle(array('uid' => $this->tpcArr['authorid'], 'replyinfo' => $this->tid)));
+				$replyinfo = ",$this->tid,";
+				$this->db->update("INSERT INTO pw_memberinfo SET " . pwSqlSingle(array('uid' => $this->tpcArr['authorid'], 'replyinfo' => $replyinfo)));
 			} elseif (strpos($rt['replyinfo'], ",$this->tid,") === false) {
 				$replyinfo = $rt['replyinfo'] ? $rt['replyinfo'].$this->tid.',' : ",$this->tid,";
 				$this->db->update("UPDATE pw_memberinfo SET replyinfo=" . pwEscape($replyinfo) . " WHERE uid=" . pwEscape($this->tpcArr['authorid']));

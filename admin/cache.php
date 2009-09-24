@@ -578,7 +578,8 @@ function updatecache_sy($name='') {
 		$style_css = explode('<!--css-->',readover(D_P."data/style/{$tplpath}_css.htm"));
 		$style_css = addslashes(str_replace(array('<style type="text/css">','</style>'),'',$style_css[1]));
 		eval("\$style_css = \"$style_css\";");
-		writeover(D_P."data/bbscache/$tplpath.css",$style_css);
+		//writeover(D_P."data/bbscache/$tplpath.css",$style_css);
+		writeover(D_P."data/bbscache/".$tplpath."_".$stylepath.".css",$style_css);
 		writeover(D_P."data/style/$name.php",str_replace("\?>","?>",$stylecontent));
 		$sqlStyles[] = $name;
 	}
@@ -597,7 +598,8 @@ function updatecache_sy($name='') {
 				$style_css = explode('<!--css-->',readover(D_P."data/style/{$tplpath}_css.htm"));
 				$style_css = addslashes(str_replace(array('<style type="text/css">','</style>'),'',$style_css[1]));
 				eval("\$style_css = \"$style_css\";");
-				writeover(D_P."data/bbscache/$tplpath.css",$style_css);
+				//writeover(D_P."data/bbscache/$tplpath.css",$style_css);
+				writeover(D_P."data/bbscache/".$tplpath."_".$stylepath.".css",$style_css);
 			}
 		}
 	}

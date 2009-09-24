@@ -199,32 +199,8 @@ EOT;
 }
 } else {print <<<EOT
 -->
-				<img src="$_LoginInfo[faceurl]" id="iconimg" class="img-20" align="absmiddle" /> <a href="u.php?action=show" id="td_userinfo_more" class="b">$windid</a><span class="gray">$gp_grouptitle</span> <!--
-EOT;
-if ($_G['allowhide']) {print <<<EOT
---><a style="cursor:pointer;" onclick="ajax.send('pw_ajax.php?action=changestate','',changeState)" id="online_state"><!--
-EOT;
-if (GetCookie('hideid') == 1) {print <<<EOT
---><img src="$imgpath/stealth.gif" align="absmiddle" />隐身<!--
-EOT;
-} else {print <<<EOT
---><img src="$imgpath/online.png" align="absmiddle" />在线<!--
-EOT;
-}print <<<EOT
---></a>
-<script language="JavaScript">
-function changeState() {
-	var msg = ajax.request.responseText;
-	if (msg == 1){
-		getObj('online_state').innerHTML = '<img src="$imgpath/stealth.gif" align="absmiddle" />隐身';
-	}else{
-		getObj('online_state').innerHTML = '<img src="$imgpath/online.png" align="absmiddle" />在线';
-	}
-}
-</script><!--
-EOT;
-}print <<<EOT
---><a href="profile.php" title="设置中心" target="_blank">设置</a><!--
+				<img src="$_LoginInfo[faceurl]" id="iconimg" class="img-20" align="absmiddle" /> <a href="u.php?action=show" class="b" id="td_userinfomore" title="" href="javascript:;">$windid</a>
+<a href="profile.php" title="设置中心" target="_blank">设置</a><!--
 EOT;
 if(CkInArray($windid,$manager) || $SYSTEM['allowadmincp']){print <<<EOT
 --><a href="$db_adminfile" target="_blank">系统设置</a><!--
@@ -236,10 +212,8 @@ EOT;
 --><a id="td_msg" href="message.php" title="短消息" target="_blank" class="icon-meg">短消息</a><!--
 EOT;
 }print <<<EOT
---><a href="$loginouturl">退出</a><!--
-EOT;
-}if ($skincount >1){print <<<EOT
---><span id="td_skin" title="风格切换"><img src="$imgpath/pwicon/style.gif" style="cursor:pointer;" align="absmiddle" /></span><!--
+--><a href="$loginouturl">退出</a>
+<!--
 EOT;
 }print <<<EOT
 -->
@@ -338,7 +312,7 @@ EOT;
 }print <<<EOT
 -->
 <table cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;">
-	<tr><td class="tal s5" width="430">
+	<tr><td class="tal s5" width="450">
 <!--
 EOT;
 if(!in_array(SCR,array('message','profile','u','register','login','userpay')) && !$showlogin){
@@ -521,7 +495,7 @@ EOT;
 	<a href="u.php?action=favor">我的收藏</a>
 <!--
 EOT;
-if ($db_modes['o']['ifopen']) {print <<<EOT
+if (isset($db_modes['o']['ifopen']) && $db_modes['o']['ifopen']) {print <<<EOT
 -->
 	<a href="mode.php?m=o&q=home">好友近况</a>
 <!--
@@ -554,9 +528,18 @@ function newrp() {
 </script>
 <!--
 EOT;
-}print <<<EOT
+}if (SCR == 'index' && ($groupid == 3 || $groupid == 4)) {print <<<EOT
 -->
-	<a id="td_userinfomore" title="更多用户信息" href="javascript:;">更多<img src="$imgpath/$stylepath/menu-down.png" align="absmiddle" /></a>
+			<a style="cursor:pointer" onclick="if (typeof MgMode == 'function') {mgm.showMenu();} else {loadjs('js/mgmode.js');}">可视化布局</a>
+<!--
+EOT;
+}if ($skincount >1){print <<<EOT
+-->
+			<a id="td_skin" title="风格切换"><img src="$imgpath/pwicon/style.gif" style="cursor:pointer;" align="absmiddle" /></a>
+<!--
+EOT;
+}print<<<EOT
+-->
 </span>
 <!--
 EOT;
@@ -610,21 +593,43 @@ if ($winduid){print<<<EOT
 <div id="menu_userinfomore" class="menu-post cc" style="display:none;">
 	<div class="menu-b" style="width:26.5em;">
 		<ul class="menu-half cc">
-			<li>帖子:$winddb[postnum]</li>
-			<li>今日: $winddb[todaypost]</li>
-			<li>$db_rvrcname: <span class="s2">$userrvrc $db_rvrcunit</span></li>
-			<li>$db_moneyname: <span class="s3">$winddb[money] $db_moneyunit</span></li>
-			<li>$db_creditname: <span class="s3">$winddb[credit] $db_creditunit</span></li>
-
+		<li>等级: $gp_grouptitle
 <!--
 EOT;
-if (SCR == 'index' && ($groupid == 3 || $groupid == 4)) {print <<<EOT
+if ($_G['allowhide']) {print <<<EOT
 -->
-			<li><a style="cursor:pointer" onclick="if (typeof MgMode == 'function') {mgm.showMenu();} else {loadjs('js/mgmode.js');}">可视化布局</a></li>
+		<li>状态: 
+<span style="cursor:pointer;" onclick="ajax.send('pw_ajax.php?action=changestate','',changeState)" id="online_state"><!--
+EOT;
+if (GetCookie('hideid') == 1) {print <<<EOT
+--><img src="$imgpath/stealth.png" align="absmiddle" />隐身<!--
+EOT;
+} else {print <<<EOT
+--><img src="$imgpath/online.png" align="absmiddle" />在线<!--
+EOT;
+}print <<<EOT
+--></span>
+<script language="JavaScript">
+function changeState() {
+	var msg = ajax.request.responseText;
+	if (msg == 1){
+		getObj('online_state').innerHTML = '<img src="$imgpath/stealth.png" align="absmiddle" />隐身';
+	}else{
+		getObj('online_state').innerHTML = '<img src="$imgpath/online.png" align="absmiddle" />在线';
+	}
+}
+</script>
+			</li>
 <!--
 EOT;
 }print <<<EOT
 -->
+			
+			<li>帖子: $winddb[postnum]</li>
+			<li>今日: $winddb[todaypost]</li>
+			<li>$db_rvrcname: $userrvrc $db_rvrcunit</li>
+			<li>$db_moneyname: $winddb[money] $db_moneyunit</li>
+			<li>$db_creditname: $winddb[credit] $db_creditunit</li>
 			<li>最后登录: <span class="f10">{$_LoginInfo['lastlodate']}</span></li>
 			<li>登录IP: <span class="f10">$onlineip</span></li>
 		</ul>

@@ -132,6 +132,12 @@ class usercontrol {
 		return $status;
 	}
 
+	function delete($uids) {
+		$this->user->delete($uids);
+		$notify = $this->base->load('notify');
+		$nid = $notify->add('deluser', array('uids' => $uids), true);
+	}
+
 	function checkName($username) {
 		$S_key = array("\\",'&',' ',"'",'"','/','*',',','<','>',"\r","\t","\n",'#','%','?');
 		if (str_replace($S_key, '', $username) != $username) {

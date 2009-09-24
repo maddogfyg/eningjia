@@ -5,20 +5,20 @@ class PW_MPageConfigDB extends BaseDB {
 
 	function getConfig($db_mode,$SCR,$fid=0){
 		$sqladd	= $fid ? " AND fid=".pwEscape($fid) : '';
-		$data = $this->_getConnection()->get_value("SELECT config FROM ".$this->_tableName." WHERE mode=".pwEscape($db_mode)."AND scr=".pwEscape($SCR).$sqladd);
+		$data = $this->_db->get_value("SELECT config FROM ".$this->_tableName." WHERE mode=".pwEscape($db_mode)."AND scr=".pwEscape($SCR).$sqladd);
 		$data = unserialize($data);
 		return $data;
 	}
 	function getInvokes($db_mode,$SCR,$fid=0){
 		$sqladd	= $fid ? " AND fid=".pwEscape($fid) : '';
-		$data = $this->_getConnection()->get_value("SELECT invokes FROM ".$this->_tableName." WHERE mode=".pwEscape($db_mode)."AND scr=".pwEscape($SCR).$sqladd);
+		$data = $this->_db->get_value("SELECT invokes FROM ".$this->_tableName." WHERE mode=".pwEscape($db_mode)."AND scr=".pwEscape($SCR).$sqladd);
 		$data = unserialize($data);
 		return $data;
 	}
 	function getInvokesByMode($mode){
 		$temp = array();
-		$query	= $this->_getConnection()->query("SELECT mode,scr,fid,invokes FROM ".$this->_tableName." WHERE mode=".pwEscape($mode));
-		while ($rt = $this->_getConnection()->fetch_array($query)) {
+		$query	= $this->_db->query("SELECT mode,scr,fid,invokes FROM ".$this->_tableName." WHERE mode=".pwEscape($mode));
+		while ($rt = $this->_db->fetch_array($query)) {
 			$rt	= $this->_unserializeData($rt);
 			if ($rt['invokes']) {
 				$temp[]	= $rt;
@@ -31,15 +31,15 @@ class PW_MPageConfigDB extends BaseDB {
 		if (!$array || !$array['scr'] || !$array['mode'] || !$array['config']) {
 			return null;
 		}
-		$this->_getConnection()->update("REPLACE INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
-		return $this->_getConnection()->insert_id();
+		$this->_db->update("REPLACE INTO ".$this->_tableName." SET ".pwSqlSingle($array,false));
+		return $this->_db->insert_id();
 	}
 
 	function deleteDataByParam($mode,$scr='',$fid=false){
 		$sqladd	= '';
 		if ($scr) $sqladd = ' AND scr='.pwEscape($scr);
 		if (is_numeric($fid)) $sqladd = ' AND fid='.pwEscape($fid);
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE mode=".pwEscape($mode).$sqladd);
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE mode=".pwEscape($mode).$sqladd);
 	}
 
 	function getAreaFid($fid){

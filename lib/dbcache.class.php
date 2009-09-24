@@ -6,6 +6,7 @@ class PW_DBCache {
 	var $connected = null;
 	var $cache = null;
 	var $now = null;
+	var $isExpire = false;
 
 	function PW_DBCache() {
 		$this->cache = $GLOBALS['db'];
@@ -28,14 +29,29 @@ class PW_DBCache {
 	 * @return bool
 	 */
 	function update($data,$expire=180) {
-		$values = '';$expire = $this->now + $expire;
+		$tmpvhash = $dcache = $kcache = array();
+		$expire = $this->now + $expire;
+		$keys = array_keys($data);
+		$query = $this->cache->query("SELECT skey,vhash FROM ".$this->table." WHERE skey IN (".pwImplode($keys,false).")");
+		while ($rt = $this->cache->fetch_array($query)) {
+			$tmpvhash[$rt['skey']] = $rt['vhash'];
+		}
 		foreach ($data as $key=>$value) {
-			$values .= ",(".pwEscape($key,false).",".pwEscape($this->_serialize($value),false).",".pwEscape($expire,false).")";
+			$v = $this->_serialize($value);
+			$vhash = md5($v);
+			if (!isset($tmpvhash[$key]) || $tmpvhash[$key] != $vhash) {
+				$dcache[] = array($key,$expire,$vhash,$v);
+			} else {
+				$kcache[] = $key;
+			}
 		}
-		if ($values) {
-			$values = trim($values,',');
-			$this->cache->update("REPLACE INTO ".$this->table ." (skey,value,expire) VALUES $values");
+		if ($dcache) {
+			$this->cache->update("REPLACE INTO ".$this->table ." (skey,expire,vhash,value) VALUES ".pwSqlMulti($dcache,false));
 		}
+		if ($kcache) {
+			$this->cache->update("UPDATE ".$this->table." SET expire=".pwEscape($expire,false)."WHERE skey IN (".pwImplode($kcache,false).")");
+		}
+		$this->_expire();
 	}
 
 	/**
@@ -48,11 +64,16 @@ class PW_DBCache {
 	 */
 	function set($key,$value,$expire=180) {
 		if ($expire > 0) {
-			$this->cache->update("REPLACE INTO ".$this->table
-				. " SET skey=" . pwEscape($key,false)
-				. ",expire=" . pwEscape($this->now + $expire,false)
-				. ",value=" . pwEscape($this->_serialize($value),false)
-			);
+			$expire = $this->now + $expire;
+			$v = $this->_serialize($value);
+			$vhash = md5($v);
+			$tmpvhash = $this->cache->get_value("SELECT vhash FROM ".$this->table." WHERE skey=".pwEscape($key,false));
+			if ($vhash != $tmpvhash) {
+				$dcache = array('skey'=>$key,'expire'=>$expire,'vhash'=>$vhash,'value'=>$v);
+				$this->cache->update("REPLACE INTO ".$this->table." SET ".pwSqlSingle($dcache,false));
+			} else {
+				$this->cache->update("UPDATE ".$this->table." SET expire=".pwEscape($expire,false)."WHERE skey=".pwEscape($key,false));
+			}
 		}
 		$this->_expire();
 	}
@@ -67,15 +88,12 @@ class PW_DBCache {
 		if (empty($keys)) return array();
 		if (is_array($keys)) {
 			$data = array();
-			$query = $this->cache->query("SELECT * FROM ".$this->table
-				. " WHERE expire > ".pwEscape($this->now,false)
-				. " AND skey IN (".pwImplode($keys,false).")"
-			);
+			$query = $this->cache->query("SELECT skey,value FROM ".$this->table." WHERE skey IN (".pwImplode($keys,false).") AND expire > ".pwEscape($this->now,false));
 			while ($rt = $this->cache->fetch_array($query)) {
 				$data[$rt['skey']] = $this->_unserialize($rt['value']);
 			}
 		} else {
-			$data = $this->cache->get_value("SELECT value FROM ".$this->table." WHERE expire < ".pwEscape($this->now,false)." AND skey=".pwEscape($keys,false));
+			$data = $this->cache->get_value("SELECT value FROM ".$this->table." WHERE skey=".pwEscape($keys,false)."AND expire > ".pwEscape($this->now,false));
 			$data = $this->_unserialize($data);
 		}
 		return $data;
@@ -94,7 +112,11 @@ class PW_DBCache {
 		return $value;
 	}
 	function _expire() {
-		$this->cache->update("DELETE FROM ".$this->table." WHERE expire<".pwEscape($this->now,false));
+		if (!$this->isExpire) {
+			$expire = $this->now - 86400;
+			$this->cache->update("DELETE FROM ".$this->table." WHERE expire<".pwEscape($expire,false));
+			$this->isExpire = true;
+		}
 	}
 }
 ?>

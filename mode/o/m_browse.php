@@ -175,7 +175,7 @@ function browseWrite($num) {
 }
 
 function browseShare($num) {
-	global $db;
+	global $db,$m;
 	$newShares = array();
 	$query = $db->query("SELECT s.*,m.groupid,m.icon FROM pw_share s LEFT JOIN pw_members m ON s.uid=m.uid WHERE s.ifhidden=0 ORDER BY s.id DESC LIMIT $num");
 	while ($rt = $db->fetch_array($query)) {
@@ -187,6 +187,10 @@ function browseShare($num) {
 		}
 
 		$rt['link']	= $temp['link'];
+		if (strpos($rt['link'],'{#APPS_BASEURL#}') !== false) {
+			$baseurl = $m == 'o' ? 'mode.php?m=o&' : 'apps.php?';
+			$rt['link'] = str_replace('{#APPS_BASEURL#}',$baseurl,$rt['link']);
+		}
 		if ($rt['type']=='user') {
 			$rt['image']	= $temp['user']['image'];
 			$rt['title']= "<a href=\"$rt[link]\" target=\"_blank\">".$temp['user']['username']."</a>";

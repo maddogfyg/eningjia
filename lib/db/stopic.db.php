@@ -21,8 +21,8 @@ class PW_STopicDB extends BaseDB {
 	function add($fieldsData) {
 		$fieldsData = $this->_checkData($fieldsData);
 		if (!$fieldsData) return null;
-		$this->_getConnection()->update("INSERT INTO ".$this->_tableName." SET " . $this->_getUpdateSqlString($fieldsData));
-		$insertId = $this->_getConnection()->insert_id();
+		$this->_db->update("INSERT INTO ".$this->_tableName." SET " . $this->_getUpdateSqlString($fieldsData));
+		$insertId = $this->_db->insert_id();
 		return $insertId;
 	}
 
@@ -33,8 +33,8 @@ class PW_STopicDB extends BaseDB {
 	 * @return int 删除行数
 	 */
 	function delete($stopicId) {
-		$this->_getConnection()->update("DELETE FROM ".$this->_tableName." WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
-		return $this->_getConnection()->affected_rows();
+		$this->_db->update("DELETE FROM ".$this->_tableName." WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
+		return $this->_db->affected_rows();
 	}
 
 	/**
@@ -47,14 +47,14 @@ class PW_STopicDB extends BaseDB {
 	function update($stopicId, $updateData) {
 		$updateData = $this->_checkData($updateData);
 		if (!$updateData) return null;
-		$this->_getConnection()->update("UPDATE ".$this->_tableName." SET " . $this->_getUpdateSqlString($updateData) . " WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
-		return $this->_getConnection()->affected_rows();
+		$this->_db->update("UPDATE ".$this->_tableName." SET " . $this->_getUpdateSqlString($updateData) . " WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
+		return $this->_db->affected_rows();
 	}
 
 	function increaseField($stopicId, $fieldName) {
 		if (!in_array($fieldName, array('used_count', 'view_count'))) return 0;
-		$this->_getConnection()->update("UPDATE ".$this->_tableName." SET $fieldName=$fieldName+1 WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
-		return $this->_getConnection()->affected_rows();
+		$this->_db->update("UPDATE ".$this->_tableName." SET $fieldName=$fieldName+1 WHERE stopic_id=". intval($stopicId) ." LIMIT 1");
+		return $this->_db->affected_rows();
 	}
 
 	/**
@@ -64,7 +64,7 @@ class PW_STopicDB extends BaseDB {
 	 * @return array/null 找到返回专题数据，否则返回null
 	 */
 	function get($stopicId) {
-		$data = $this->_getConnection()->get_one("SELECT * FROM ".$this->_tableName." WHERE stopic_id=".intval($stopicId));
+		$data = $this->_db->get_one("SELECT * FROM ".$this->_tableName." WHERE stopic_id=".intval($stopicId));
 		if (!$data) return null;
 		return $this->_unserializeData($data);
 	}
@@ -80,7 +80,7 @@ class PW_STopicDB extends BaseDB {
 		if ('' != $keyword) $sqlAdd[] = " title LIKE ".$this->_addSlashes('%' . $keyword . '%')." ";
 		if ($categoryId > 0) $sqlAdd[] = " category_id=".$this->_addSlashes($categoryId)." ";
 		$sqlAdd = count($sqlAdd) ? " WHERE " . implode(" AND ", $sqlAdd) : "";
-		$rt = $this->_getConnection()->get_one("SELECT COUNT(*) AS total_num FROM ".$this->_tableName." ".$sqlAdd);
+		$rt = $this->_db->get_one("SELECT COUNT(*) AS total_num FROM ".$this->_tableName." ".$sqlAdd);
 		return $rt['total_num'];
 	}
 
@@ -104,7 +104,7 @@ class PW_STopicDB extends BaseDB {
 		if ($categoryId > 0) $sqlAdd[] = " a.category_id=".$this->_addSlashes($categoryId)." ";
 		$sqlAdd = count($sqlAdd) ? " WHERE " . implode(" AND ", $sqlAdd) : "";
 		
-		$query = $this->_getConnection()->query("SELECT a.*,c.title as catetitle FROM ".$this->_tableName." a LEFT JOIN ".$this->_cateTableName." c ON a.category_id=c.id $sqlAdd ORDER BY a.create_date DESC LIMIT $offset,$perPage");
+		$query = $this->_db->query("SELECT a.*,c.title as catetitle FROM ".$this->_tableName." a LEFT JOIN ".$this->_cateTableName." c ON a.category_id=c.id $sqlAdd ORDER BY a.create_date DESC LIMIT $offset,$perPage");
 		return $this->_getAllResultFromQuery($query);
 	}
 
@@ -125,7 +125,7 @@ class PW_STopicDB extends BaseDB {
 		$offset = ($page - 1) * $perPage;
 		$sqlAdd = $categoryId ? " AND category_id=$categoryId " : "";
 		$nowTime = time();
-		$query = $this->_getConnection()->query("SELECT * FROM ".$this->_tableName."  WHERE start_date<=$nowTime AND end_date>$nowTime $sqlAdd ORDER BY create_date DESC LIMIT $offset,$perPage");
+		$query = $this->_db->query("SELECT * FROM ".$this->_tableName."  WHERE start_date<=$nowTime AND end_date>$nowTime $sqlAdd ORDER BY create_date DESC LIMIT $offset,$perPage");
 		return $this->_getAllResultFromQuery($query);
 	}
 
@@ -145,7 +145,7 @@ class PW_STopicDB extends BaseDB {
 
 		$offset = ($page - 1) * $perPage;
 		$sqlAdd = $categoryId ? " WHERE category_id=$categoryId " : "";
-		$query = $this->_getConnection()->query("SELECT a.*, b.path FROM ".$this->_tableName." a LEFT JOIN ".$this->_bgTableName." b ON a.bg_id=b.id $sqlAdd ORDER BY used_count DESC LIMIT $offset,$perPage");
+		$query = $this->_db->query("SELECT a.*, b.path FROM ".$this->_tableName." a LEFT JOIN ".$this->_bgTableName." b ON a.bg_id=b.id $sqlAdd ORDER BY used_count DESC LIMIT $offset,$perPage");
 		return $this->_getAllResultFromQuery($query);
 	}
 
@@ -159,14 +159,14 @@ class PW_STopicDB extends BaseDB {
 		$backgroundId = intval($backgroundId);
 		if ($backgroundId <= 0) return 0;
 
-		return $this->_getConnection()->get_value("SELECT COUNT(*) FROM ".$this->_tableName." WHERE bg_id=$backgroundId");
+		return $this->_db->get_value("SELECT COUNT(*) FROM ".$this->_tableName." WHERE bg_id=$backgroundId");
 	}
 
 	function countByCategoryId($categoryId) {
 		$categoryId = intval($categoryId);
 		if ($categoryId <= 0) return 0;
 
-		return $this->_getConnection()->get_value("SELECT COUNT(*) FROM ".$this->_tableName." WHERE category_id=$categoryId");
+		return $this->_db->get_value("SELECT COUNT(*) FROM ".$this->_tableName." WHERE category_id=$categoryId");
 	}
 
 	function getStruct() {

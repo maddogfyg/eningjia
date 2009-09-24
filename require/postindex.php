@@ -5,7 +5,7 @@ class PostIndexDB {
 	var $db;
 	var $db_perpage;
 	var $basename;
-
+	
 	function PostIndexDB(){
 		$this->__construct();
 	}
@@ -20,7 +20,7 @@ class PostIndexDB {
 		$this->db_perpage = $db_perpage;
 		$this->basename = & $basename;
 	}
-
+	
 	/**
 	 * @param $perpage
 	 * @return unknown_type
@@ -28,26 +28,37 @@ class PostIndexDB {
 	function setPerpage($perpage) {
 		$this->db_perpage = $perpage;
 	}
-
-	function getALLIndexedThreads($page = '1'){
-		$sql = "SELECT count(*) AS sum FROM pw_threads t WHERE conv(conv(tpcstatus,2,10) >> 1 & 1 , 10 , 2)!='0'";
-		$rt = $this->db->get_one ( $sql );
+	
+	function getALLIndexedThreads($page = 1){
+		$sql = "SELECT p.tid FROM pw_postsfloor p GROUP BY p.tid ORDER BY p.tid DESC";
+		$query = $this->db->query($sql);
+		$count = 0;
+		(int)$page == 0 && $page = 1;
+		$start = ($page - 1) * $this->db_perpage;
+		$end = $start + $this->db_perpage - 1;
+		while ($rt = $this->db->fetch_array($query)) {
+			if ($count >= $start && $count <= $end) { 
+				$tid[] = $rt['tid'];
+			}
+			$count++;
+		}
 		(! is_numeric ( $page ) || $page < 1) && $page = 1;
-		$limit = pwLimit ( ($page - 1) * $this->db_perpage, $this->db_perpage );
-		$result ['pages'] = numofpage ( $rt ['sum'], $page, ceil ( $rt ['sum'] / $this->db_perpage ),
+		$result ['pages'] = numofpage ( $count, $page, ceil ( $count / $this->db_perpage ), 
 		$this->basename . "&action=search&" );
-		$sql = "SELECT t.tid, t.subject, t.replies, t.postdate
-				FROM pw_threads t
-				WHERE conv(conv(tpcstatus,2,10) >> 1 & 1 , 10 , 2)!='0' $limit";
-		$query = $this->db->query ( $sql );
-		while ( $rt = $this->db->fetch_array ( $query ) ) {
-			list ( $lastDate ) = PostIndexUtility::getLastDate ( $rt ["postdate"] );
-			$rt ["postdate"] = $lastDate;
-			$result ['data'] [] = $rt;
+		if ($tid) {
+			$sql = "SELECT t.tid, t.subject, t.replies, t.postdate 
+					FROM pw_threads t 
+					WHERE t.tid IN ( ". pwImplode($tid) ." ) ORDER BY t.tid DESC";
+			$query = $this->db->query ( $sql );
+			while ( $rt = $this->db->fetch_array ( $query ) ) {
+				list ( $lastDate ) = PostIndexUtility::getLastDate ( $rt ["postdate"] );
+				$rt ["postdate"] = $lastDate;
+				$result ['data'] [] = $rt;
+			}
 		}
 		return $result;
 	}
-
+	
 	/**
 	 * @param $replies
 	 * @param $order
@@ -59,16 +70,23 @@ class PostIndexDB {
 		if (! $replies) {
 			return;
 		}
-		$sql = "SELECT count(*) AS sum FROM pw_threads t WHERE conv(conv(tpcstatus,2,10) >> 1 & 1 , 10 , 2) = '0' AND t.replies > $replies";
+		$sql = "SELECT p.tid FROM pw_postsfloor p GROUP BY p.tid ORDER BY p.tid DESC";
+		$query = $this->db->query($sql);
+		while ($rt = $this->db->fetch_array($query)) {
+			$tid[] = $rt['tid'];
+		}
+		if ($tid) {
+			$w_tid = " t.tid NOT IN ( ". pwImplode($tid) ." ) AND ";
+		}
+		$sql = "SELECT count(*) AS sum FROM pw_threads t WHERE $w_tid t.replies > " . pwEscape($replies);
 		$rt = $this->db->get_one ( $sql );
 		(! is_numeric ( $page ) || $page < 1) && $page = 1;
 		$limit = pwLimit ( ($page - 1) * $this->db_perpage, $this->db_perpage );
-		$result ['pages'] = numofpage ( $rt ['sum'], $page, ceil ( $rt ['sum'] / $this->db_perpage ),
+		$result ['pages'] = numofpage ( $rt ['sum'], $page, ceil ( $rt ['sum'] / $this->db_perpage ), 
 		$this->basename . "&sub=y&action=search&replies=$replies&" );
-		$sql = "SELECT t.tid, t.subject, t.replies, t.postdate
-				FROM pw_threads t
-				WHERE conv(conv(tpcstatus,2,10) >> 1 & 1 , 10 , 2) = '0' AND t.replies > $replies
-				$orderby $limit";
+		$sql = "SELECT t.tid, t.subject, t.replies, t.postdate 
+				FROM pw_threads t 
+				WHERE $w_tid t.replies > ".pwEscape($replies)." $orderby $limit";
 		$query = $this->db->query ( $sql );
 		while ( $rt = $this->db->fetch_array ( $query ) ) {
 			list ( $lastDate ) = PostIndexUtility::getLastDate ( $rt ["postdate"] );
@@ -77,15 +95,15 @@ class PostIndexDB {
 		}
 		return $result;
 	}
-
+	
 	/**
 	 * @param $tid
 	 * @return unknown_type
 	 */
 	function getThreadsById($tid){
-		$sql = "SELECT t.tid, t.subject, t.replies, t.postdate
-				FROM pw_threads t
-				WHERE conv(conv(tpcstatus,2,10) >> 1 & 1 , 10 , 2) = '0' AND t.tid = '".$tid."'";
+		$sql = "SELECT t.tid, t.subject, t.replies, t.postdate 
+				FROM pw_threads t 
+				WHERE t.tid = ".pwEscape($tid)." AND t.tpcstatus & 2 = '0'";
 		$rt = $this->db->get_one($sql);
 		if ($rt) {
 			list ( $lastDate ) = PostIndexUtility::getLastDate ( $rt ["postdate"] );
@@ -94,7 +112,7 @@ class PostIndexDB {
 		}
 		return $result;
 	}
-
+	
 	/**
 	 * @param $tid
 	 * @param $postTable
@@ -104,22 +122,22 @@ class PostIndexDB {
 		$this->deletePostIndex ( $tid );
 		$this->addPostIndex ( $tid );
 	}
-
+	
 	/**
 	 * @param $tid
 	 * @return unknown_type
 	 */
 	function deletePostIndex($tid) {
-		$sql = "DELETE FROM pw_postsfloor WHERE tid = ".pwEscape($tid);
+		$sql = "DELETE FROM pw_postsfloor WHERE tid = ".pwEscape($tid); 
 		$this->db->update ( $sql );
-		$sql = "UPDATE pw_threads SET tpcstatus = conv(conv(tpcstatus,2,10) & conv('fD',16,10) , 10 , 2) WHERE tid = ".pwEscape($tid);
+		$sql = "UPDATE pw_threads SET tpcstatus = tpcstatus & conv('fD',16,10) WHERE tid = ".pwEscape($tid);
 		$this->db->update ( $sql );
 
 		//临时修改，待改进
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($tid);
 	}
-
+	
 	/**
 	 * @param $tid
 	 * @param $postTable
@@ -127,24 +145,25 @@ class PostIndexDB {
 	 */
 	function addPostIndex($tid) {
 		$ptable = PostIndexDB::getPostTable ( $tid );
-		$sql = "SELECT p.tid, p.pid, p.postdate
-				FROM $ptable p
+		$sql = "SELECT p.tid, p.pid, p.postdate 
+				FROM $ptable p 
 				WHERE p.tid = ".pwEscape($tid)." ORDER BY p.postdate";
 		$query = $this->db->query ( $sql );
 		$floor = 1;
 		while ( $rt = $this->db->fetch_array ( $query ) ) {
-			$this->db->update ( "INSERT INTO pw_postsfloor
+			$this->db->update ( "INSERT INTO pw_postsfloor 
 							   SET pid=" .pwEscape($rt ["pid"]). ", tid=" . pwEscape($rt ["tid"]) . ", floor=" . pwEscape($floor));
 			$floor ++;
 		}
-		$sql = "UPDATE pw_threads SET tpcstatus = conv(conv(tpcstatus,2,10) | 2 , 10 , 2) WHERE tid =".pwEscape($tid);
-		$this->db->update ( $sql );
-
+		if ($floor > 1) {
+			$sql = "UPDATE pw_threads SET tpcstatus = tpcstatus | 2 WHERE tid =".pwEscape($tid);
+			$this->db->update ( $sql );
+		}
 		//临时修改，待改进
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($tid);
 	}
-
+	
 	function getPostTable($tid) {
 		$sql = "SELECT t.ptable FROM pw_threads t WHERE t.tid = ".pwEscape($tid);
 		$rt = $this->db->get_one ( $sql );

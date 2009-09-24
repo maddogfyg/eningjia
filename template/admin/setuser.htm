@@ -173,7 +173,7 @@ print <<<EOT
 EOT;
 }elseif($action==edit){print <<<EOT
 -->
-<form action="$basename&" method=post>
+<form action="$basename&" method="post" onsubmit="return setFaceLen()">
 <h2><b>编辑用户</b></h2>
 <table width="100%" cellspacing="0" cellpadding="0">
 <tr class="tr3"><td width="30%">系统头衔</td>
@@ -234,7 +234,7 @@ EOT;
 </table>
 <table width="100%" cellspacing="0" cellpadding="0">
 <tr id="face1" style="display:none;"><td><select name="proicon">{$faces}</select></td></tr>
-<tr id="face2" style="display:none;"><td>头像链接 <input type="text" class="input" size="20" name="i_http" value='$httpurl'> 宽: <input type=text size="5" name="i_w" class="input" value='$iconwidth'> 高: <input type=text size="5" name="i_h" class="input" value='$iconheight'></td></tr>
+<tr id="face2" style="display:none;"><td>头像链接 <input type="text" class="input" size="20" id="httpurl_url" name="httpurl[0]" value='$httpurl'> 宽: <input type=text size="5" name="httpurl[1]" class="input" value='$iconwidth'> 高: <input type=text size="5" name="httpurl[2]" class="input" value='$iconheight'><input type="hidden" id="httpurl_w" name="httpurl[3]" /><input type="hidden" id="httpurl_h" name="httpurl[4]" /></td></tr>
 <tr id="face3" style="display:none;"><td><img src="$iconurl"$iconsize><input type="checkbox" name="delupload" value="$iconfile" />删</td></tr>
 </table>
 </td></tr>
@@ -392,6 +392,22 @@ function CkFaceType(value){
 			document.getElementById('face' + facetype[i].value).style.display = 'none';
 		}
 	}
+}
+function setFaceLen() {
+	var v = 0;
+	var facetype = document.getElementsByName('facetype');
+	for (i = 0; i < facetype.length; i++) {
+		if (facetype[i].checked === true) {
+			v = facetype[i].value;break
+		}
+	}
+	if (v == 2) {
+		var img = new Image();
+		img.src = getObj('httpurl_url').value;
+		getObj('httpurl_w').value = img.width;
+		getObj('httpurl_h').value = img.height;
+	}
+	return true;
 }
 CkFaceType('$icontype');
 </script>

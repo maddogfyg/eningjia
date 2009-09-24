@@ -80,6 +80,9 @@ print <<<EOT
 <!-- 
 EOT;
 foreach($v['data'] as $k1 => $v1){
+if($v[tag] == "memberOnLine"){
+	$v1[value] = $datanalyse->getOnlineTime($v1[value]);
+}
 print <<<EOT
 -->
 							<dl class="cc">
@@ -95,11 +98,6 @@ EOT;
 						</div>
 					</div>
 				</div>
-				<script src="js/core/core.js" language="JavaScript" type="text/javascript"></script>	
-				<script src="js/core/utils/changeView.js" language="JavaScript" type="text/javascript"></script>	
-				<script language="JavaScript">
-				var frist = New(changeView,['list','dl']);
-				</script>
 <!--	
 EOT;
 			break;
@@ -251,7 +249,7 @@ if('picHot' == $value['tag']){
 if( $b != 0){
 print <<<EOT
 -->
-
+</div>
 <!--
 EOT;
 $num=0;
@@ -259,16 +257,17 @@ $num=0;
 -->
 	<div class="cc">
 		<div style="padding:0 10px;">
-			<div class="hot-title cc"><span class="f14 b">相册$v[cTime]$v[title]</span>
+			<div class="hot-title cc"><span class="f14 b">照片$v[cTime]$v[title]</span>
 			<ul><li class="red"><a href="{$basename}action=$value[tag]&sub=$v[tag]">更多</a></li></ul>
 			</div>
 			<ul class="img-list-b cc">
 <!-- 
 EOT;
 foreach($v['data'] as $k1 => $v1){
+$v1[image] = getphotourl($v1[image],$v1['ifthumb']);
 print <<<EOT
 -->
-			<li><table><tr><td height="75"><a href="$v1[url]" target="_blank" style="width:100px; height:75px;"><img src="$v1[image]" width="100" height="75" /></a></td></tr></table>
+			<li><table><tr><td style="width:100px; height:75px;" class="tac"><a href="$v1[url]" target="_blank" ><img src="$v1[image]"/></a></td></tr></table>
 			<p><span class="red">$v[unit]数：$v1[value]</span>&nbsp;
 <!--
 EOT;
@@ -299,9 +298,20 @@ EOT;
 	</div>
 <!--
 EOT;
-}}}print <<<EOT
+}}}
+if( $b != 0 && $num!=0){
+print <<<EOT
 -->
-
+</div>
+<!--
+EOT;
+}print <<<EOT
+-->
+<script src="js/core/core.js" language="JavaScript" type="text/javascript"></script>	
+<script src="js/core/utils/changeView.js" language="JavaScript" type="text/javascript"></script>	
+<script language="JavaScript">
+var frist = New(changeView,['list','dl']);
+</script>
 <!--
 EOT;
 }print <<<EOT
@@ -357,6 +367,9 @@ print <<<EOT
 <!-- 
 EOT;
 foreach($result[data] as $key => $value){
+if($sub == "memberOnLine"){
+	$value[value] = $datanalyse->getOnlineTime($value[value]);
+}
 print <<<EOT
 -->
 			<li><a class="fl" href="$value[url]" target="_blank"><img height="50" width="50" class="mt3" src="$value[image]"/></a><a class="f14" href="$value[url]" target="_blank">$value[title]</a>
@@ -534,6 +547,7 @@ print <<<EOT
 <!-- 
 EOT;
 foreach($result['data'] as $key => $value){
+$value['image'] = getphotourl($value['image'],$value['ifthumb']);
 print <<<EOT
 -->
 			<li><table><tbody><tr><td class="tac"><a class="photo-img" href="$value[url]" target="_blank"><img src="$value[image]"/></a></td></tr></tbody></table>

@@ -230,10 +230,10 @@ class postData {
 
 	function setConvert($convert, $autourl = 1) {
 		if ($convert) {
+			$autourl && $this->data['content'] = $this->autourl($this->data['content']);
 			if ($this->posturlnum > 0 && $this->post->user['postnum'] < $this->posturlnum && !$this->post->isGM && $this->urlCheck($this->data['content'])) {
 				Showmsg('postfunc_urlnum_limit');
 			}
-			$autourl && $this->data['content'] = $this->autourl($this->data['content']);
 		}
 		$this->data['convert'] = $convert ? 1 : 0;
 	}
@@ -339,6 +339,8 @@ class postData {
 		} elseif ($this->hide == '1') {
 			$this->data['content'] = "[post]".str_replace(array('[post]','[/post]'), "", $this->data['content'])."[/post]";
 			$this->data['convert'] = 2;
+		} elseif (false !== strpos($this->data['content'], '[post]') && false !== strpos($this->data['content'], '[/post]')) {
+			$this->data['convert'] = 2;
 		}
 		if (!$this->post->isGM && (!$this->forum->forumset['allowencode'] || !$this->post->_G['allowencode'])) {
 			$this->data['content'] = str_replace("[hide=","[\thide=", $this->data['content']);
@@ -352,6 +354,8 @@ class postData {
 		} elseif ($this->sell) {
 			$this->data['content'] = str_replace("[/sell]","",preg_replace("/\[sell=(.+?)\]/is","",$this->data['content']));
 			$this->data['content'] = "[sell=".$this->sell[0].",{$this->sell[1]}]{$this->data[content]}[/sell]";
+			$this->data['convert'] = 2;
+		} elseif (false !== strpos($this->data['content'], '[sell') && false !== strpos($this->data['content'], '[/sell]')) {
 			$this->data['convert'] = 2;
 		}
 		if ($this->data['convert'] == 1) {
@@ -478,7 +482,7 @@ class topicPostData extends postData {
 			$w_sub_type = $p_sub_type;
 		}
 		$w_type = $w_sub_type ? $w_sub_type : $w_type;
-		$db_forcetype && $w_type == '0' && Showmsg('force_tid_select');
+		$GLOBALS['db_forcetype'] && $w_type == '0' && Showmsg('force_tid_select');
 		$this->data['w_type'] = $w_type;
 	}
 
@@ -636,6 +640,9 @@ class BbsTag {
 		@include(D_P.'data/bbscache/tagdb.php');
 		$i    = 0;
 		$tags = '';
+		if(!$tagdb){
+			return '';
+		}
 		foreach ($tagdb as $tag => $num) {
 			if (strpos($subject,$tag) !== false || strpos($content,$tag) !== false) {
 				$tags .= $tags ? ' '.$tag : $tag;

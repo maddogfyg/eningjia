@@ -24,11 +24,11 @@ if ($a == 'write' || $a == 'edit') {print <<<EOT
 			}
 			function IFRAME_FORM (obj)
 			{
-				var tds = obj.contentWindow.document.getElementsByTagName('td') || [];
+				var tds = obj.contentWindow.document.getElementsByTagName('span') || [];
 				var tipText = '';
 				for (var i = 0; i < tds.length; i++)
 				{
-					if (tds[i].className == 'tac p10')
+					if (tds[i].className == 'f14')
 					{
 						tipText = tds[i].innerHTML.replace(/<.+?>/g, '');
 						break;

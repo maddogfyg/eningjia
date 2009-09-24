@@ -5,8 +5,8 @@ class PW_RateResultDB extends BaseDB {
 	var $_tableName = "pw_rateresult";
 
 	function add($fieldData) {
-		$this->_getConnection ()->update ( "INSERT INTO " . $this->_tableName . " SET " . $this->_getUpdateSqlString ( $fieldData ) );
-		return $this->_getConnection ()->insert_id ();
+		$this->_db->update ( "INSERT INTO " . $this->_tableName . " SET " . $this->_getUpdateSqlString ( $fieldData ) );
+		return $this->_db->insert_id ();
 	}
 
 	/**
@@ -17,7 +17,7 @@ class PW_RateResultDB extends BaseDB {
 	 * @return array
 	 */
 	function getByOptionId($optionId, $objectId) {
-		return $this->_getConnection ()->get_one ( "SELECT * FROM " . $this->_tableName . " WHERE optionid=" . $this->_addSlashes ( $optionId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) . "  LIMIT 1" );
+		return $this->_db->get_one ( "SELECT * FROM " . $this->_tableName . " WHERE optionid=" . $this->_addSlashes ( $optionId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) . "  LIMIT 1" );
 	}
 
 	/**
@@ -28,8 +28,8 @@ class PW_RateResultDB extends BaseDB {
 	 * @return unknown
 	 */
 	function updateByOptionId($optionId, $objectId) {
-		$this->_getConnection ()->update ( "UPDATE " . $this->_tableName . " SET num=num+1 WHERE optionid=" . $this->_addSlashes ( $optionId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) . "  LIMIT 1" );
-		return $this->_getConnection ()->affected_rows ();
+		$this->_db->update ( "UPDATE " . $this->_tableName . " SET num=num+1 WHERE optionid=" . $this->_addSlashes ( $optionId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) . "  LIMIT 1" );
+		return $this->_db->affected_rows ();
 	}
 
 	/**
@@ -40,7 +40,7 @@ class PW_RateResultDB extends BaseDB {
 	 * @return unknown
 	 */
 	function getByTypeId($typeId, $objectId) {
-		$query = $this->_getConnection ()->query ( "SELECT * FROM " . $this->_tableName . " WHERE typeid=" . $this->_addSlashes ( $typeId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) );
+		$query = $this->_db->query ( "SELECT * FROM " . $this->_tableName . " WHERE typeid=" . $this->_addSlashes ( $typeId ) . " AND objectid=" . $this->_addSlashes ( $objectId ) );
 		return $this->_getAllResultFromQuery ( $query );
 	}
 }

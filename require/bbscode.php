@@ -264,8 +264,8 @@ function cvpic($url,$type='',$picwidth='',$picheight='',$ifthumb='') {
 	if ($picwidth || $picheight) {
 		$wopen = !$wopen ? "if(this.width>=$picwidth)" : '';
 		$onload = 'onload="';
-		$picwidth  && $onload .= "if(this.width>'$picwidth')this.width='$picwidth';";
-		$picheight && $onload .= "if(this.height>'$picheight')this.height='$picheight';";
+		$picwidth  && $onload .= "if(this.offsetWidth>'$picwidth')this.width='$picwidth';";
+		$picheight && $onload .= "if(this.offsetHeight>'$picheight')this.height='$picheight';";
 		$onload .= '"';
 		$code = "<img src=\"$turl\" border=\"0\" onclick=\"$wopen window.open('$url');\" $onload $alt>";
 	} else{

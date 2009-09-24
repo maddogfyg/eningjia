@@ -92,7 +92,7 @@ class topicPost {
 				$StaticPage->update($this->tid);
 			}
 			$lastpost = array(
-				'subject'	=> substrs($this->data['title'],40),
+				'subject'	=> substrs($this->data['title'],26),
 				'author'	=> $this->data['lastposter'],
 				'lastpost'	=> $timestamp,
 				'tid'		=> $this->tid,
@@ -102,6 +102,17 @@ class topicPost {
 
 			if ($this->forum->isOpen() && !$this->data['anonymous']) {
 				pwAddFeed($this->post->uid, 'post', '', array('subject' => stripslashes($this->data['title']), 'tid' => $this->tid, 'fid' => $this->forum->fid));
+
+				//会员资讯缓存
+				$usercachedata = array();
+				$usercache = L::loadDB('Usercache');
+				$usercachedata['subject'] = substrs(stripWindCode($this->data['title']),100,N);
+				$usercachedata['content'] = $this->data['content'];
+				$usercachedata['postdate'] = $timestamp;
+				if ($this->att) {
+					$usercachedata['attimages']= $this->att->getImages(4);
+				}
+				$usercache->update($this->data['authorid'],'topic',$this->tid,$usercachedata);
 			}
 			//Start elementupdate
 			if ($db_ifpwcache & 128 || (($db_ifpwcache & 512) && $this->att && $this->att->elementpic)) {

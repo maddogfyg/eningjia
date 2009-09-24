@@ -1,6 +1,6 @@
 <?php
 @include_once (R_P . 'lib/rate.class.php');
-class Datanalyse {
+class Datanalyse { 
 	var $db;
 	var $nowtimestamp;
 	var $overtimestamp;
@@ -29,18 +29,55 @@ class Datanalyse {
 	function setSpecialLimit($specialLimit) {
 		$this->specialLimit = $specialLimit;
 	}
-
 	
 	/**
-	 * private method
+	 * @param $type
 	 * @return unknown_type
 	 */
-	function deleteAllOverdueData() {
-		$sql = "DELETE FROM pw_datanalyse WHERE timeunit < " . pwEscape($this->overtimestamp);
-		$this->db->update ( $sql );
+	function getDatanalyseForRateByType($type){
+		if ($type == "1") {
+			$actions = $this->actions->threadRate;
+		}elseif ($type == "3") {
+			$actions = $this->actions->picRate;
+		}elseif ($type == "2") {
+			$actions = $this->actions->diaryRate;
+		}
+		if ($actions) {
+			$sql = "SELECT a.tag, SUM(a.num) AS num, a.action FROM pw_datanalyse a
+					WHERE action IN ( ". pwImplode($actions) ." ) 
+					AND timeunit >= ". pwEscape($this->getTimestamp('w')) ." 
+					GROUP BY a.tag,a.action  ORDER BY num DESC";
+			$query = $this->db->query($sql);
+			$result = array();
+			while ($rt = $this->db->fetch_array($query)) {
+				if (!in_array($rt['action'],$result)) {
+					$result[$rt['tag']] = $rt['action'];
+					$nums[] = $rt['num'];
+					$tags[] = $rt['tag'];
+				}
+			}
+			if ($type == "1") {
+				$r1 = $this->getThreadSort($tags,$nums);
+			}elseif ($type == "3") {
+				$r1 = $this->getPicSort($tags,$nums);
+			}elseif ($type == "2") {
+				$r1 = $this->getDiarySort($tags,$nums); 
+			}
+			foreach ($r1 as $key => $value) {
+				 $value['action'] = $result[$value['id']];
+				 $r1[$key] = $value;
+			}
+			if (! empty ( $tags ) && ! empty ( $r1 )) {
+				foreach ( $tags as $key => $value ) {
+					if (!empty($r1 [$value])) {
+						$result [$value] = $r1 [$value];
+					}
+				}
+			}
+			return $result;
+		}
 	}
-	
-	
+
 	/**
 	 * @param $action
 	 * @return unknown_type
@@ -54,18 +91,19 @@ class Datanalyse {
 		//保留每天的top 100
 		$d_time = $this->getDeleteTimes();
 		$d_time[] = $this->historyTime;
-		foreach ($d_time as $time) {
-			$query = $this->db->query("SELECT * FROM pw_datanalyse
-				WHERE action = ". pwEscape($action) ." AND timeunit = ".pwEscape($time)."
-				ORDER BY num DESC LIMIT " . $this->getMaxMun());
-			while ($rt = $this->db->fetch_array($query)) {
-				$num[] = $rt['num'];
+		foreach ($d_time as $t) {
+			$sql = "SELECT num FROM pw_datanalyse
+					WHERE action = ". pwEscape($action) ." AND timeunit = ". pwEscape($t) ."
+					ORDER BY num DESC LIMIT ". $this->getMaxNum() .",1"; 
+			$rt = $this->db->get_one($sql);
+			$_w = "";
+			if ($rt) { 
+				$_w .= "( action = ". pwEscape($action) ." AND timeunit = ". pwEscape($t) ." AND num < ". pwEscape($rt['num']) ." ) OR";
 			}
-			if ($num) {
-				sort($num);
-				$this->db->update("DELETE FROM pw_datanalyse WHERE action = ".pwEscape($action)."
-							AND timeunit = ".pwEscape($time)." AND num < ".pwEscape($num[0]));
-			}
+		}
+		$_w = trim($_w,"OR");
+		if ($_w) {
+			$this->db->update("DELETE FROM pw_datanalyse WHERE $_w ");
 		}
 		$this->setDeleteTimePoint();
 	}
@@ -74,12 +112,19 @@ class Datanalyse {
 	 * @return unknown_type
 	 */
 	function getDeleteTimes(){
-		$d_points = $this->getDeleteTimePoint();
-		$n_points = $this->nowtimestamp;
+		$file = @fopen(R_P."data/bbscache/datanlyse.txt","rb");
+		if ($file) {
+			$c = fgets($file,'100');
+			$c = explode("=",trim($c));
+			if (count($c) > 1) {
+				$d_points = $c[1];
+			}
+			fclose($file);
+		}
 		if (!$d_points) {
 			$d_points = $this->overtimestamp;
 		}
-		$diff = ($n_points - $d_points) / 86400;
+		$diff = ($this->nowtimestamp - $d_points) / 86400;
 		$result = array();
 		for ($index = 0; $index < $diff; $index++) {
 			$result[] = $d_points + $index*24*60*60;
@@ -98,72 +143,13 @@ class Datanalyse {
 			fclose($file);
 		}
 	}
-	
+
 	/**
 	 * @return unknown_type
 	 */
-	function getDeleteTimePoint(){
-		$file = @fopen(R_P."data/bbscache/datanlyse.txt","rb");
-		if ($file) {
-			$c = fgets($file,'100');
-			$c = explode("=",trim($c));
-			if (count($c) > 1) {
-				$timepoint = $c[1];
-			}
-			fclose($file);
-		}
-		return $timepoint;
+	function getMaxNum(){
+		return $this->defaultLimit * 1;
 	}
-	
-	/**
-	 * @return unknown_type
-	 */
-	function getMaxMun(){
-		return $this->defaultLimit * 10;
-	}
-	
-	/**
-	 * private method
-	 * @param $tag
-	 * @param $action
-	 * @return unknown_type
-	 */
-	function update($tag, $action, $value) {
-		$num = $this->db->get_value("SELECT num FROM pw_datanalyse
-				WHERE tag=". pwEscape($tag) ." AND action=". pwEscape($action) ." AND timeunit=". pwEscape($this->nowtimestamp));
-		$num = (int)$num + (int)$value;
-		$sql = "REPLACE INTO pw_datanalyse
-				SET tag=" . pwEscape($tag) . ",action=" . pwEscape($action) . ",
-				timeunit=" . pwEscape($this->nowtimestamp) . ",num= " . pwEscape($num);
-		$this->db->update ( $sql );
-		
-		//记录历史数据
-		$snum = $this->db->get_value("SELECT num FROM pw_datanalyse WHERE tag=".pwEscape($tag)."
-				AND action=".pwEscape($action)." AND timeunit=".pwEscape($this->historyTime));
-		$snum = (int)$snum + $value;
-		$sql = "REPLACE INTO pw_datanalyse
-				SET tag=" . pwEscape($tag) . ",action=" . pwEscape($action) . ",
-				timeunit=".pwEscape($this->historyTime).",num= " . pwEscape($snum);
-		$this->db->update($sql);
-	}
-	
-	/**
-	 * public method
-	 * @param $tag
-	 * @param $action
-	 * @return unknown_type
-	 */
-	function updateDatanalyse($tag, $action, $value = 1) {
-		if (! empty ( $tag ) && is_numeric ( $tag ) && ! empty ( $action ) && $this->actions->isAction ( $action )) {
-			if (empty ( $value ) || ! is_numeric ( $value )) {
-				$value = 0;
-			}
-			$this->update ( $tag, $action, $value );
-			return true;
-		}
-		return false;
-	}
-	
 	/**
 	 * public method
 	 * @param $action
@@ -186,6 +172,8 @@ class Datanalyse {
 		} else {
 			if ($this->actions->getMember ( $action ) && ($subType != null)) {
 				$result = $this->memberSortByType ( $subType, $limit );
+			}elseif($this->actions->getForum( $action ) && ($subType != null)){
+				$result = $this->forumSortByType ( $subType , $limit);
 			}
 		}
 		return $result;
@@ -204,6 +192,25 @@ class Datanalyse {
 			$nums [$value ['addition'] ['uid']] = $this->formatValue($value ['value']);
 		}
 		$r = $this->getMemberSort ( $tags, $nums );
+		if (! empty ( $tags ) && ! empty ( $r )) {
+			foreach ( $tags as $key => $value ) {
+				if (!empty($r [$value])) {
+					$result [] = $r [$value];
+				}
+			}
+		}
+		return $result;
+	}
+	
+	function forumSortByType($action,$limit){
+		@include_once (R_P . 'lib/element.class.php');
+		$pwElement = new PW_Element ( $this->defaultLimit );
+		$data = $pwElement->forumSort( $action,$limit );
+		foreach ( $data as $key => $value ) {
+			$tags [] = $value ['addition'] ['fid'];
+			$nums [$value ['addition'] ['fid']] = $this->formatValue($value ['value']);
+		}
+		$r = $this->getForumSort ( $tags, $nums );
 		if (! empty ( $tags ) && ! empty ( $r )) {
 			foreach ( $tags as $key => $value ) {
 				if (!empty($r [$value])) {
@@ -287,7 +294,7 @@ class Datanalyse {
 	 */
 	function getPicSort($tags, $nums) {
 		if (! empty ( $tags ) && ! empty ( $nums )) {
-			$sql = "SELECT p.pid, p.path, p.uploader, p.uptime, p.pintro,  a.aid, a.ownerid, a.atype
+			$sql = "SELECT p.pid, p.path, p.uploader, p.uptime, p.pintro,  a.aid, a.ownerid, a.atype, p.ifthumb
 					FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid = a.aid WHERE p.pid IN ( " . pwImplode ( $tags ) . " )";
 			$query = $this->db->query ( $sql );
 			$result = array ();
@@ -299,9 +306,11 @@ class Datanalyse {
 					$r ['url'] = "mode.php?m=o&q=galbum&a=album&cyid=". $rt['ownerid'] ."&aid=".$rt['aid'];
 				}
 				$r ['author'] = $rt['uploader'];
-				$r ['image'] = getphotourl($rt['path'],true);
+				$r ['image'] = $rt['path']; //getphotourl($rt['path'],$rt['ifthumb']);
+				$r ['ifthumb'] = $rt['ifthumb'];
 				$r ['lasttime'] = get_date($rt ["uptime"]);
 				$r ['value'] = $nums [$rt ['pid']];
+				$r ['title'] = $rt['pintro']? $rt['pintro'] : getLangInfo("other","photo_none_desc");
 				$result [$rt['pid']] = $r;
 			}
 		}
@@ -377,11 +386,26 @@ class Datanalyse {
 				$r ['image'] = $userIcon;
 				list ( $lastDate ) = getLastDate ( $rt ["lastvisit"] );
 				$r ['lastDate'] = $lastDate;
-				$r ['value'] = $nums [$rt ['uid']];
+				$r ['value'] = $nums [$rt ['uid']]; //$this->getOnlineTime($nums [$rt ['uid']]);
 				$result [$rt ['uid']] = $r;
 			}
 		}
 		return $result;
+	}
+	
+	/**
+	 * @param $value
+	 * @return unknown_type
+	 */
+	function getOnlineTime($value){
+		if ($value < 60){
+			$value = "0分钟";
+		}elseif ($value >= 60 && $value < 3600) {
+			$value = ceil($value/60) . "分钟";
+		}elseif($value >= 3600) {
+			$value = ceil($value/3600) . "小时" . ceil(($value%3600)/60) . "分钟";
+		}
+		return $value;
 	}
 	
 	function formatValue($value){
@@ -420,7 +444,7 @@ class DatanalyseAction {
 	var	$diaryRate = array();
 	var	$threadRate = array();
 	var $member = array ('memberOnLine', 'memberThread', 'memberShare','memberCredit','memberFriend');
-	var $memberUnit = array ('小时','贴','分享');
+	var $memberUnit = array ('','贴','分享');
 	var $thread = array ('threadPost', 'threadFav', 'threadShare', 'threadRate');
 	var $threadUnit = array ('回复','收藏','分享','评价');
 	var $diary = array ('diaryComment', 'diaryFav', 'diaryShare', 'diaryRate');
@@ -434,13 +458,13 @@ class DatanalyseAction {
 		$this->rate = new PW_Rate();
 		$this->share = array("memberShareThread","memberShareDiary","memberShareAlbum","memberShareUser","memberShareGroup",
 						"memberSharePic","memberShareLink","memberShareVideo","memberShareMusic","memberShareAll");
-		$this->picRate = $this->getRate("threadRate");
+		$this->picRate = $this->getRate("picRate");
 		$this->diaryRate = $this->getRate("diaryRate");
-		$this->threadRate = $this->getRate("picRate");
+		$this->threadRate = $this->getRate("threadRate");
 		!empty($this->share) && $this->member = array_merge($this->member, $this->share);
-		!empty($this->picRate) && $this->thread = array_merge($this->thread, $this->picRate);
+		!empty($this->picRate) && $this->pic = array_merge($this->pic, $this->picRate);
 		!empty($this->diaryRate) && $this->diary = array_merge($this->diary, $this->diaryRate);
-		!empty($this->threadRate) && $this->pic = array_merge($this->pic, $this->threadRate);
+		!empty($this->threadRate) && $this->thread = array_merge($this->thread, $this->threadRate);
 	}
 	
 	function getMemberShareType($index){

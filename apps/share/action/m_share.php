@@ -359,7 +359,7 @@ if ($a == 'my' && $see == 'postfavor'){
 				$temp_uid	= $temp['photo']['uid'];
 				$rt['title']= $belong."<a href=\"u.php?uid=$temp_uid\" target=\"_blank\">".$temp['photo']['username']."</a>";
 			} elseif ($rt['type']=='album') {
-				$belong	= getLangInfo('o','photo_belong',false,1);
+				$belong	= getLangInfo('app','photo_belong');
 				$rt['image']	= $temp['album']['image'];
 				$temp_uid	= $temp['album']['uid'];
 				$rt['title']= $belong."<a href=\"u.php?uid=$temp_uid\" target=\"_blank\">".$temp['album']['username']."</a>";

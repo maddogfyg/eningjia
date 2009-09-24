@@ -1,6 +1,7 @@
 <?php
 defined('P_W') || exit('Forbidden');
-define('WIND_VERSION','7.5RC2');
+define('WIND_VERSION','7.5');
+
 
 /**
  * 获取客户端IP
@@ -895,12 +896,13 @@ function minImage($sourceImg,$width,$height){
 function ObContents($output){
 	//Copyright (c) 2003-09 PHPWind
 	ob_end_clean();
-	if (!headers_sent() && $GLOBALS['db_obstart'] && GetServer('HTTP_ACCEPT_ENCODING') && N_output_zip()!='ob_gzhandler') {
+	$getHAE = GetServer('HTTP_ACCEPT_ENCODING');
+	if (!headers_sent() && $GLOBALS['db_obstart'] && $getHAE && N_output_zip()!='ob_gzhandler') {
 		$encoding = '';
-		if (strpos(' '.GetServer('HTTP_ACCEPT_ENCODING'),'gzip') !== false) {
-			$encoding = 'gzip';
-		} elseif (strpos(' '.GetServer('HTTP_ACCEPT_ENCODING'),'x-gzip') !== false) {
+		if (strpos($getHAE,'x-gzip') !== false) {
 			$encoding = 'x-gzip';
+		} elseif (strpos($getHAE,'gzip') !== false) {
+			$encoding = 'gzip';
 		}
 		if ($encoding && function_exists('crc32') && function_exists('gzcompress')) {
 			header('Content-Encoding: '.$encoding);
@@ -933,16 +935,16 @@ function ObGetMode(){
 	}
 	return $mode;
 }
-function N_flush(){
+function N_flush($ob=null){
 	//Copyright (c) 2003-09 PHPWind
-	if (N_output_zip() == 'ob_gzhandler') {
-		return;
-	}
-	if (php_sapi_name() != 'apache2handler' && php_sapi_name() != 'apache2filter') {
+	if (php_sapi_name()!='apache2handler' && php_sapi_name()!='apache2filter') {
+		if (N_output_zip() == 'ob_gzhandler') {
+			return;
+		}
+		if ($ob && ob_get_length()!==false && ob_get_status() && !ObGetMode($GLOBALS['db_obstart'])) {
+			@ob_flush();
+		}
 		flush();
-	}
-	if (function_exists('ob_get_status') && ob_get_status() && function_exists('ob_flush') && !ObGetMode($GLOBALS['db_obstart'])) {
-		@ob_flush();
 	}
 }
 function N_output_zip(){
@@ -959,7 +961,7 @@ function N_output_zip(){
 }
 function ajax_footer(){
 	global $db_charset;
-	$output = str_replace(array('<!--<!---->','<!---->'),array('',''),ob_get_contents());
+	$output = str_replace(array('<!--<!---->','<!---->'),'',ob_get_contents());
 	header("Content-Type: text/xml;charset=$db_charset");
 	echo ObContents("<?xml version=\"1.0\" encoding=\"$db_charset\"?><ajax><![CDATA[".$output."]]></ajax>");exit;
 }
@@ -1350,7 +1352,7 @@ class L {
 		if ($dir) {
 			$dir = strtolower(trim($dir));
 			if ($dir == 'db') {
-				if (!class_exists('BaseDB')) require(R_P.'lib/db/basedb.php');
+				if (!class_exists('BaseDB')) require(R_P.'lib/base/basedb.php');
 				$fileDir = Pcv(R_P.'lib/'.$dir.'/'.strtolower($className).'.db.php');
 				$className .= 'DB';
 			} else {
@@ -1404,7 +1406,7 @@ class L {
 		global $skin,$db_styledb,$db_defaultstyle;
 		$skinco && isset($db_styledb[$skinco]) && $skin = $skinco;
 
-		if (strpos($skin, '..') === false && file_exists(D_P . "data/style/$skin.php") && $db_styledb[$skin][1] == '1') {
+		if (strpos($skin, '..') === false && file_exists(D_P . "data/style/$skin.php") && is_array($db_styledb[$skin]) &&$db_styledb[$skin][1] == '1') {
 
 		} elseif (strpos($db_defaultstyle, '..') === false && file_exists(D_P . "data/style/$db_defaultstyle.php")) {
 			$skin = $db_defaultstyle;

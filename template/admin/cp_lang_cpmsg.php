@@ -320,7 +320,6 @@ $lang['cpmsg'] = array (
 'invokename_toolang'			=> '模块名称长度过长，请保持在50个字节之内',
 'invokename_repeat'				=> '该模块名已被使用，请使用其他模块名',
 'invokename_error'				=> '模块名只允许使用中文和数字及英文',
-'invoke_parse_error'			=> '模块解析出错',
 'no_invoke_in_this_page'		=> '本页面没有可自定义内容的标签模块',
 //7.3.2 End
 'diyoption_maxlength'			=> '常用功能定制最多只能定制15条操作',
@@ -340,6 +339,8 @@ $lang['cpmsg'] = array (
 'mode_o_hot_itemIsInt'			=> '您输入了错误的显示条数',
 'postcate_not_exists'			=> '该主题不存在，请确认！',
 'topic_search_none'				=> '至少输入一个搜索条件',
+
+'mode_admin_error'				=> '本模式不存在，或者本模式没有后台管理',
 
 'uc_server_set'					=> '该功能是用户中心服务端设置选项！',
 'uc_cname_empty'				=> '请选择同步积分!',

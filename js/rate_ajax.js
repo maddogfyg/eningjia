@@ -35,6 +35,12 @@ var rate = {
 
 	voteLoading : function() {
 		return '<div class="c"></div><div class="mood-bg"><div class="mood-bg2"><div style="padding:30px;"><img src="images/loading.gif" align="absmiddle" /> 加载中...</div></div></div><div class="c"></div>';
+	},
+	
+	showWeekMore : function(){
+		if(getObj("more")){
+			document.getElementById('more').style.display=(document.getElementById('more').style.display =='none')?'':'none';
+		}
 	}
 }
 

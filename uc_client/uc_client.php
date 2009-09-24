@@ -1,10 +1,5 @@
-﻿<?php
+<?php
 
-/*
-if (!defined('UC_CONNECT_METHOD')) {
-    exit('forbidden');
-}
-*/
 // uc_client 包的根目录
 define('UC_CLIENT_ROOT', dirname(__FILE__) . '/');
 // uc_client 包使用的 lib 库所在的目录
@@ -56,6 +51,7 @@ function uc_user_register($username, $password, $email) {
 function uc_user_get($username, $bytype = 0) {
 	return uc_data_request('user', 'get', array($username, $bytype));
 }
+
 /**
  验证
   @param  string $uid - 用户名
@@ -66,6 +62,29 @@ function uc_user_check($uid, $checkstr) {
 	$args = func_get_args();
 	return uc_data_request('user', 'check', $args);
 }
+
+/**
+ 编辑用户资料
+  @param  string $username - 用户名
+  @param  string $oldpwd - 原密码(md5)
+  @param  string $newpwd - 新密码(md5)
+  @param  string $email - 新邮箱
+  @param  string $question - 新验证问题
+  @param  string $answer - 新验证回答
+*/
+function uc_user_edit($uid, $username, $pwd, $email) {
+	return uc_data_request('user', 'edit', array($uid, $username, $pwd, $email));
+}
+
+/**
+ 删除指定 uid 的用户
+  @param  mixed $uids - 用户uid序列，支持单个uid,多个uid数组或者用“,”隔开的字符串序列
+  @param  int $del
+*/
+function uc_user_delete($uids) {
+	return uc_data_request('user', 'delete', array($uids));
+}
+
 /**
  * 添加好友
  *
@@ -317,18 +336,6 @@ function uc_msg_get_public($mid) {
     return uc_data_request('message', 'get_public', $args);
 }
 
-/**
- 编辑用户资料
-  @param  string $username - 用户名
-  @param  string $oldpwd - 原密码(md5)
-  @param  string $newpwd - 新密码(md5)
-  @param  string $email - 新邮箱
-  @param  string $question - 新验证问题
-  @param  string $answer - 新验证回答
-*/
-function uc_user_edit($uid, $username, $pwd, $email) {
-	return uc_data_request('user', 'edit', array($uid, $username, $pwd, $email));
-}
 /**
  设置用户积分增减
   @param  array $credit array($uid1 => array($ctype1 => $point1, $ctype2 => $point2), $uid2 => array())

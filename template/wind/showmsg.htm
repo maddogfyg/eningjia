@@ -1,5 +1,5 @@
-<!--<?php print <<<EOT
--->
+<?php
+print <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -58,10 +58,10 @@ function opencode() {
 	<table cellpadding="0" cellspacing="0" class="tip-table">
 		<tr><td height="170">
 		<div class="tip-content">
-<!--
+
 EOT;
 if($showlogin){print <<<EOT
--->
+
 		<div>您没有登录或者您没有权限访问此页面，可能有如下几个原因:</div>
 		<div class="mt10">
 			<ol><li>$msg_info</li>
@@ -69,50 +69,50 @@ if($showlogin){print <<<EOT
 				<form action="login.php?" method="post" name="login">
 				<table width="100%" style="margin:20px 0 0px 0;">
 				<tr class="vt"><td width="60" onclick="document.login.pwuser.focus();">
-<!--
+
 EOT;
 $arr_logintypename = array('用户名','UID','Email');
 $value = 0;
 if(count($_LoginInfo['logintype'])==1){
 	$value = current($_LoginInfo['logintype']);print <<<EOT
--->
+
 				<input type="hidden" name="lgt" value="$value"/>$arr_logintypename[$value]
-<!--
+
 EOT;
 }elseif(count($_LoginInfo['logintype'])>1){print <<<EOT
--->
+
 				<select name="lgt">
-<!--
+
 EOT;
 	$i=1;
 	foreach($_LoginInfo['logintype'] as $value){
 		$str_checked = $i==1? 'SELECTED':'';
 		$i++;print <<<EOT
--->
+
 				<option value="$value" $str_checked>{$arr_logintypename[$value]}</option>
-<!--
+
 EOT;
 	}print <<<EOT
--->
+
 				</select>
-<!--
+
 EOT;
 }else{print <<<EOT
--->
+
 				<input type="hidden" name="lgt" value="$value" />用户名
-<!--
+
 EOT;
 }print <<<EOT
--->
+
 			</td>
 			<td><input class="input" type="text" tabindex="11" name="pwuser" alt="请输入账户" /></td></tr>
 			<tr class="vt"><td>密　码：</td>
 				<td><input class="input" type="password" tabindex="12" name="pwpwd" alt="请输入密码" /></td>
 			</tr>
-<!--
+
 EOT;
 if($db_ifsafecv){print <<<EOT
--->
+
 			<tr class="vt"><td>安全问题：</td>
 				<td><select name="question" onchange="showcustomquest(this.value)" tabindex="13"><option value="0">无安全问题</option><option value="1">我爸爸的出生地</option><option value="2">我妈妈的出生地</option><option value="3">我的小学校名</option><option value="4">我的中学校名</option><option value="5">我最喜欢的运动</option><option value="6">我最喜欢的歌曲</option><option value="7">我最喜欢的电影</option><option value="8" >我最喜欢的颜色</option><option value="-1">自定义问题</option></select>
 				<input id="customquest" style="display:none" type="text" name="customquest" class="input" tabindex="14" />
@@ -120,20 +120,20 @@ if($db_ifsafecv){print <<<EOT
 			<tr class="vt"><td>您的答案：</td>
 				<td><input type="text" name="answer" class="input" tabindex="15"></td>
 			</tr>
-<!--
+
 EOT;
 }if(is_numeric($qkey)){print <<<EOT
--->
+
 			<tr class="vt"><td>验证问答：</td>
 				<td>问题:{$db_question[$qkey]}<br />
 					正确答案:{$db_answer[$qkey]}
 					<input type="hidden" name="qkey" value="$qkey"  alt="请输入自定义安全问题"/><br />
 					<input class="input" type="text" name="qanswer" tabindex="16"  alt="请输入安全答案"/>
 			</td></tr>
-<!--
+
 EOT;
 }if($db_gdcheck & 2){print <<<EOT
--->
+
 			<tr class="vt"><td>认证码：</td>
 				<td>
 					<input class="input" type="text" name="gdcode" size="6" tabindex="17" alt="请输入验证码" />
@@ -143,10 +143,10 @@ EOT;
 opencode();
 </script>
 			</td></tr>
-<!--
+
 EOT;
 }print <<<EOT
--->
+
 			<tr class="vt"><td>隐身登录：</td>
 				<td><input name="hideid" type="radio" value="1" /> 是 &nbsp;
 					<input name="hideid" type="radio" value="0" checked tabindex="18" /> 否
@@ -171,20 +171,20 @@ document.login.pwuser.focus();
 <div class="tar cc" style="padding:0 20px 20px;">
 	<a href="javascript:;" onclick="javascript:history.go(-1);" class="show-back fr" tabindex="20">返回继续操作</a>
 </div>
-<!--
+
 EOT;
 }else{print <<<EOT
--->
+
 <div class="lh3">
 <span class="f14">$msg_info</span><br />
 <div class="cc" style="padding:0 20px 20px 0;">
-	<a href="javascript:history.go(-1);" class="show-back fl" tabindex="20">返回继续操作</a>
+	<a href="javascript:void(0);" onclick="if(document.referrer){history.go(-1);}else{self.location.reload();}return false;" class="show-back fl" tabindex="20">返回继续操作</a>
 </div><br />
-<!--
+
 EOT;
 $dejump && $dejump!=1 && include_once PrintEot($dejump);
 }print <<<EOT
--->
+
 				</div>
 			</td>
 		</tr>
@@ -194,6 +194,6 @@ $dejump && $dejump!=1 && include_once PrintEot($dejump);
 </div>
 </body>
 </html>
-<!--
+
 EOT;
-?>-->
+?>

@@ -368,4 +368,12 @@ function getfavor($tids) {
 	}
 	return $tiddb;
 }
+
+function checkFields($tableName,$fieldName){
+	global $db;
+	$isField = $db->get_one("show columns from ".$tableName." like '".$fieldName."'");
+	if(!$isField){
+		$db->query("ALTER TABLE pw_argument add tpcid smallint(6) NOT NULL default '0'");
+	}
+}
 ?>

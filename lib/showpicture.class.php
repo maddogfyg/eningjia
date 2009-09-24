@@ -6,8 +6,10 @@ class PW_ShowPicture{
      *
      */
     var $_perPage = 7;
+	var $_db;
 
     function PW_ShowPicture($register){
+		$this->_db = $GLOBALS['db'];
         $this->_register($register);
     }
 
@@ -87,7 +89,7 @@ class PW_ShowPicture{
         $photos = array();
         foreach($pictures as $photo){
             $photo['path'] = getphotourl($photo['path'],$photo['ifthumb']);
-            if ($album['groupid'] == 6 && $this->_db_shield && $this->_groupid != 3) {
+            if ($album['groupid'] == 6 && $this->_db_shield && $this->_groupid != 3) {//TODO $album?
                     $photo['path'] = $this->_pwModeImg.'/banuser.gif';
             }
             $photos[] = $photo;
@@ -100,26 +102,26 @@ class PW_ShowPicture{
             return null;
         }
         $pictureIds = implode(",",$pictureIds);
-        $query = $this->_getConnection()->query("SELECT pid,path,ifthumb FROM pw_cnphoto WHERE pid in(".$pictureIds.") ORDER BY pid ASC ");
+        $query = $this->_db->query("SELECT pid,path,ifthumb FROM pw_cnphoto WHERE pid in(".$pictureIds.") ORDER BY pid ASC ");
         $result = array();
-        while($rs = $this->_getConnection()->fetch_array($query)){
+        while($rs = $this->_db->fetch_array($query)){
             $result[] = $rs;
         }
         return $result;
     }
 
     function _getAlbumByPictureId($pictureId){
-        return  $this->_getConnection()->get_one("SELECT * FROM pw_cnphoto p LEFT JOIN pw_cnalbum a USING(aid) WHERE pid=".pwEscape($pictureId));
+        return  $this->_db->get_one("SELECT * FROM pw_cnphoto p LEFT JOIN pw_cnalbum a USING(aid) WHERE pid=".pwEscape($pictureId));
     }
 
     function _getAlbumByAlbumId($albumId){
-        return  $this->_getConnection()->get_one("SELECT * FROM pw_cnalbum  WHERE aid=".pwEscape($albumId)." LIMIT 1");
+        return  $this->_db->get_one("SELECT * FROM pw_cnalbum  WHERE aid=".pwEscape($albumId)." LIMIT 1");
     }
 
     function _getPictureIds($ablumId){
-        $query = $this->_getConnection()->query("SELECT pid FROM pw_cnphoto WHERE aid=".pwEscape($ablumId)." ORDER BY pid ASC LIMIT 200");
+        $query = $this->_db->query("SELECT pid FROM pw_cnphoto WHERE aid=".pwEscape($ablumId)." ORDER BY pid ASC LIMIT 200");
         $result = array();
-        while($rs = $this->_getConnection()->fetch_array($query)){
+        while($rs = $this->_db->fetch_array($query)){
             $result[] = $rs['pid'];
         }
         return $result;
@@ -130,11 +132,11 @@ class PW_ShowPicture{
     }
 
     function _getPicture($pictureId){
-        return $this->_getConnection()->get_one("SELECT p.pid,p.aid,p.pintro,p.path as basepath,p.uploader,p.uptime,p.hits,p.c_num,p.ifthumb,a.aname,a.private, a.ownerid,a.owner,a.photonum,m.groupid FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid LEFT JOIN pw_members m ON p.uploader=m.username WHERE p.pid=" . pwEscape($pictureId) . " AND a.atype='0'");
+        return $this->_db->get_one("SELECT p.pid,p.aid,p.pintro,p.path as basepath,p.uploader,p.uptime,p.hits,p.c_num,p.ifthumb,a.aname,a.private, a.ownerid,a.owner,a.photonum,m.groupid FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid LEFT JOIN pw_members m ON p.uploader=m.username WHERE p.pid=" . pwEscape($pictureId) . " AND a.atype='0'");
     }
 
     function _getGroupsPicture($pictureId){
-        return $this->_getConnection()->get_one("SELECT p.pid,p.aid,p.pintro,p.path as basepath,p.ifthumb,p.uploader,p.uptime,p.hits,a.aname,a.atype, a.private,a.ownerid,a.photonum,m.groupid FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid LEFT JOIN pw_members m ON p.uploader=m.username WHERE p.pid=" . pwEscape($pictureId));
+        return $this->_db->get_one("SELECT p.pid,p.aid,p.pintro,p.path as basepath,p.ifthumb,p.uploader,p.uptime,p.hits,a.aname,a.atype, a.private,a.ownerid,a.photonum,m.groupid FROM pw_cnphoto p LEFT JOIN pw_cnalbum a ON p.aid=a.aid LEFT JOIN pw_members m ON p.uploader=m.username WHERE p.pid=" . pwEscape($pictureId));
     }
 
     function _getConnection(){

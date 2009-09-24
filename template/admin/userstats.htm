@@ -15,18 +15,16 @@ foreach($groupnum as $group){print <<<EOT
 EOT;
 if($group[1]=='-1'){print <<<EOT
 -->
-[<a href="$admin_file?adminjob=setuser&action=search&groupid=$group[1]">
+[<a href="$admin_file?adminjob=setuser&action=search&groupid=$group[1]">查看用户组会员</a>]
 <!--
 EOT;
 }else{ print <<<EOT
 -->
-[<a href="$admin_file?adminjob=setuser&action=search&groupid=$group[1]&orderway=username">
+[<a href="$admin_file?adminjob=setuser&action=search&groupid=$group[1]&orderway=username">查看用户组会员</a>]
 <!--
 EOT;
 } print <<<EOT
 -->
-查看用户组会员
-</a>]
 </td>
 </tr>
 <!--

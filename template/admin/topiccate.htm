@@ -27,7 +27,7 @@ include_once PrintEot('left');
 .h{border-bottom:1px solid #9ec0e1;background:#e6f0f9;text-align:left;color:#333333;padding:0 .5em; line-height:2.4em;}
 
 .admin-tips{padding:0 10px;}
-.admin-tips span{float:left;margin-right:20px;display:inline;white-space:nowrap;height:20px;margin-top:15px;}
+.admin-tips span{float:left;margin-right:20px;display:inline;white-space:nowrap;height:25px;margin-top:15px;}
 </style>
 <!--
 EOT;
@@ -136,8 +136,7 @@ if($modelid){print<<<EOT
 <input type="hidden" name="modelid" value="$modelid" />
 <input type="hidden" name="tids" value="$tids" />
 <h2>搜索内容</h2>
-<div class="admin-tips cc2">$searchhtml</div>
-<div class="admin-tips cc2" id="asearch" style="display:none">$asearchhtml</div>
+<div class="admin-tips cc2">$searchhtml<b id="asearch" style="display:none;font-weight:normal;">$asearchhtml</b></div>
 <div class="c"></div>
 <center style="margin-top:10px"><input type="submit" value="提 交" class="btn" /> &nbsp;<a id="show" href="javascript:;" onclick="showasearch()">高级搜索</a></center>
 </form>
@@ -178,7 +177,7 @@ print <<<EOT
 	<tr class="tr3" align="center">
 		<td><input type="checkbox" name="selid[]" value="$value[tid]"></td>
 		<td><a href="read.php?tid=$value[tid]" target="_blank" class="unline">$value[subject]</a></td>
-		<td>{$topicmodeldb[$value[modelid]][name]}</td>
+		<td>{$topicmodeldb[$modelid][name]}</td>
 		<td>{$forum[$value[fid]][name]}</td>
 		<td><a href="u.php?uid=$value[authorid]" target="_blank" class="unline">$value[author]</a></td>
 		<td>$value[postdate]</td>
@@ -491,17 +490,17 @@ EOT;
 -->
 	</td>
 	<td class="tac"><a href="javascript:;" onclick="sendmsg('$ajax_basename_edit','fieldid=$k&modelid=$modelid&cateid=$cateid',this.id);" id="editfield_$k">编辑</a>
-	<a href="javascript:;" onclick="delfield($k)" style="color:#C0C0C0">X</a><br />
+	<a href="javascript:;" onclick="delfield($k);return false;" style="color:#C0C0C0">X</a><br />
 <!--
 EOT;
 if($v['indexstate'] == 1){print<<<EOT
 -->
-	<a href="javascript:;" onclick="editIndex($modelid,$k,'del');">删除索引</a>
+	<a href="javascript:;" onclick="editIndex($modelid,$k,'del');return false;">删除索引</a>
 <!--
 EOT;
 }elseif($v['indexstate'] == 0 && $v['ifindex']){print<<<EOT
 -->
-	<a href="javascript:;" onclick="editIndex($modelid,$k,'add');">添加索引</a>
+	<a href="javascript:;" onclick="editIndex($modelid,$k,'add');return false;">添加索引</a>
 <!--
 EOT;
 }else{print<<<EOT
@@ -724,7 +723,7 @@ function editIndex(modelid,fieldid,type) {
 }
 
 function delmodel(modelid){
-	if(confirm('是否确认删除该模板？删除该模板后将清空该模板下的所有信息！')){
+	if(confirm('删除该模板后将清空该模板下的所有信息，包括帖子信息！是否确认删除该模板？')){
 		ajax.send(ajax_basename_delmodel,'modelid='+modelid,function(){
 				var str = ajax.request.responseText.split("\t");
 				if (str[0] == 'success'){
@@ -797,7 +796,7 @@ EOT;
 EOT;
 foreach($modeldb as $key => $value) {print<<<EOT
 -->
-	<tr><td><input name="vieworder[$key]" value="$value[vieworder]" size="3" class="input"></td><td><input class="input" name="name[$key]" value="$value[name]"></td><td><a href="javascript:;" onclick="delmodel($key)" style="cursor:pointer;" class="unline">删除模板</a></td></tr>
+	<tr><td><input name="vieworder[$key]" value="$value[vieworder]" size="3" class="input"></td><td><input class="input" name="name[$key]" value="$value[name]"></td><td><a href="javascript:;" onclick="delmodel($key);return false;" style="cursor:pointer;" class="unline">删除模板</a></td></tr>
 <!--
 EOT;
 }print<<<EOT

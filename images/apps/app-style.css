@@ -113,9 +113,9 @@ ol li{}
 .img-list-a dd{width:130px; text-align:right;}
 .img-list-a dt .link-w{width:150px;float:left;}
 .img-list-a a{display:block;float:left;}
-.img-list-b{padding:10px 0 5px;background:#f7f7f7;}
-.img-list-b li{float:left;width:120px; text-align:center;}
-.img-list-b li p{padding-top:5px;}
+.img-list-b{padding:10px 0 5px;}
+.img-list-b li{float:left;width:120px;}
+.img-list-b li p{padding-top:5px;width:110px;text-align:center;}
 .img-list-c li{float:left;width:190px;height:190px;margin-top:10px;}
 .img-list-c li img{width:100px;height:100px;}
 .img-list-c li p{padding-top:5px;}

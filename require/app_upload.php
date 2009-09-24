@@ -25,13 +25,13 @@ if ($filenum > 0 && $filenum <= $db_attachnum) {
 
 	foreach ($uploaddb as $value) {
 		$value['name'] = addslashes($value['name']);
-	
+
 		if (!$value['ifreplace']) {
 			InitGP(array('atc_desc'.$value['id']),'P',1);
 			$value['descrip']	= ${'atc_desc'.$value['id']};
 			$value['needrvrc'] = $value['special'] = 0;
 			$value['ctype'] = '';
-			
+
 			$db->update("INSERT INTO pw_attachs SET ".pwSqlSingle(array(
 				'fid'		=> $fid,				'uid'		=> $winduid,
 				'hits'		=> 0,					'name'		=> $value['name'],
@@ -82,7 +82,6 @@ foreach ($attachs as $key => $value) {
 	$aids[] = $key;
 }
 $aids && $aids = pwImplode($aids);
-$attachs = !empty($attachs) ? addslashes(serialize($attachs)) : '';
 
 pwFtpClose($ftp);
 
@@ -98,11 +97,11 @@ function UploadDiary($uid,$uptype = 'all',$thumbs = null){
 			$atc_attachment_name = Char_cv($value['name']);
 			$atc_attachment_size = $value['size'];
 			$attach_ext = strtolower(substr(strrchr($atc_attachment_name,'.'),1));
-		
+
 			if (empty($attach_ext) || !isset($o_uploadsize[$attach_ext])) {
 				uploadmsg($uptype,'upload_type_error');
 			}
-		
+
 			if ((int)$atc_attachment_size < 1) {
 				uploadmsg($uptype,'upload_size_0');
 			}
@@ -135,11 +134,11 @@ function UploadDiary($uid,$uptype = 'all',$thumbs = null){
 				}
 			}
 			$thumbdir = "thumb/diary/$fileuplodeurl";
-			
+
 			$havefile = $ifthumb = 0;
-			
+
 			$source = "$attachdir/diary/$fileuplodeurl";
-	
+
 			if (!postupload($atc_attachment,$source)) {
 				uploadmsg($uptype,'upload_error');
 			}
@@ -169,7 +168,7 @@ function UploadDiary($uid,$uptype = 'all',$thumbs = null){
 						$source != $thumburl && $ifthumb = 1;
 					}
 				}
-			
+
 				if ($uptype == 'all' && $db_watermark && $img_size[2]<'4' && $img_size[0]>$db_waterwidth && $img_size[1]>$db_waterheight && function_exists('imagecreatefromgif') && function_exists('imagealphablending') && ($attach_ext!='gif' || function_exists('imagegif') && ($db_ifgif==2 || $db_ifgif==1 && (PHP_VERSION > '4.4.2' && PHP_VERSION < '5' || PHP_VERSION > '5.1.4'))) && ($db_waterimg && function_exists('imagecopymerge') || !$db_waterimg && function_exists('imagettfbbox'))) {
 					ImgWaterMark($source,$db_waterpos,$db_waterimg,$db_watertext,$db_waterfont,$db_watercolor, $db_waterpct,$db_jpgquality);
 					if ($ifthumb == 1) {
@@ -185,14 +184,14 @@ function UploadDiary($uid,$uptype = 'all',$thumbs = null){
 					P_unlink("$attachdir/$thumbdir");
 					@rename($thumburl,"$attachdir/$thumbdir");
 				}
-				//TODO 几个变量?
-				if ($m_ifthumb == 1) {
-					P_unlink("$attachdir/$m_thumbdir/diary");
-					@rename($m_thumburl,"$attachdir/$m_thumbdir/diary");
+
+				if ($m_ifthumb == 1) {//TODO $m_ifthumb?
+					P_unlink("$attachdir/$m_thumbdir/diary");//TODO $m_thumbdir?
+					@rename($m_thumburl,"$attachdir/$m_thumbdir/diary");//TODO $m_thumburl?
 				}
-				if ($s_ifthumb == 1) {
-					P_unlink("$attachdir/$s_thumbdir/diary");
-					@rename($s_thumburl,"$attachdir/$s_thumbdir/diary");
+				if ($s_ifthumb == 1) {//TODO $m_ifthumb?
+					P_unlink("$attachdir/$s_thumbdir/diary");//TODO $s_thumbdir?
+					@rename($s_thumburl,"$attachdir/$s_thumbdir/diary");//TODO $s_thumburl?
 				}
 			}
 			$uploaddb[] = array('id' => $i,'ifreplace' => $ifreplace,'name' => $atc_attachment_name,'size' => $size,'type' => $type,'attachurl' => $fileuplodeurl,'ifthumb' => $ifthumb,'img_w' => $img_size[0],'img_h' => $img_size[1]);

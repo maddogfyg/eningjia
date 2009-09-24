@@ -251,6 +251,7 @@ $lang['other'] = array(
 	'pc_search'				=> '搜索',
 	'pc_asearch'			=> '高级搜索',
 	'pc_delimg'				=> '[删除]',
+	'pc_limitnum'			=> '无限制',
 
 	'field_number'			=> '数字',
 	'field_text'			=> '字串',
@@ -265,5 +266,12 @@ $lang['other'] = array(
 	'field_upload'			=> '上传',
 	'field_range'			=> '取值范围',
     'admin_level'			=> '创始人',
+	'rate_type_1'			=> '帖子',
+	'rate_type_2'			=> '日志',
+	'rate_type_3'			=> '相片',
+	'photo_none_desc'		=> '图片暂无描述',
+	'edit'					=> '编辑',
+	'ajax_edit_way'			=> '(按住Ctrl点击直接进入高级模式)',
+	'read_quote_info'		=> '引用回复这个帖子'
 );
 ?>

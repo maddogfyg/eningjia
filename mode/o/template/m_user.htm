@@ -270,7 +270,7 @@ if ($ismyfriend) { print <<<EOT
                                 <p class="fl"><textarea maxlength="200" id="board" name="atc_content"/></textarea>
                                 <input type="hidden" id="board_uid" value="$u"></p>
                             </div>
-                            <span class="button"><span><button type="submit" onclick="postBoard();">留言</button></span></span>
+                            <span class="button" style="margin-left:0;"><span><button type="submit" onclick="postBoard();">留言</button></span></span>
                             </div>
                             <div id="linkbox" style="display:none;"></div>
                             </form>
@@ -279,7 +279,7 @@ EOT;
 }print <<<EOT
 -->         
                             <div class="cc"></div>
-														<div style="width:510px;padding:10px 0 30px 10px;">
+														<div style="width:510px;padding:10px 0 30px 0;">
                             <div class="o-commnet">
                             <div id="createboardbox"></div>
                             
@@ -426,9 +426,8 @@ $c++;if($c>6)break;
 print <<<EOT
 -->							
 						<li>
-                        	<a href="u.php?uid=$value[uid]"><img src="$value[icon]" class="img-50" onmouseover="getObj('card_$value[uid]').style.display=''" onmouseout="getObj('card_$value[uid]').style.display='none'"/></a><a class="pw-card" id="card_{$value[uid]}" onmouseover="getObj('card_$value[uid]').style.display=''" onmouseout="getObj('card_$value[uid]').style.display='none'" onclick="showcard(this.id,'$value[uid]')" style="margin-left:-22px;margin-top:41px;cursor:pointer;display:none;" title="查看名片">查看名片</a>
-                            <p>
-                            	<a href="u.php?uid=$value[uid]" class="u-name">$value[username]</a><br />
+                        	<a href="u.php?uid=$value[uid]"><img src="$value[icon]" class="img-50 userCard" id="card_s1_{$value[uid]}_{$value[uid]}" /></a>
+                            <p><a href="u.php?uid=$value[uid]" class="u-name">$value[username]</a></p>
                         		<span>
 <!--
 EOT;
@@ -441,9 +440,8 @@ EOT;
 }print <<<EOT
 -->
                    
-                        			$value[visittime]
-                                 </span>
-                             </p>
+                        			{$value[visittime]}
+                                </span>
                          </li>
 <!--
 EOT;
@@ -475,9 +473,8 @@ foreach ($tovisit as $value) {
 $c++;if($c>6)break;print <<<EOT
 -->
 						<li>
-                        	<a href="u.php?uid=$value[uid]"><img src="$value[icon]" class="img-50" onmouseover="getObj('card1_$value[uid]').style.display=''" onmouseout="getObj('card1_$value[uid]').style.display='none'"/></a><a class="pw-card" id="card1_{$value[uid]}" onmouseover="getObj('card1_$value[uid]').style.display=''" onmouseout="getObj('card1_$value[uid]').style.display='none'" onclick="showcard(this.id,'$value[uid]')" style="margin-left:-22px;margin-top:41px;cursor:pointer;display:none;" title="查看名片">查看名片</a>
-                            <p>
-                            	<a href="u.php?uid=$value[uid]">$value[username]</a><br />
+                        	<a href="u.php?uid=$value[uid]"><img src="$value[icon]" class="img-50 userCard" id="card_s2_{$value[uid]}_{$value[uid]}" /></a>
+                            <p><a href="u.php?uid=$value[uid]">$value[username]</a></p>
                                 <span>
 <!--
 EOT;
@@ -492,7 +489,6 @@ EOT;
                             
                                 $value[visittime]
                                 </span>
-                             </p>
                          </li>
 <!--
 EOT;
@@ -544,7 +540,8 @@ $value[showname] = substrs($value[username],8);
 if($SpaceShow){
 print <<<EOT
 -->              
-						<li><a href="u.php?uid={$value[uid]}"><img title="{$value[username]}" src="$value[face]" class="portrait-m" onmouseover="getObj('card2_$value[uid]').style.display=''" onmouseout="getObj('card2_$value[uid]').style.display='none'"/></a><a class="pw-card" id="card2_{$value[uid]}" onmouseover="getObj('card2_$value[uid]').style.display=''" onmouseout="getObj('card2_$value[uid]').style.display='none'" onclick="showcard(this.id,'$value[uid]')" style="margin-left:-22px;margin-top:41px;cursor:pointer;display:none;" title="查看名片">查看名片</a><p><a href="{$basename}q=user&u={$value[uid]}">$value[showname]</a></p></li>
+						<li><a href="u.php?uid={$value[uid]}"><img title="{$value[username]}" src="$value[face]" class="portrait-m userCard"  id="card_s3_{$value[uid]}_{$value[uid]}" /></a>
+						<p><a href="{$basename}q=user&u={$value[uid]}">$value[showname]</a></p></li>
                         
 <!--
 EOT;
@@ -572,6 +569,7 @@ EOT;
 </div>
 <div class="y-bg2"></div>
 <div class="y-bg"></div>
+<script language="JavaScript">window.onReady(userCard.init);</script>
 <!--
 EOT;
 if (GetCookie('o_invite') && $db_modes['o']['ifopen']==1) {print <<<EOT
@@ -581,5 +579,4 @@ setTimeout(function(){showDialog('success','成功加该用户为好友');},1000
 </script>
 <!--
 EOT;
-}
-?>-->
+}?>-->

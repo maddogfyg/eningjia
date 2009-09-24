@@ -10,7 +10,7 @@ if ($t_db) {
 		if ($value['upid'] == 0) {
 			$t_typedb[$value['id']] = $value;
 		} else {
-			$t_subtypedb[$value['upid']][$value['id']] = $value['name'];
+			$t_subtypedb[$value['upid']][$value['id']] = strip_tags($value['name']);
 		}
 		$t_exits = 1;
 	}

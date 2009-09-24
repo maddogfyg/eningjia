@@ -465,15 +465,16 @@ if ($db_allowupload && $_G['allowupload'] || $attach) {print <<<EOT
 -->
 					<tr><td colspan="2">
 						<table cellPadding="0" cellSpacing="0" style="display:none" width="100%">
-						<tbody id="att_mode"><tr><td><input class="input" type="text" name="atc_desc" size="20" /></td>
-							<td><input class="input" type="file" name="attachment_" size="20" /></td>
-							<td><select style="display:none"></select></td>
-							<td><select style="display:none"></select></td>
+						<tbody id="att_mode"><tr>
+							<td><input class="input" type="file" name="attachment_" size="20" /></td><td><input class="input" type="text" name="atc_desc" size="20" /></td>
+							<td><select style="display:none;"><option value="0"></option><option value="1">加密</option><option value="2">出售</option></select></td>
+							<td><select name="att_ctype" style="display:none;">{$alltype}</select></td>
 							<td><input class="input" type="hidden" name="atc_needrvrc" value="0" size="1" /></td>
 							<td></td></tr>
 						</tbody>
 						</table>
-					</td></tr>
+					</td>
+				</tr>
 <script language="JavaScript">
 var allow_ext = '$uploadfiletype';
 var attachnum = parseInt('$db_attachnum');
@@ -486,29 +487,28 @@ initCheckTextNum('textarea','textarea_warn',postmax);
 <script type="text/javascript" language="JavaScript" src="js/upload.js"></script>
 <!--
 EOT;
-}print <<<EOT
--->
-<!--
-EOT;
-if($attach){print <<<EOT
+}if($attach){print <<<EOT
 -->
 	<tr class="tr3">
 		<th colspan="2">
 			<div class="editor-mwidth">
-				<div style="margin-left:200px">该帖包含附件<span class="gray">(不想保留的附件去掉√)</span> :
-					<table style="margin-top:10px;">
-						<tr>
-							<td width="3%"></td>
-							<td width="25%">描述</td>
-							<td>附件</td>
-						</tr>
-						<tbody id="ajaxtable"></tbody>
-					</table>
+				该帖包含附件<span class="gray">(不想保留的附件去掉√)</span> :
+				<table class="tr_p10">
+					<tr>
+						<td width="3%"></td>
+						<td width="31%">附件</td>
+						<td width="20%">描述</td>
+						<td width="10%"></td>
+						<td width="10%"></td>
+						<td width="8%"></td>
+						<td></td>
+					</tr>
+					<tbody id="ajaxtable"></tbody>
+				</table>
 <script language="JavaScript">
 var attachs = {{$attach}};
 oldAtt.init();
 </script>
-				</div>
 			</div>
 		</th>
 	</tr>
@@ -520,32 +520,28 @@ $shortcut=$_GET['s']?'':'tr3';
 if($db_allowupload && $_G['allowupload']){print <<<EOT
 -->
 	<tr class="$shortcut">
-		<td>&nbsp;</td>
-		<td style="padding-top:0;">
+		<td style="padding-top:0;" colspan="2">
 <!--
 EOT;
-if ($mutiupload > 0) {print <<<EOT
--->
-					<span id="mutiinfo">您现在有 <b>{$mutiupload}</b> 个已经上传的附件 <a href="javascript:void(0);" class="bta" onclick="flashAtt.use();">使用</a> <a href="javascript:void(0);" class="bta" onclick="flashAtt.clear();" title="删除所有已经上传的附件">清空</a></span>
-<!--
-EOT;
-}
 $shortcut=$_GET['s']?' style="display:none"':'';
 print <<<EOT
 -->
-					<table $shortcut >
-						<tr>
-							<td width="25%">描述</td>
-							<td>附件</td>
-						</tr>
-						<tbody id="attach"></tbody>
-					</table>
-					<div id="viewimg" class="menu" style="display:none;"></div>
-					<div id="attsize" $shortcut style="margin-top:10px">有效文件类型:$uploadfilesize</div>
+			<table class="tr_p10">
+				<tr valign="top">
+					<td height="24" style="padding-right:3em" width="35%">上传图片附件</td>
+					<td width="20%">描述</td>
+					<td width="10%"></td>
+					<td width="10%"></td>
+					<td width="8%"></td>
+					<td></td>
+				</tr>
+				<tbody id="attach"></tbody>
+			</table>
+			<div id="viewimg" class="menu" style="display:none;"></div>
+			<div id="attsize" $shortcut style="margin-top:10px">有效文件类型:$uploadfilesize</div>
 		</td>
 	</tr>
 <script language="JavaScript">
-var mutiupload = '$mutiupload';
 newAtt.create();
 </script>
 <!--
@@ -750,4 +746,21 @@ insertlink=function (){
 	closep();
 };
 };
+/*增加一标识，用于ie6，在页面未记载完成时操作的判断*/
+var IE6=navigator.userAgent.indexOf("MSIE 7.0")==-1&&navigator.userAgent.indexOf("MSIE 8.0")==-1&&navigator.userAgent.indexOf("MSIE 6.0")>0;
+if(IE6)
+{
+var wl=window.onload;
+window.onload=function()
+{
+	wl?wl():0;
+	WINDOW_LOADED=1;
+	$("wy_windcode")?($("wy_windcode").disabled=false)&($("wy_htmlmode").disabled=false):0;
+};
+}
+else
+{
+	WINDOW_LOADED=1;
+	$("wy_windcode")?($("wy_windcode").disabled=false)&($("wy_htmlmode").disabled=false):0;
+}
 </script>

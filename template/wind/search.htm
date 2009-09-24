@@ -23,7 +23,7 @@ $db_searchinfo
 		<tr class="tr3">
 			<td colspan="2">
 				<div class="forum-search">
-					<div style="padding-left:80px;">
+					<div class="tac">
 					<span class="b f14">关键字</span><input class="input" type="text" id="keyword" name="keyword" value="$skeyword" size="40" style="padding:5px 0 0 2px;height:21px;font-size:14px;" />
 					<input class="btn b" type="submit" name="submit" value="搜索" style="width:70px;height:27px;font-size:14px;" /> 
 					<a style="cursor:pointer;" onclick="showAdvancedSearch();">高级搜索</a>
@@ -214,7 +214,7 @@ EOT;
 foreach($schdb as $sch){print <<<EOT
 -->
 <tr class="tr3 tac"><td class="y-style"><img src="$imgpath/$stylepath/thread/$sch[status].gif" border="0"></td>
-<th class="y-style" class="tal">
+<th class="y-style tal">
 <!--
 EOT;
 if($admincheck){print <<<EOT

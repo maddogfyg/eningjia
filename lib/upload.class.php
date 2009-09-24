@@ -18,7 +18,7 @@ class PwUpload {
 		return $arr;
 	}
 
-	function upload($bhv) {
+	function upload(&$bhv) {
 
 		$uploaddb = array();
 
@@ -30,12 +30,12 @@ class PwUpload {
 			$upload = PwUpload::initCurrUpload($key, $value);
 
 			if (empty($upload['ext']) || !isset($bhv->ftype[$upload['ext']])) {
-				uploadmsg($uptype,'upload_type_error');
+				uploadmsg('upload_type_error');
 			}
 			if ($upload['size'] < 1 || $upload['size'] > $bhv->ftype[$upload['ext']]*1024) {
 				$GLOBALS['atc_attachment_name'] = $upload['name'];
 				$GLOBALS['oversize'] = $bhv->ftype[$upload['ext']];
-				uploadmsg($uptype, $upload['size'] < 1 ? 'upload_size_0' : 'upload_size_error');
+				uploadmsg($upload['size'] < 1 ? 'upload_size_0' : 'upload_size_error');
 			}
 			list($filename, $savedir, $thumbname, $thumbdir) = $bhv->getFilePath($upload);
 			$upload['fileuploadurl'] = $savedir . $filename;
@@ -44,7 +44,7 @@ class PwUpload {
 			$thumburl = PwUpload::savePath($bhv->ifftp, $thumbname, $thumbdir, 'thumb_');
 
 			if (!PwUpload::postupload($atc_attachment, $source)) {
-				uploadmsg($uptype,'upload_error');
+				uploadmsg('upload_error');
 			}
 			$upload['size'] = ceil(filesize($source)/1024);
 
@@ -52,7 +52,7 @@ class PwUpload {
 				require_once(R_P.'require/imgfunc.php');
 				if (!$img_size = GetImgSize($source, $upload['ext'])) {
 					P_unlink($source);
-					uploadmsg($uptype, 'upload_content_error');
+					uploadmsg('upload_content_error');
 				}
 				if ($upload['ext'] != 'swf') {
 					if ($bhv->allowThumb()) {
@@ -67,7 +67,7 @@ class PwUpload {
 			} elseif ($upload['ext'] == 'txt') {
 				if (preg_match('/(onload|submit|post|form)/i', readover($source))) {
 					P_unlink($source);
-					uploadmsg($uptype,'upload_content_error');
+					uploadmsg('upload_content_error');
 				}
 				$upload['type'] = 'txt';
 			}
@@ -196,7 +196,7 @@ class uploadBehavior {
 
 	var $ftype;
 	var $ifftp;
-	
+
 	function uploadBehavior() {
 		global $db_ifftp;
 		$this->ifftp =& $db_ifftp;
@@ -210,7 +210,7 @@ class uploadBehavior {
 	function allowWaterMark() {
 		return false;
 	}
-	
+
 	function getThumbSize() {
 		return '';
 	}
@@ -222,7 +222,7 @@ class uploadBehavior {
 	function update($uploaddb){}
 }
 
-function uploadmsg($uptype,$msg) {
+function uploadmsg($msg) {
 	Showmsg($msg);
 }
 ?>

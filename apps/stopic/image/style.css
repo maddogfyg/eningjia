@@ -43,6 +43,7 @@ form{display:inline;}
 .f24{font-size:24px;}
 .fn,.fn a{font-weight:normal}
 .aimg{display:block;text-indent:-2000em;}
+ol{list-style-type:decimal;}
 
 body{ font-size:12px;}
 a:hover{ text-decoration:underline;}
@@ -56,7 +57,7 @@ li{list-style:none;}
 /*.groupItem .itemContent{padding:4px 10px;} 模型内边距*/
 /*.groupItem .itemContent li{line-height:24px;} 列表行高*/
 
-.itemContent h2{ font-size:14px; font-weight:700; text-align:center;height:21px;overflow:hidden;}
+.itemContent h2{ font-size:14px; font-weight:700; text-align:center;height:21px;overflow:hidden;padding-top:5px;}
 .itemContent p{margin:5px 0; text-indent:2em;}
 .itemContent tr td,.itemContent tr th{padding:4px 0 10px;}
 .itemContent th{vertical-align:top;}
@@ -67,4 +68,4 @@ li{list-style:none;}
 
 .list-img-a{padding-bottom:10px;}
 .list-img-a li{float:left;margin:6px 10px 5px 0;display:inline;}
-.list-img-a li p{line-height:20px;height:20px;overflow:hidden; text-align:center;}
+.list-img-a li p{line-height:20px;height:20px;overflow:hidden; text-align:center;text-indent:0;}

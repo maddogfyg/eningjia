@@ -111,9 +111,9 @@ EOT
 ,
 );
 
-
+$stopicBloackDB = $stopic->_getSTopicBloackDB();
 foreach ($insertdata as $value) {
-	$stopic->addBlock($value);
+	$stopicBloackDB->replace($value);
 }
 
 ?>

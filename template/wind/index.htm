@@ -230,9 +230,7 @@ EOT;
 -->
 <div style="padding:5px 0;" class="fl">
 <h3>
-<a href="thread.php?fid=$forums[fid]" id="fn_$forums[fid]" class="fnamecolor b">
-$forums[name]
-</a>
+<a href="thread.php?fid=$forums[fid]" id="fn_$forums[fid]" class="fnamecolor b">$forums[name]</a>
 <!--
 EOT;
 if($db_todaypost && $forums[tpost]){print <<<EOT
@@ -243,13 +241,13 @@ EOT;
 }print <<<EOT
 -->
 </h3><br />
-<span class="gray">主题 : $forums[topics]&nbsp;&nbsp;帖子 : $forums[article]<br />
+<span class="gray">主题:$forums[topics]&nbsp;&nbsp;&nbsp;帖子:$forums[article]</span><br />
 <!--
 EOT;
 if($forums[au]){print <<<EOT
 -->
 					<a href="$forums[ft]">$forums[t]</a><br />
-					by：$forums[au] <span class="f10">[$forums[newtitle]]</span>
+					<span class="gray">by:$forums[au] <span class="f10">[$forums[newtitle]]</span>
 <!--
 EOT;
 }if($forums[pic]=='lock'){print <<<EOT
@@ -398,7 +396,7 @@ EOT;
 <!--
 EOT;
 }}
-list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Layer.Index',-1,$key+1);
+list($htmlAdvert,$arrayAdvert) = pwAdvert('Mode.Layer.Index',-1,$k+1);
 if($htmlAdvert){print <<<EOT
 -->
 <div style="margin-bottom:5px;" class="tac">$htmlAdvert</div>

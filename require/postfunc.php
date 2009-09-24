@@ -92,7 +92,7 @@ function lastinfo($fid,$allowhtm=0,$type='',$sys_type='') {
 		$rt['postdate'] = $timestamp;
 		$rt['lastpost'] = $timestamp;
 		$author   = $windid;
-		$subject  = substrs($atc_title,100);
+		$subject  = substrs($atc_title,26);
 		$topicadd = ",tpost=tpost+1,article=article+1,topic=topic+1 ";
 		$fupadd   = "subtopic=subtopic+1,tpost=tpost+1,article=article+1";
 	} elseif ($type == 'reply') {
@@ -100,17 +100,17 @@ function lastinfo($fid,$allowhtm=0,$type='',$sys_type='') {
 		$rt['postdate'] = $t_date;
 		$rt['lastpost'] = $timestamp;
 		$author         = $windid;
-		$subject  = $atc_title ? substrs($atc_title,40) : 'Re:'.addslashes(substrs($replytitle,40));
+		$subject  = $atc_title ? substrs($atc_title,26) : 'Re:'.addslashes(substrs($replytitle,26));
 		$topicadd = ",tpost=tpost+1,article=article+1 ";
 		$fupadd   = "tpost=tpost+1,article=article+1 ";
 	} else {
 		$rt = $db->get_one("SELECT tid,author,postdate,subject,lastpost,lastposter FROM pw_threads WHERE fid=".pwEscape($fid)." AND topped=0 AND ifcheck=1 AND lastpost>0 ORDER BY lastpost DESC LIMIT 0,1");
 
 		if ($rt['postdate'] == $rt['lastpost']) {
-			$subject = addslashes(substrs($rt['subject'],40));
+			$subject = addslashes(substrs($rt['subject'],26));
 			$author  = $rt['author'];
 		} else {
-			$subject = 'Re:'.addslashes(substrs($rt['subject'],40));
+			$subject = 'Re:'.addslashes(substrs($rt['subject'],26));
 			$author  = $rt['lastposter'];
 		}
 		$topicadd = $fupadd = "";

@@ -163,7 +163,7 @@ if ($action == 'type') {
 		}
 		$type = $subtype ? $subtype : $type;
 		!$tids && Showmsg('mawhole_nodata');
-		$db->update('UPDATE pw_threads SET type='.pwEscape($type)." WHERE tid IN() AND fid=".pwEscape($fid));
+		$db->update('UPDATE pw_threads SET type='.pwEscape($type)." WHERE tid IN(".pwImplode($tids).") AND fid=".pwEscape($fid));
 
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($tids);
@@ -276,59 +276,36 @@ if ($action == 'type') {
 		PostCheck();
 		InitGP(array('ifdel','ifmsg'));
 		count($tidarray) > 500 && Showmsg('mawhole_count');
-		$delids = $readdb  = $ttable_a = $ptable_a = $attachdb = $msgdb = $specialdb = $_tids = array();
+
+		$delids = $msgdb = array();
 		foreach ($tidarray as $key => $value) {
 			if (is_numeric($value)) {
 				$delids[] = $value;
-				$ttable_a[GetTtable($value)][] = $value;
 			}
 		}
-		$delids && $delids = pwImplode($delids);
 		!$delids && Showmsg('mawhole_nodata');
 
 		require_once(R_P.'require/credit.php');
 		$creditset = $credit->creditset($foruminfo['creditset'],$db_creditset);
 		$msg_delrvrc  = $ifdel ? abs($creditset['Delete']['rvrc']) : 0;
 		$msg_delmoney = $ifdel ? abs($creditset['Delete']['money']) : 0;
-
-		$updatetop = 0;
-
-		foreach ($ttable_a as $pw_tmsgs => $value) {
-			$query = $db->query("SELECT t.tid,t.fid as tfid,t.postdate,tm.aid,t.author,t.authorid,t.subject,t.replies,t.topped,t.special,t.ifupload,t.ptable
-			FROM pw_threads t
-			LEFT JOIN $pw_tmsgs tm
-			ON tm.tid=t.tid
-			WHERE t.tid IN(".pwImplode($value).")");
-			while ($read = $db->fetch_array($query)) {
-				$read['tfid'] != $fid && Showmsg('admin_forum_right');
-				$readdb[] = $read;
-			}
-		}
-		$db_guestread && require_once(R_P.'require/guestfunc.php');
+		
+		$delarticle = L::loadClass('DelArticle');
+		$readdb = $delarticle->getTopicDb('tid ' . $delarticle->sqlFormatByIds($delids));
 
 		foreach ($readdb as $key => $read) {
-			@extract($read);
-			$topped > 1 && $updatetop = 1;
-			$ptable_a[$ptable]=1;
-
-			switch ($special) {
-				case 1: case 2: case 3: case 4:
-					$specialdb[$special][] = $tid;break;
-			}
-			if ($ifupload) {
-				$_tids[$tid] = $tid;
-			}
+			$read['fid'] != $fid && Showmsg('admin_forum_right');
 			if ($ifmsg) {
 				$msgdb[] = array(
-					'toUser'	=> $author,
+					'toUser'	=> $read['author'],
 					'subject'	=> 'del_title',
 					'content'	=> 'del_content',
 					'other'		=> array(
 						'manager'	=> $windid,
-						'fid'		=> $fid,
-						'tid'		=> $tid,
-						'subject'	=> $subject,
-						'postdate'	=> get_date($postdate),
+						'fid'		=> $read['fid'],
+						'tid'		=> $read['tid'],
+						'subject'	=> $read['subject'],
+						'postdate'	=> get_date($read['postdate']),
 						'forum'		=> strip_tags($forum[$fid]['name']),
 						'affect'    => "{$db_rvrcname}:-{$msg_delrvrc},{$db_moneyname}:-{$msg_delmoney}",
 						'admindate'	=> get_date($timestamp),
@@ -338,117 +315,45 @@ if ($action == 'type') {
 			}
 			$logdb[] = array(
 				'type'      => 'delete',
-				'username1' => $author,
+				'username1' => $read['author'],
 				'username2' => $windid,
 				'field1'    => $fid,
-				'field2'    => $tid,
+				'field2'    => $read['tid'],
 				'field3'    => '',
 				'descrip'   => 'del_descrip',
 				'timestamp' => $timestamp,
 				'ip'        => $onlineip,
 				'affect'    => "{$db_rvrcname}：-{$msg_delrvrc}，{$db_moneyname}：-{$msg_delmoney}",
-				'tid'		=> $tid,
-				'subject'	=> substrs($subject,28),
+				'tid'		=> $read['tid'],
+				'subject'	=> substrs($read['subject'],28),
 				'forum'		=> $forum[$fid]['name'],
 				'reason'	=> stripslashes($atc_content)
 			);
 			if ($ifdel) {
-				$credit->addLog('topic_Delete',$creditset['Delete'],array(
-					'uid'		=> $authorid,
-					'username'	=> $author,
+				$credit->addLog('topic_Delete', $creditset['Delete'], array(
+					'uid'		=> $read['authorid'],
+					'username'	=> $read['author'],
 					'ip'		=> $onlineip,
 					'fname'		=> strip_tags($forum[$fid]['name']),
 					'operator'	=> $windid
 				));
-				$credit->sets($authorid,$creditset['Delete'],false);
+				$credit->sets($read['authorid'], $creditset['Delete'], false);
 			}
-			$credit->setMdata($authorid,'postnum',-1);
-			// 删除静态模版
-			$htmurl = R_P.$db_htmdir.'/'.$fid.'/'.date('ym',$postdate).'/'.$tid.'.html';
-			if (file_exists($htmurl)) {
-				P_unlink($htmurl);
-			}
-			if ($db_recycle) {
-				$pwSQL = pwSqlSingle(array(
-					'pid'	=> 0,
-					'tid'	=> $tid,
-					'fid'	=> $fid,
-					'deltime'=> $timestamp,
-					'admin'	=> $windid
-				));
-				$db->update("REPLACE INTO pw_recycle SET $pwSQL");
-			}
-			$db_guestread && clearguestcache($tid,$replies);
 		}
+		$delarticle->delTopic($readdb, $db_recycle);
 		$credit->runsql();
 
-		if ($_tids) {
-			$pw_attachs = L::loadDB('attachs');
-			$attachdb = $pw_attachs->getByTid($_tids);
-			require_once(R_P.'require/updateforum.php');
-			delete_att($attachdb,!$db_recycle);
-			pwFtpClose($ftp);
-		}
 		foreach ($msgdb as $key => $val) {
 			pwSendMsg($val);
 		}
 		foreach ($logdb as $key => $val) {
 			writelog($val);
 		}
-
-		if (!$db_recycle) {
-			if (isset($specialdb[1])) {
-				$pollids = pwImplode($specialdb[1]);
-				$db->update("DELETE FROM pw_polls WHERE tid IN($pollids)");
-			}
-			if (isset($specialdb[2])) {
-				$actids = pwImplode($specialdb[2]);
-				$db->update("DELETE FROM pw_activity WHERE tid IN($actids)");
-				$db->update("DELETE FROM pw_actmember WHERE actid IN($actids)");
-			}
-			if (isset($specialdb[3])) {
-				$rewids = pwImplode($specialdb[3]);
-				$db->update("DELETE FROM pw_reward WHERE tid IN($rewids)");
-			}
-			if (isset($specialdb[4])) {
-				$tradeids = pwImplode($specialdb[4]);
-				$db->update("DELETE FROM pw_trade WHERE tid IN($tradeids)");
-			}
-			# $db->update("DELETE FROM pw_threads	WHERE tid IN($delids)");
-			# ThreadManager
-			$threadManager = L::loadClass("threadmanager");
-			$threadManager->deleteByThreadIds($fid,$delids);
-
-			foreach ($ttable_a as $pw_tmsgs=>$val) {
-				$val = pwImplode($val);
-				$db->update("DELETE FROM $pw_tmsgs WHERE tid IN($val)");
-			}
-			foreach ($ptable_a as $key=>$val) {
-				$pw_posts = GetPtable($key);
-				$db->update("DELETE FROM $pw_posts WHERE tid IN($delids)");
-			}
-			delete_tag($delids);
-		} else {
-			$db->update("UPDATE pw_threads SET fid=0,ifcheck=1,topped=0 WHERE tid IN($delids)");
-			foreach ($ptable_a as $key=>$val) {
-				$pw_posts = GetPtable($key);
-				$db->update("UPDATE $pw_posts SET fid=0 WHERE tid IN($delids)");
-			}
-			# ThreadManager reflesh memcache
-            $threadlist = L::loadClass("threadlist");
-			$threadlist->refreshThreadIdsByForumId($fid);
-			$threads = L::loadClass('Threads');
-			$threads->delThreads($tids);
-		}
 		if ($db_ifpwcache ^ 1) {
-			$db->update("DELETE FROM pw_elements WHERE type !='usersort' AND id IN($delids)");
-		}
-		updateforum($fid);
-
-		if ($updatetop) {
-			updatetop();
+			$db->update("DELETE FROM pw_elements WHERE type !='usersort' AND id IN(" . pwImplode($delids) . ')');
 		}
 		P_unlink(D_P.'data/bbscache/c_cache.php');
+
 		if (!defined('AJAX')) {
 			refreshto("thread.php?fid=$fid{$viewbbs}",'operate_success');
 		} else {
@@ -513,6 +418,10 @@ if ($action == 'type') {
 
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($mids);
+
+		$pw_attachs = L::loadDB('attachs');
+		$pw_attachs->updateByTid($mids,array('fid'=>$to_id));
+
 		$mids = pwImplode($mids);
 		$updatetop = 0;
 		$query     = $db->query("SELECT tid,fid as tfid,author,postdate,subject,replies,topped,ptable FROM pw_threads WHERE tid IN($mids)");
@@ -1499,8 +1408,8 @@ if ($action == 'type') {
 					$ttable_a[GetTtable($v)][] = $v;
 				}
 			}
-			$selids = pwImplode($selids);
 		}
+		$selids = pwImplode($selids);
 		if ($title1 && !preg_match('/#[0-9A-F]{6}/is',$title1)) {
 			Showmsg('mawhole_nodata');
 		}
@@ -1509,7 +1418,6 @@ if ($action == 'type') {
 		$threads = L::loadClass('Threads');
 		$threads->delThreads($selids);
 
-		$selids = pwImplode($selids);
 		$titlefont = Char_cv("$title1~$title2~$title3~$title4~$title5~$title6~");
 		$ifedit = (!$title1 && !$title2 && !$title3 && !$title4) ? 0 : 1;
 		$toolfield = $timelimit>0 && $ifedit ? $timelimit*86400 + $timestamp : '';
